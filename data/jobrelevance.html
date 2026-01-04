@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Job Relevance — Admin</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../adminstyle.css">
+    <script src="/logo-fallback.js" defer></script>
+    <script src="/user-menu.js" defer></script>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <div class="logo-circle small"><img src="../../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+        </div>
+        <div class="header-center">NEXT STEP</div>
+        <div class="header-right">
+            <button class="user-icon">👤</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li class="active"><span class="home-ico">🏠</span> Dashboard</li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#">About</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <a class="back-link" href="../homepage.html">←</a>
+            <h1>Educational Relevance</h1>
+
+            <div class="page-card">
+                <div class="edu-content">
+                    <div class="edu-left">
+                        <p style="font-weight:700; font-size:18px; margin:0 0 12px 0">How relevant is your college degree to your current job?</p>
+                        <div class="edu-legend">
+                            <div class="legend-row">
+                                <span class="legend-swatch jr-relevant"></span>
+                                <div class="legend-text">Relevant</div>
+                            </div>
+                            <div class="legend-row" style="margin-top:12px">
+                                <span class="legend-swatch jr-not"></span>
+                                <div class="legend-text">Not Relevant</div>
+                            </div>
+                            <div class="legend-row" style="margin-top:12px">
+                                <span class="legend-swatch jr-some"></span>
+                                <div class="legend-text">Somewhat Relevant</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="edu-right">
+                        <div class="pie donut" style="--p:50" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <footer class="admin-footer">
+        <div class="admin-footer-inner">© Next Step</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../supabase-client.js" defer></script>
+    <script src="../logout.js" defer></script>
+    <script src="jobrelevance.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXT STEP | Admin Registration</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="adminstyle.css" />
+</head>
+
+<body>
+    <div class="login-page-wrapper">
+        <div class="container">
+            <div class="logo-wrapper">
+                <img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="Next Step logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'">
+            </div>
+            <h2>Create Admin Account</h2>
+
+            <form id="admin-register-form">
+                <label>Full name</label>
+                <input name="fullName" type="text" placeholder="Jane Doe" required>
+
+                <label>Employee ID</label>
+                <input name="employeeId" type="text" placeholder="e.g. EMP-001" required>
+
+                <label>Email</label>
+                <input name="email" type="email" placeholder="name@example.com" required>
+
+                <label>Password</label>
+                <input name="password" type="password" placeholder="Create a password" required>
+
+                <div class="status" style="display:none"></div>
+                <button type="submit" class="btn">Create account</button>
+            </form>
+
+            <div class="login-footer">
+                <a class="back-link" href="index.html">← Back to login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="db-helper.js" defer></script>
+    <script src="admin-register.js" defer></script>
+</body>
+
+</html>

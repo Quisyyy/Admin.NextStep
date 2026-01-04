@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Connection Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-icon.pending {
+            background: #e3e8ef;
+            color: #666;
+        }
+        
+        .status-icon.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-icon.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            word-break: break-word;
+        }
+        
+        .status-text.success {
+            color: #155724;
+        }
+        
+        .status-text.error {
+            color: #721c24;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        button:hover:not(:disabled) {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .results h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .results pre {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Database Connection Test</h1>
+        <p class="subtitle">Verify your Supabase RLS setup and JavaScript integration</p>
+        
+        <div class="info-box">
+            ℹ️ This page tests your database connection and RLS policies. Open the browser console (F12) for detailed logs.
+        </div>
+        
+        <!-- Test 1: Supabase Client -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon pending">•••</span>
+                <span>1. Supabase Client</span>
+            </div>
+            <div class="status-text" id="test1-status">Checking...</div>
+        </div>
+        
+        <!-- Test 2: Database Helper -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon pending">•••</span>
+                <span>2. Database Helper</span>
+            </div>
+            <div class="status-text" id="test2-status">Checking...</div>
+        </div>
+        
+        <!-- Test 3: Admins Table -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon pending">•••</span>
+                <span>3. Admins Table Access</span>
+            </div>
+            <div class="status-text" id="test3-status">Checking...</div>
+        </div>
+        
+        <!-- Test 4: Authentication -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon pending">•••</span>
+                <span>4. Current User Status</span>
+            </div>
+            <div class="status-text" id="test4-status">Checking...</div>
+        </div>
+        
+        <button onclick="runAllTests()">🔄 Run All Tests Again</button>
+        
+        <div class="results" id="results">
+            <h3>Test Results:</h3>
+            <pre id="results-content"></pre>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="supabase-client.js"></script>
+    <script src="db-helper.js"></script>
+    
+    <script>
+        const tests = {
+            results: {}
+        };
+
+        // Update status display
+        function updateStatus(testId, status, message) {
+            const element = document.getElementById(`test${testId}-status`);
+            if (element) {
+                element.textContent = message;
+                element.className = `status-text ${status}`;
+                
+                // Update icon
+                const iconElement = element.previousElementSibling.querySelector('.status-icon');
+                if (iconElement) {
+                    iconElement.className = `status-icon ${status}`;
+                    if (status === 'success') iconElement.textContent = '✓';
+                    else if (status === 'error') iconElement.textContent = '✗';
+                    else iconElement.textContent = '•••';
+                }
+            }
+            
+            tests.results[`test${testId}`] = { status, message };
+        }
+
+        // Test 1: Supabase Client
+        async function test1_supabaseClient() {
+            try {
+                if (!window.supabase) {
+                    throw new Error('window.supabase not found');
+                }
+                if (!window.supabaseClientReady) {
+                    throw new Error('Supabase client not initialized');
+                }
+                updateStatus(1, 'success', '✓ Supabase client loaded and initialized');
+                console.log('✓ Test 1 passed: Supabase client ready');
+                return true;
+            } catch (err) {
+                updateStatus(1, 'error', `✗ ${err.message}`);
+                console.error('✗ Test 1 failed:', err);
+                return false;
+            }
+        }
+
+        // Test 2: Database Helper
+        function test2_databaseHelper() {
+            try {
+                if (!window.DatabaseHelper) {
+                    throw new Error('window.DatabaseHelper not found');
+                }
+                if (typeof window.DatabaseHelper.loginAdmin !== 'function') {
+                    throw new Error('DatabaseHelper.loginAdmin not a function');
+                }
+                if (typeof window.DatabaseHelper.registerAdmin !== 'function') {
+                    throw new Error('DatabaseHelper.registerAdmin not a function');
+                }
+                updateStatus(2, 'success', '✓ DatabaseHelper loaded with all methods');
+                console.log('✓ Test 2 passed: DatabaseHelper available');
+                return true;
+            } catch (err) {
+                updateStatus(2, 'error', `✗ ${err.message}`);
+                console.error('✗ Test 2 failed:', err);
+                return false;
+            }
+        }
+
+        // Test 3: Admins Table
+        async function test3_adminsTable() {
+            try {
+                // Try to query the admins table (this will test RLS policies)
+                const { data, error } = await window.supabase
+                    .from('admins')
+                    .select('employee_id')
+                    .limit(1);
+
+                if (error) {
+                    // Check if error is about permissions (expected for non-logged-in users)
+                    if (error.message && error.message.includes('permission')) {
+                        updateStatus(3, 'success', '✓ Table accessible (RLS active, non-authenticated access blocked as expected)');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    updateStatus(3, 'success', `✓ Admins table accessible (${data?.length || 0} records)`);
+                }
+                console.log('✓ Test 3 passed: Admins table queries working');
+                return true;
+            } catch (err) {
+                updateStatus(3, 'error', `✗ ${err.message}`);
+                console.error('✗ Test 3 failed:', err);
+                return false;
+            }
+        }
+
+        // Test 4: Authentication Status
+        async function test4_authStatus() {
+            try {
+                const user = await window.DatabaseHelper.getCurrentUser();
+                if (user) {
+                    updateStatus(4, 'success', `✓ Logged in as: ${user.email}`);
+                    console.log('✓ Test 4 passed: User authenticated');
+                } else {
+                    updateStatus(4, 'success', '✓ Not logged in (create an account or log in to test auth)');
+                    console.log('✓ Test 4 passed: Authentication check working');
+                }
+                return true;
+            } catch (err) {
+                updateStatus(4, 'error', `✗ ${err.message}`);
+                console.error('✗ Test 4 failed:', err);
+                return false;
+            }
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            console.clear();
+            console.log('🔌 Starting database connection tests...');
+            console.log('═'.repeat(50));
+            
+            tests.results = {};
+            
+            // Run tests in sequence
+            await test1_supabaseClient();
+            await new Promise(r => setTimeout(r, 500));
+            
+            test2_databaseHelper();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await test3_adminsTable();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await test4_authStatus();
+            
+            // Display results
+            displayResults();
+            
+            console.log('═'.repeat(50));
+            console.log('🎯 Testing complete!');
+            console.log(tests.results);
+        }
+
+        // Display results in UI
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            const content = document.getElementById('results-content');
+            
+            let output = 'TEST RESULTS\n' + '═'.repeat(50) + '\n\n';
+            
+            for (const [key, value] of Object.entries(tests.results)) {
+                output += `${key}:\n`;
+                output += `  Status: ${value.status.toUpperCase()}\n`;
+                output += `  Message: ${value.message}\n\n`;
+            }
+            
+            const passed = Object.values(tests.results).filter(r => r.status === 'success').length;
+            const total = Object.values(tests.results).length;
+            
+            output += '═'.repeat(50) + '\n';
+            output += `SUMMARY: ${passed}/${total} tests passed\n`;
+            
+            if (passed === total) {
+                output += '✓ All systems operational!';
+            } else {
+                output += '✗ Some issues detected. Check console for details.';
+            }
+            
+            content.textContent = output;
+            resultsDiv.classList.add('show');
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, starting tests...');
+            runAllTests();
+        });
+    </script>
+</body>
+</html>

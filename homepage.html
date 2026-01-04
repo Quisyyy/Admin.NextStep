@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard - Next Step</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="adminstyle.css">
+    <script src="/logo-fallback.js" defer></script>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+        </div>
+        <div class="header-center">NEXT STEP</div>
+        <div class="header-right"><button class="user-icon" title="Click to logout">👤</button></div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li class="active"><span class="home-ico">🏠</span> Dashboard</li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#">About</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <h1>Dashboard</h1>
+
+            <div class="dashboard-summary">
+                <h2>Alumni Registration Overview</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number" id="totalAlumni">0</div>
+                        <div class="summary-label">Total Registered Alumni</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="newThisMonth">0</div>
+                        <div class="summary-label">New This Month</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="activeAlumni">0</div>
+                        <div class="summary-label">Active Alumni</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="completedProfiles">0</div>
+                        <div class="summary-label">Completed Profiles</div>
+                    </div>
+                </div>
+                <div class="last-updated" id="lastUpdated">Last updated: October 29, 2025 at 2:30 PM</div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Monthly Alumni Registrations (2025)</h3>
+                <div class="chart" id="registrationChart">
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Jan</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Feb</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Mar</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Apr</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">May</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Jun</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Jul</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Aug</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Sep</div>
+                    </div>
+                    <div class="bar" style="--height: 0px; height: 0px;">
+                        <div class="bar-value">0</div>
+                        <div class="bar-label">Oct</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="card-total">0</div>
+                    <div class="stat-text">Total Registered Alumni</div>
+                    <a class="card-btn" href="alumlist.html">View Details</a>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="card-status">0</div>
+                    <div class="stat-text">Alumni Current Status</div>
+                    <a class="card-btn" href="alumstatus.html">View Details</a>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="card-education">0</div>
+                    <div class="stat-text">Alumni Further Education</div>
+                    <a class="card-btn" href="data/edu.html">View Details</a>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="card-jobs">0</div>
+                    <div class="stat-text">Alumni Job Relevance</div>
+                    <a class="card-btn" href="data/jobrelevance.html">View Details</a>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="card-effectiveness">0%</div>
+                    <div class="stat-text">Program Effectiveness</div>
+                    <a class="card-btn" href="effectiveness.html">View Details</a>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="card-engagement">0</div>
+                    <div class="stat-text">Alumni Engagement</div>
+                    <a class="card-btn" href="data/iengagement.html">View Details</a>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <h2>Download Alumni Data</h2>
+                <div class="download-form-container">
+                    <form id="downloadForm">
+                        <div class="form-group">
+                            <label for="downloadFormat">Select Format:</label>
+                            <select id="downloadFormat" required>
+                                <option value="">-- Choose Format --</option>
+                                <option value="csv">CSV File</option>
+                                <option value="pdf">PDF File</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataFilter">Filter Data (Optional):</label>
+                            <select id="dataFilter">
+                                <option value="all">All Alumni</option>
+                                <option value="active">Active Only</option>
+                                <option value="incomplete">Incomplete Profiles</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="download-btn">Download Data</button>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <footer class="admin-footer">
+        <div class="admin-footer-inner">© Next Step</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="logout.js" defer></script>
+    <script src="index.js" defer></script>
+
+</body>
+
+</html>
