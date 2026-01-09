@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Job Status & Career Information - Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adminstyle.css">
+    <script src="logo-fallback.js" defer></script>
+    <script src="user-menu.js" defer></script>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <div class="logo-circle small"><img src="logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+        </div>
+        <div class="header-center">NEXT STEP</div>
+        <div class="header-right"><button class="user-icon">👤</button></div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <a class="back-link" href="homepage.html">←</a>
+            <div class="page-card">
+                <h2>Job Status & Career Information</h2>
+                <p style="color:#555;">Capture alumni job status, roles, industry, certifications, and mentorship interest.</p>
+
+                <form id="careerForm" class="career-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="jobStatus">Job Status</label>
+                            <select id="jobStatus" name="job_status" required>
+                                <option value="">Select Job Status</option>
+                                <option value="Employed">Employed</option>
+                                <option value="Self-Employed">Self-Employed</option>
+                                <option value="Freelancer">Freelancer</option>
+                                <option value="Unemployed">Unemployed</option>
+                                <option value="Student">Student</option>
+                                <option value="Career Break">Career Break</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="currentPosition">Current Job/Position</label>
+                            <input type="text" id="currentPosition" name="current_position" placeholder="e.g. Software Engineer, Manager">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="previousRoles">Previous Roles</label>
+                            <input type="text" id="previousRoles" name="previous_roles" placeholder="e.g. Junior Developer, Intern">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="careerPath">Career Path</label>
+                            <input type="text" id="careerPath" name="career_path" placeholder="e.g. Technology, Business, Education">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="industry">What industry are you in?</label>
+                            <input type="text" id="industry" name="industry" placeholder="e.g. IT, Finance, Healthcare, Education">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="certificates">Professional Certificates</label>
+                            <input type="text" id="certificates" name="certificates" placeholder="e.g. AWS Certified, PMP, CPA">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mentorship">Are you open for mentorship?</label>
+                            <select id="mentorship" name="mentorship" required>
+                                <option value="">Select Option</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Maybe">Maybe</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Save</button>
+                        <button type="button" class="secondary-btn" onclick="careerForm.reset()">Clear</button>
+                    </div>
+                </form>
+
+                <div id="careerStatus" class="form-status"></div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="admin-footer">
+        <div class="admin-footer-inner">© Next Step</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script>
+        const form = document.getElementById('careerForm');
+        const statusBox = document.getElementById('careerStatus');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            statusBox.textContent = '';
+
+            const payload = {
+                job_status: form.jobStatus.value,
+                current_position: form.currentPosition.value,
+                previous_roles: form.previousRoles.value,
+                career_path: form.careerPath.value,
+                industry: form.industry.value,
+                certificates: form.certificates.value,
+                mentorship: form.mentorship.value
+            };
+
+            try {
+                if (!window.supabase || !window.supabase.from) {
+                    statusBox.textContent = 'Database connection not available.';
+                    statusBox.className = 'form-status error';
+                    return;
+                }
+
+                console.log('📝 Saving career data:', payload);
+
+                // Save to Supabase career_info table
+                const { data, error } = await window.supabase
+                    .from('career_info')
+                    .insert([payload])
+                    .select();
+
+                if (error) {
+                    console.error('❌ Error saving career data:', error);
+                    if (error.code === '42P01') {
+                        throw new Error('Table "career_info" does not exist. Please run create-career-info-table.sql in Supabase SQL Editor.');
+                    }
+                    throw error;
+                }
+
+                console.log('✅ Career data saved successfully:', data);
+                statusBox.textContent = '✓ Saved successfully!';
+                statusBox.className = 'form-status success';
+                form.reset();
+                
+                // Dispatch event to refresh dashboard
+                window.dispatchEvent(new CustomEvent('career:saved', { detail: data }));
+                
+                // Redirect to homepage after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = 'homepage.html';
+                }, 1500);
+                
+            } catch (err) {
+                console.error('❌ Save error:', err);
+                statusBox.textContent = err.message || 'Failed to save';
+                statusBox.className = 'form-status error';
+            }
+        });
+    </script>
+</body>
+</html>

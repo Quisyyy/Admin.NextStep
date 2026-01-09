@@ -1,0 +1,121 @@
+<!-- CAREER INFORMATION FORM - Copy this section into Information.html -->
+
+<section class="career-form-section">
+    <div class="form-container">
+        <h2>Career Information</h2>
+        <p>Help us track your career journey and connect with other alumni</p>
+
+        <form id="alumniCareerForm" class="alumni-career-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="jobStatus">Current Job Status *</label>
+                    <select id="jobStatus" name="job_status" required>
+                        <option value="">Select Job Status</option>
+                        <option value="Employed">Employed</option>
+                        <option value="Self-Employed">Self-Employed</option>
+                        <option value="Freelancer">Freelancer</option>
+                        <option value="Unemployed">Unemployed</option>
+                        <option value="Student">Student</option>
+                        <option value="Career Break">Career Break</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentPosition">Current Position</label>
+                    <input type="text" id="currentPosition" name="current_position" placeholder="e.g. Software Engineer, Marketing Manager">
+                </div>
+
+                <div class="form-group">
+                    <label for="industry">Industry</label>
+                    <input type="text" id="industry" name="industry" placeholder="e.g. IT, Finance, Healthcare, Education">
+                </div>
+
+                <div class="form-group">
+                    <label for="mentorship">Open for Mentorship? *</label>
+                    <select id="mentorship" name="mentorship" required>
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Maybe">Maybe</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="previousRoles">Previous Roles</label>
+                    <input type="text" id="previousRoles" name="previous_roles" placeholder="e.g. Junior Developer, Intern, Trainee">
+                </div>
+
+                <div class="form-group">
+                    <label for="careerPath">Career Path</label>
+                    <input type="text" id="careerPath" name="career_path" placeholder="e.g. Technology, Business, Education">
+                </div>
+
+                <div class="form-group">
+                    <label for="certificates">Professional Certificates</label>
+                    <input type="text" id="certificates" name="certificates" placeholder="e.g. AWS Certified, PMP, CPA">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">Save Career Info</button>
+                <button type="button" class="secondary-btn" onclick="document.getElementById('alumniCareerForm').reset()">Clear</button>
+            </div>
+
+            <div id="careerFormStatus" class="form-status"></div>
+        </form>
+    </div>
+</section>
+
+<script>
+    // Career form submission handler
+    document.getElementById('alumniCareerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusBox = document.getElementById('careerFormStatus');
+        statusBox.textContent = '';
+
+        const form = document.getElementById('alumniCareerForm');
+        const payload = {
+            job_status: form.jobStatus.value,
+            current_position: form.currentPosition.value,
+            industry: form.industry.value,
+            mentorship: form.mentorship.value,
+            previous_roles: form.previousRoles.value,
+            career_path: form.careerPath.value,
+            certificates: form.certificates.value
+        };
+
+        try {
+            if (!window.supabase || !window.supabase.from) {
+                statusBox.textContent = 'Database connection not available.';
+                statusBox.className = 'form-status error';
+                return;
+            }
+
+            console.log('📝 Saving career data:', payload);
+
+            // Save to Supabase career_info table
+            const { data, error } = await window.supabase
+                .from('career_info')
+                .insert([payload])
+                .select();
+
+            if (error) {
+                console.error('❌ Error saving career data:', error);
+                throw error;
+            }
+
+            console.log('✅ Career data saved successfully:', data);
+            statusBox.textContent = '✓ Career information saved successfully!';
+            statusBox.className = 'form-status success';
+            form.reset();
+            
+            // Dispatch event to refresh profile
+            window.dispatchEvent(new CustomEvent('career:saved', { detail: data }));
+            
+        } catch (err) {
+            console.error('❌ Save error:', err);
+            statusBox.textContent = err.message || 'Failed to save. Please try again.';
+            statusBox.className = 'form-status error';
+        }
+    });
+</script>

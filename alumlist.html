@@ -28,29 +28,71 @@
                     <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
                 </ul>
             </nav>
-            <div class="sidebar-footer"><a href="#">About</a><a href="#">Contact Us</a></div>
+            <!-- Sidebar footer removed -->
         </aside>
 
         <main class="admin-main">
             <a class="back-link" href="../homepage.html">←</a>
-            <div class="page-card">
-                <h2>Alumni List</h2>
-                <div class="table-wrap">
-                    <table id="alumTable">
-                        <thead>
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Student Number</th>
-                                <th>Degree</th>
-                                <th>Graduation Year</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="4" class="empty">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            
+            <div class="alumni-list-container">
+                <aside class="alumni-filters">
+                    <h3>Filters</h3>
+                    
+                    <div class="filter-group">
+                        <label for="searchName">Search Name</label>
+                        <input type="text" id="searchName" placeholder="Enter name...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filterDegree">Degree</label>
+                        <select id="filterDegree">
+                            <option value="">All Degrees</option>
+                            <option value="BSA">BSA - Accountancy</option>
+                            <option value="BSCpE">BSCpE - Computer Engineering</option>
+                            <option value="BSENTREP">BSENTREP - Entrepreneurship</option>
+                            <option value="BSHM">BSHM - Hospitality Management</option>
+                            <option value="BSIT">BSIT - Information Technology</option>
+                            <option value="BSEDEN">BSEDEN - Secondary Education (English)</option>
+                            <option value="BSEDMT">BSEDMT - Secondary Education (Math)</option>
+                            <option value="DOMTLOM">DOMTLOM - Office Management</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filterYear">Graduation Year</label>
+                        <select id="filterYear">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+                    
+                    <button class="reset-btn" id="resetFilters">Reset Filters</button>
+                </aside>
+                
+                <div class="alumni-content">
+                    <div class="content-header">
+                        <h2>Alumni List</h2>
+                        <div class="content-stats">
+                            Showing <strong id="showingCount">0</strong> of <strong id="totalCount">0</strong> alumni
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrap">
+                        <table id="alumTable">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Student Number</th>
+                                    <th>Degree</th>
+                                    <th>Graduation Year</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="empty">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>

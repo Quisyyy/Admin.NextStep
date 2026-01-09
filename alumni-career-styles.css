@@ -1,0 +1,321 @@
+/* ALUMNI CAREER STYLES - Copy this into alumni/profilestyle.css */
+
+/* Career Form Section */
+.career-form-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.form-container h2 {
+    font-size: 24px;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-container > p {
+    color: #666;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.alumni-career-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #004AAD;
+    box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #004AAD, #0066cc);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 74, 173, 0.3);
+}
+
+.secondary-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.secondary-btn:hover {
+    background: #e0e0e0;
+}
+
+.form-status {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 12px;
+}
+
+.form-status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Career Overview Section */
+.career-overview-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.overview-container h2 {
+    font-size: 24px;
+    color: #1a1a2e;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.career-stats-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border-left: 4px solid #004AAD;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 32px;
+    color: #004AAD;
+    font-weight: 700;
+}
+
+/* Career Chart */
+.career-chart-section h3 {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.chart-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.career-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 15px;
+    min-height: 280px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 16px;
+    flex: 1;
+}
+
+.chart-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 70px;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 70px;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    transition: all 0.5s ease;
+    animation: chartGrowUp 0.8s ease-out;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+@keyframes chartGrowUp {
+    from {
+        height: 0 !important;
+        opacity: 0;
+    }
+    to {
+        height: var(--bar-height);
+        opacity: 1;
+    }
+}
+
+.bar-value {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 16px;
+    color: #004AAD;
+}
+
+.bar-label {
+    font-size: 12px;
+    color: #495057;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 16px;
+    min-width: 180px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #495057;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.chart-placeholder {
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+    color: #868e96;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-wrapper {
+        flex-direction: column;
+    }
+
+    .career-chart {
+        min-height: 250px;
+    }
+
+    .chart-legend {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .career-stats-display {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .career-form-section,
+    .career-overview-section {
+        padding: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        width: 100%;
+    }
+
+    .career-stats-display {
+        grid-template-columns: 1fr;
+    }
+}

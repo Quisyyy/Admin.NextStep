@@ -99,15 +99,98 @@ function renderTable(alumni) {
     });
 }
 
+// Store original data for filtering
+let allAlumni = [];
+
+// Apply filters
+function applyFilters() {
+    const degree = document.getElementById('filterDegree')?.value || '';
+    const year = document.getElementById('filterYear')?.value || '';
+    const search = document.getElementById('searchName')?.value?.toLowerCase() || '';
+
+    let filtered = allAlumni;
+
+    if (degree) {
+        filtered = filtered.filter(a => a.degree === degree);
+    }
+
+    if (year) {
+        filtered = filtered.filter(a => String(a.graduationYear) === year);
+    }
+
+    if (search) {
+        filtered = filtered.filter(a => 
+            (a.fullName || '').toLowerCase().includes(search) ||
+            (a.studentNumber || '').toLowerCase().includes(search)
+        );
+    }
+
+    renderTable(filtered);
+    
+    // Update counts
+    const showingCount = document.getElementById('showingCount');
+    const totalCount = document.getElementById('totalCount');
+    if (showingCount) showingCount.textContent = filtered.length;
+    if (totalCount) totalCount.textContent = allAlumni.length;
+}
+
+// Populate year filter
+function populateYearFilter(alumni) {
+    const years = [...new Set(alumni.map(a => a.graduationYear).filter(y => y))].sort((a, b) => b - a);
+    const yearSelect = document.getElementById('filterYear');
+    if (yearSelect) {
+        const current = yearSelect.value;
+        yearSelect.innerHTML = '<option value="">All Years</option>';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        });
+        if (current) yearSelect.value = current;
+    }
+}
+
+// Initialize filters
+function initFilters() {
+    const degreeFilter = document.getElementById('filterDegree');
+    const yearFilter = document.getElementById('filterYear');
+    const searchInput = document.getElementById('searchName');
+    const resetBtn = document.getElementById('resetFilters');
+
+    if (degreeFilter) degreeFilter.addEventListener('change', applyFilters);
+    if (yearFilter) yearFilter.addEventListener('change', applyFilters);
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (degreeFilter) degreeFilter.value = '';
+            if (yearFilter) yearFilter.value = '';
+            if (searchInput) searchInput.value = '';
+            applyFilters();
+        });
+    }
+}
+
 // Initialize on load
 (async() => {
     const data = await loadAlumni();
+    allAlumni = data;
     renderTable(data);
+    populateYearFilter(data);
+    initFilters();
+    
+    // Set initial counts
+    const showingCount = document.getElementById('showingCount');
+    const totalCount = document.getElementById('totalCount');
+    if (showingCount) showingCount.textContent = data.length;
+    if (totalCount) totalCount.textContent = data.length;
 })();
 
 // Listen for saves from other pages/tabs and reload
 window.addEventListener('alumni:saved', async function(e) {
     console.info('alumni:saved event received, reloading list', e && e.detail);
     const data = await loadAlumni();
-    renderTable(data);
+    allAlumni = data;
+    applyFilters();
+    populateYearFilter(data);
 });

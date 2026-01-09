@@ -69,13 +69,28 @@ async function loadDashboardData() {
         animateNumber(document.getElementById('activeAlumni'), 0, total, 1000); // assuming all are active
         animateNumber(document.getElementById('completedProfiles'), 0, completedProfiles, 1000);
 
-        // Update card numbers
+        // Update card numbers (only show total)
         animateNumber(document.getElementById('card-total'), 0, total, 1000);
-        animateNumber(document.getElementById('card-status'), 0, total, 1000);
-        animateNumber(document.getElementById('card-education'), 0, total, 1000);
-        animateNumber(document.getElementById('card-jobs'), 0, total, 1000);
-        document.getElementById('card-effectiveness').textContent = total > 0 ? '85%' : '0%';
-        animateNumber(document.getElementById('card-engagement'), 0, total, 1000);
+
+        // Store profiles data for filtering
+        window.allProfiles = profiles;
+
+        // Load alumni status data (current status by degree)
+        loadAlumniStatus(profiles);
+
+        // Setup degree filter
+        const degreeFilter = document.getElementById('degreeFilter');
+        if (degreeFilter) {
+            degreeFilter.addEventListener('change', (e) => {
+                const selectedDegree = e.target.value;
+                if (selectedDegree) {
+                    const filtered = profiles.filter(p => p.degree === selectedDegree);
+                    animateNumber(document.getElementById('card-total'), total, filtered.length, 500);
+                } else {
+                    animateNumber(document.getElementById('card-total'), document.getElementById('card-total').textContent, total, 500);
+                }
+            });
+        }
 
         // Calculate monthly registrations for chart
         const monthlyData = new Array(12).fill(0);
@@ -107,10 +122,48 @@ async function loadDashboardData() {
     }
 }
 
+// Load and display alumni current status by degree
+async function loadAlumniStatus(profiles) {
+    const degreeLabels = {
+        'BSA': 'Bachelor of Science in Accountancy',
+        'BSCpE': 'Bachelor of Science in Computer Engineering',
+        'BSENTREP': 'Bachelor of Science in Entrepreneurship',
+        'BSHM': 'Bachelor of Science in Hospitality Management',
+        'BSIT': 'Bachelor of Science in Information Technology',
+        'BSEDEN': 'Bachelor of Secondary Education (English)',
+        'BSEDMT': 'Bachelor of Secondary Education (Mathematics)',
+        'DOMTLOM': 'Diploma in Office Management Technology'
+    };
+
+    // Count alumni by degree
+    const degreeCounts = {};
+    Object.keys(degreeLabels).forEach(code => {
+        degreeCounts[code] = profiles.filter(p => p.degree === code).length;
+    });
+
+    // Display status grid
+    const statusGrid = document.getElementById('statusGrid');
+    if (statusGrid) {
+        statusGrid.innerHTML = '';
+        Object.entries(degreeLabels).forEach(([code, label]) => {
+            const count = degreeCounts[code];
+            const statusCard = document.createElement('div');
+            statusCard.className = 'status-card';
+            statusCard.innerHTML = `
+                <div class="status-degree">${label}</div>
+                <div class="status-count">${count}</div>
+                <a href="degree-details.html?degree=${code}" class="status-view-btn">View</a>
+            `;
+            statusGrid.appendChild(statusCard);
+        });
+    }
+}
+
 // Initialize dashboard on load
 document.addEventListener('DOMContentLoaded', () => {
     // Load real data
     loadDashboardData();
+    loadCareerStats();
 
     // Animate initial load
     setTimeout(() => {
@@ -125,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for alumni updates to refresh dashboard
     window.addEventListener('alumni:saved', () => {
         setTimeout(loadDashboardData, 500);
+        setTimeout(loadCareerStats, 500);
     });
 
     // Download form handler
@@ -141,6 +195,10 @@ async function handleDownload(event) {
     const format = document.getElementById('downloadFormat').value;
     const filter = document.getElementById('dataFilter').value;
     const button = event.target.querySelector('.download-btn');
+    // Degree codes for filtering
+    const degreeCodes = [
+        'BSA', 'BSCpE', 'BSENTREP', 'BSHM', 'BSIT', 'BSEDEN', 'BSEDMT', 'DOMTLOM'
+    ];
     
     if (!format) {
         alert('Please select a format');
@@ -150,45 +208,43 @@ async function handleDownload(event) {
     try {
         button.disabled = true;
         button.textContent = 'Downloading...';
-        
+
         // Fetch alumni data
         const ready = await ensureSupabaseReady();
         if (!ready) {
             alert('Database connection failed');
             return;
         }
-        
+
         const { data: profiles, error } = await window.supabase
             .from('alumni_profiles')
             .select('*');
-        
+
         if (error) {
             console.error('Error fetching data:', error);
             alert('Failed to fetch data: ' + error.message);
             return;
         }
-        
+
         console.log('Fetched alumni profiles:', profiles.length, profiles);
-        
+
         // Apply filter
         let filteredData = profiles;
-        if (filter === 'active') {
-            filteredData = profiles.filter(p => p.status === 'active' || !p.status);
-        } else if (filter === 'incomplete') {
-            filteredData = profiles.filter(p => !p.full_name || !p.email || !p.degree);
+        if (degreeCodes.includes(filter)) {
+            filteredData = profiles.filter(p => p.degree === filter);
         }
-        
+
         console.log('Filtered data:', filteredData.length, filteredData);
-        
+
         if (format === 'csv') {
             downloadAsCSV(filteredData);
         } else if (format === 'pdf') {
             downloadAsPDF(filteredData);
         }
-        
+
         button.textContent = 'Download Data';
         button.disabled = false;
-        
+
     } catch (error) {
         console.error('Download error:', error);
         alert('Error downloading data: ' + error.message);
@@ -200,7 +256,18 @@ async function handleDownload(event) {
 // Generate and download CSV file
 function downloadAsCSV(data) {
     if (!data || data.length === 0) {
-        alert('❌ No data to download. Please add alumni records first.\n\nTo add test data:\n1. Go to Supabase SQL Editor\n2. Run the contents of add-sample-data.sql');
+        // Check if a degree is selected for filtering
+        const filterSelect = document.getElementById('dataFilter');
+        let filterLabel = '';
+        if (filterSelect) {
+            const selectedOption = filterSelect.options[filterSelect.selectedIndex];
+            filterLabel = selectedOption && selectedOption.value !== 'all' ? selectedOption.text : '';
+        }
+        if (filterLabel) {
+            alert(`❌ No information found for "${filterLabel}".`);
+        } else {
+            alert('❌ No data to download.');
+        }
         return;
     }
     
@@ -230,7 +297,14 @@ function downloadAsCSV(data) {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `alumni_data_${new Date().toISOString().split('T')[0]}.csv`);
+    // Get selected filter value and label
+    const filterSelect = document.getElementById('dataFilter');
+    let filterLabel = '';
+    if (filterSelect) {
+        const selectedOption = filterSelect.options[filterSelect.selectedIndex];
+        filterLabel = selectedOption && selectedOption.value !== 'all' ? `_${selectedOption.text.replace(/\s+/g, '_')}` : '';
+    }
+    link.setAttribute('download', `alumni_data${filterLabel}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
@@ -347,4 +421,221 @@ function downloadAsPDF(data) {
 function createSimplePDF(data) {
     // For now, alert user that they need html2pdf library
     alert('PDF download requires additional library. Please download as CSV instead.');
+}
+
+// Load career stats percentages from Supabase career_info table
+async function loadCareerStats() {
+    try {
+        const ready = await ensureSupabaseReady();
+        if (!ready) {
+            console.warn('Supabase not ready, skipping career stats');
+            showCareerStatsError('Database connection not ready');
+            return;
+        }
+
+        console.log('🔍 Fetching career stats from alumni_profiles table...');
+        const { data, error } = await window.supabase
+            .from('alumni_profiles')
+            .select('job_status, industry, open_for_mentorship');
+
+        if (error) {
+            console.error('❌ Error fetching career stats:', error);
+            if (error.code === '42P01') {
+                showCareerStatsError('Table "alumni_profiles" does not exist. Please create it first.');
+            } else {
+                showCareerStatsError(`Database error: ${error.message}`);
+            }
+            return;
+        }
+
+        console.log(`✅ Found ${data.length} career records:`, data);
+        const total = data.length;
+
+        if (total === 0) {
+            console.warn('⚠️ No career data found in database');
+            showCareerStatsEmpty();
+            return;
+        }
+
+        const statusCounts = {};
+        const industryCounts = {};
+        let employedCount = 0;
+        let mentorshipCount = 0;
+
+        const normalizeStatus = (raw) => {
+            const s = (raw || '').trim().toLowerCase();
+            if (!s) return 'Other';
+            if (s.includes('self')) return 'Self-Employed';
+            if (s.includes('free')) return 'Freelancer';
+            if (s.includes('unemploy')) return 'Unemployed';
+            if (s.includes('student')) return 'Student';
+            if (s.includes('career')) return 'Career Break';
+            if (s.includes('employ')) return 'Employed';
+            return (raw || '').trim() || 'Other';
+        };
+
+        data.forEach(d => {
+            const normStatus = normalizeStatus(d.job_status);
+            statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
+
+            if (['Employed', 'Self-Employed', 'Freelancer'].includes(normStatus)) {
+                employedCount++;
+            }
+
+            if ((d.open_for_mentorship || '').trim().toLowerCase() === 'yes') {
+                mentorshipCount++;
+            }
+
+            const key = (d.industry || '').trim();
+            if (key) {
+                industryCounts[key] = (industryCounts[key] || 0) + 1;
+            }
+        });
+
+        const topIndustry = Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+
+        const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
+        const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
+
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        setText('careerTotal', total.toLocaleString());
+        setText('careerEmployedPercent', `${employedPct}%`);
+        setText('careerEmployedCount', `${employedCount} of ${total}`);
+        setText('careerMentorshipPercent', `${mentorshipPct}%`);
+        setText('careerMentorshipCount', `${mentorshipCount} of ${total}`);
+        setText('careerTopIndustry', topIndustry[0] || '—');
+        setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
+
+        renderCareerStatusBars(statusCounts, total);
+
+    } catch (err) {
+        console.error('loadCareerStats error:', err);
+        showCareerStatsError(err.message);
+    }
+}
+
+// Show error message in career stats
+function showCareerStatsError(message) {
+    const container = document.getElementById('careerStatusChart');
+    if (container) {
+        container.innerHTML = `<div class="status-placeholder" style="color: #dc3545;">⚠️ ${message}</div>`;
+    }
+    
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    };
+    
+    setText('careerTotal', '0');
+    setText('careerEmployedPercent', '0%');
+    setText('careerEmployedCount', '0 of 0');
+    setText('careerMentorshipPercent', '0%');
+    setText('careerMentorshipCount', '0 of 0');
+    setText('careerTopIndustry', '—');
+    setText('careerTopIndustryCount', '0 submissions');
+}
+
+// Show empty state for career stats
+function showCareerStatsEmpty() {
+    const container = document.getElementById('careerStatusChart');
+    if (container) {
+        container.innerHTML = '<div class="status-placeholder">No career data available yet.</div>';
+    }
+    
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    };
+    
+    setText('careerTotal', '0');
+    setText('careerEmployedPercent', '0%');
+    setText('careerEmployedCount', '0 of 0');
+    setText('careerMentorshipPercent', '0%');
+    setText('careerMentorshipCount', '0 of 0');
+    setText('careerTopIndustry', '—');
+    setText('careerTopIndustryCount', '0 submissions');
+}
+
+// Render vertical bar chart for career status breakdown
+function renderCareerStatusBars(statusCounts, total) {
+    const container = document.getElementById('careerStatusChart');
+    const legendContainer = document.getElementById('careerChartLegend');
+    if (!container) return;
+
+    container.innerHTML = '';
+    if (legendContainer) legendContainer.innerHTML = '';
+
+    if (!total) {
+        container.innerHTML = '<div class="status-placeholder">No career data available yet.</div>';
+        return;
+    }
+
+    const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'Other'];
+    const colors = [
+        'linear-gradient(to top, #004AAD, #0066cc)',
+        'linear-gradient(to top, #2e6edc, #5b8ee0)',
+        'linear-gradient(to top, #FF6B35, #ff8c5a)',
+        'linear-gradient(to top, #dc3545, #e8576a)',
+        'linear-gradient(to top, #ffc107, #ffd454)',
+        'linear-gradient(to top, #6f5ac8, #8a7cd8)',
+        'linear-gradient(to top, #666, #888)'
+    ];
+
+    // Filter and prepare data
+    const chartData = [];
+    order.forEach((label, index) => {
+        const count = statusCounts[label] || 0;
+        if (count > 0) {
+            chartData.push({ label, count, color: colors[index] });
+        }
+    });
+
+    // Add any additional statuses not in order
+    Object.entries(statusCounts).forEach(([label, count]) => {
+        if (!order.includes(label) && count > 0) {
+            chartData.push({ label, count, color: colors[6] });
+        }
+    });
+
+    if (chartData.length === 0) {
+        container.innerHTML = '<div class="status-placeholder">No career data yet.</div>';
+        return;
+    }
+
+    // Find max for scaling
+    const maxCount = Math.max(...chartData.map(d => d.count));
+    const maxHeight = 220; // Max height in pixels
+
+    // Render bars
+    chartData.forEach(({ label, count, color }) => {
+        const pct = total ? Math.round((count / total) * 100) : 0;
+        const height = maxCount > 0 ? (count / maxCount) * maxHeight : 0;
+
+        const barItem = document.createElement('div');
+        barItem.className = 'career-bar-item';
+        barItem.innerHTML = `
+            <div class="career-bar" style="--bar-height: ${height}px; height: ${height}px; background: ${color};">
+                <div class="career-bar-value">${pct}%</div>
+            </div>
+            <div class="career-bar-label">${label}<br>(${count})</div>
+        `;
+        container.appendChild(barItem);
+    });
+
+    // Render legend
+    if (legendContainer) {
+        chartData.forEach(({ label, count, color }) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'career-legend-item';
+            legendItem.innerHTML = `
+                <div class="career-legend-color" style="background: ${color}"></div>
+                <span><strong>${label}:</strong> ${count}</span>
+            `;
+            legendContainer.appendChild(legendItem);
+        });
+    }
 }
