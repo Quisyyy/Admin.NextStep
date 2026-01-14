@@ -46,8 +46,8 @@ async function handleCreateAccount(e) {
             throw new Error(result.error || 'Account creation failed');
         }
 
-        setStatus(statusEl, '✅ Account created. Redirecting to login…', 'success');
-        setTimeout(() => { window.location.href = 'index.html'; }, 900);
+        setStatus(statusEl, '✅ Account created! Please check your email and confirm your address before logging in.', 'success');
+        form.reset();
     } catch (err) {
         setStatus(statusEl, err.message || 'Account creation failed', 'error');
     } finally {

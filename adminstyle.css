@@ -1,3 +1,16 @@
+/* Forgot/Reset password link styles */
+.forgot-link, .back-link {
+    display: inline-block;
+    margin: 10px 0 0 0;
+    color: #0074d9;
+    text-decoration: underline;
+    font-size: 0.98em;
+    cursor: pointer;
+}
+.forgot-link:hover, .back-link:hover {
+    color: #005fa3;
+    text-decoration: underline;
+}
 /* Admin Dashboard Styles */
 
 
