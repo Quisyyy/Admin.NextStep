@@ -1,3 +1,23 @@
+/* Audit Trail Table Styles */
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    background: #fff;
+}
+.audit-table th, .audit-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: left;
+}
+.audit-table th {
+    background: #004AAD;
+    color: #fff;
+}
+.audit-table tr:nth-child(even) {
+    background: #f9f9f9;
+}
 /* Forgot/Reset password link styles */
 .forgot-link, .back-link {
     display: inline-block;

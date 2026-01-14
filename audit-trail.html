@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Audit Trail</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="adminstyle.css">
+</head>
+<body>
+    <div class="login-page-wrapper">
+        <div class="container">
+            <h2>Audit Trail</h2>
+            <table id="auditTable" class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4">Loading…</td></tr>
+                </tbody>
+            </table>
+            <div class="login-footer">
+                <a class="back-link" href="homepage.html">← Back to dashboard</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="db-helper.js" defer></script>
+    <script src="audit-trail.js" defer></script>
+</body>
+</html>

@@ -1,3 +1,28 @@
+    // ========================================================================
+    // AUDIT TRAIL - Log admin actions
+    // ========================================================================
+
+    /**
+     * Log an admin action to the audit trail table
+     * @param {string} employeeId - Employee number of the admin
+     * @param {string} action - Action performed (e.g., 'download')
+     * @param {string} details - Optional details (e.g., file type, filter)
+     * @returns {Promise<{success: boolean, error?: string}>}
+     */
+    async logAdminAction(employeeId, action, details = '') {
+        try {
+            if (!await this.ensureReady()) throw new Error('Database not ready');
+            if (!employeeId || !action) throw new Error('Missing employeeId or action');
+            const { error } = await window.supabase
+                .from('admin_audit_trail')
+                .insert([{ employee_id: employeeId, action, details }]);
+            if (error) throw error;
+            return { success: true };
+        } catch (err) {
+            console.error('logAdminAction error:', err);
+            return { success: false, error: err.message };
+        }
+    },
 // ============================================================================
 // DATABASE HELPER - Integrates with Supabase RLS Policies
 // ============================================================================

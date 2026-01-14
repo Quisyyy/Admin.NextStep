@@ -236,6 +236,18 @@ async function handleDownload(event) {
 
         console.log('Filtered data:', filteredData.length, filteredData);
 
+        // Get current admin info for audit
+        let employeeId = '';
+        if (window.DatabaseHelper && typeof window.DatabaseHelper.getMyAdminRecord === 'function') {
+            const admin = await window.DatabaseHelper.getMyAdminRecord();
+            if (admin && admin.employee_id) employeeId = admin.employee_id;
+        }
+        // Log download action
+        if (employeeId && window.DatabaseHelper && typeof window.DatabaseHelper.logAdminAction === 'function') {
+            const details = `format=${format}, filter=${filter || 'all'}`;
+            window.DatabaseHelper.logAdminAction(employeeId, 'download', details);
+        }
+
         if (format === 'csv') {
             downloadAsCSV(filteredData);
         } else if (format === 'pdf') {
