@@ -24,12 +24,26 @@ async function handleResetPassword(e) {
     const statusEl = form.querySelector('.status');
     const btn = form.querySelector('button[type="submit"]');
 
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    // Validate passwords match
+    if (!password) {
+        setStatus(statusEl, 'Enter a new password.', 'error');
+        return;
+    }
+    if (password !== confirmPassword) {
+        setStatus(statusEl, 'Passwords do not match.', 'error');
+        return;
+    }
+    if (password.length < 6) {
+        setStatus(statusEl, 'Password must be at least 6 characters.', 'error');
+        return;
+    }
+
     setStatus(statusEl, 'Resetting password…');
     setBusy(btn, true);
     try {
-        const password = form.password.value;
-        if (!password) throw new Error('Enter a new password.');
-
         // Use Supabase to update password (user must be authenticated via reset link)
         const { error } = await window.supabase.auth.updateUser({ password });
         if (error) throw new Error(error.message || 'Failed to reset password.');
@@ -45,4 +59,28 @@ async function handleResetPassword(e) {
 document.addEventListener('DOMContentLoaded', () => {
     const resetForm = document.getElementById('reset-password-form');
     if (resetForm) resetForm.addEventListener('submit', handleResetPassword);
+
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirm = document.getElementById('toggleConfirm');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirmPassword');
+
+    if (togglePassword) {
+        togglePassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
+
+    if (toggleConfirm) {
+        toggleConfirm.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = confirmInput.type === 'password' ? 'text' : 'password';
+            confirmInput.type = type;
+            toggleConfirm.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
 });

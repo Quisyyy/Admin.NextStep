@@ -64,6 +64,23 @@ async function loadDegreeDetails() {
             return;
         }
 
+        // Fetch career info for all alumni
+        const { data: careerData, error: careerError } = await window.supabase
+            .from('career_info')
+            .select('*');
+
+        if (careerError) {
+            console.warn('Could not fetch career data:', careerError);
+        }
+
+        // Create a career info map by alumni_id
+        const careerMap = {};
+        if (careerData) {
+            careerData.forEach(career => {
+                careerMap[career.alumni_id] = career;
+            });
+        }
+
         // Calculate statistics
         const total = profiles.length;
         const completed = profiles.filter(p =>
@@ -86,15 +103,16 @@ async function loadDegreeDetails() {
         }
 
         profiles.forEach(profile => {
+            const career = careerMap[profile.id] || {};
             const tr = document.createElement('tr');
-            const gradYear = profile.graduation_year || '';
-            const status = profile.status || 'Active';
             
             tr.innerHTML = `
                 <td>${profile.full_name || 'N/A'}</td>
                 <td>${profile.student_number || 'N/A'}</td>
                 <td>${profile.email || 'N/A'}</td>
-                    <td>${gradYear}</td>
+                <td>${career.current_position || 'Not specified'}</td>
+                <td>${career.job_status || 'Not specified'}</td>
+                <td>${career.industry || 'Not specified'}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -108,7 +126,7 @@ async function loadDegreeDetails() {
 // Show empty table
 function showEmptyTable() {
     const tbody = document.querySelector('#degreeAlumniTable tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">Unable to load data</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Unable to load data</td></tr>';
     document.getElementById('totalCount').textContent = '0';
     document.getElementById('completedCount').textContent = '0';
 }

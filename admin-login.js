@@ -55,4 +55,17 @@ async function handleLogin(e) {
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('admin-login-form');
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
+
+    // Password toggle for login
+    const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+    const loginPasswordInput = document.getElementById('loginPassword');
+
+    if (toggleLoginPassword) {
+        toggleLoginPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = loginPasswordInput.type === 'password' ? 'text' : 'password';
+            loginPasswordInput.type = type;
+            toggleLoginPassword.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
 });

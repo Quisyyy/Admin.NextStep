@@ -1,28 +1,3 @@
-    // ========================================================================
-    // AUDIT TRAIL - Log admin actions
-    // ========================================================================
-
-    /**
-     * Log an admin action to the audit trail table
-     * @param {string} employeeId - Employee number of the admin
-     * @param {string} action - Action performed (e.g., 'download')
-     * @param {string} details - Optional details (e.g., file type, filter)
-     * @returns {Promise<{success: boolean, error?: string}>}
-     */
-    async logAdminAction(employeeId, action, details = '') {
-        try {
-            if (!await this.ensureReady()) throw new Error('Database not ready');
-            if (!employeeId || !action) throw new Error('Missing employeeId or action');
-            const { error } = await window.supabase
-                .from('admin_audit_trail')
-                .insert([{ employee_id: employeeId, action, details }]);
-            if (error) throw error;
-            return { success: true };
-        } catch (err) {
-            console.error('logAdminAction error:', err);
-            return { success: false, error: err.message };
-        }
-    },
 // ============================================================================
 // DATABASE HELPER - Integrates with Supabase RLS Policies
 // ============================================================================
@@ -106,8 +81,11 @@ const DatabaseHelper = {
      */
     async registerAdmin(email, password, fullName, employeeId) {
         try {
+            if (typeof window.supabase === 'undefined') {
+                throw new Error('Supabase library not loaded. Please check your internet connection or contact support.');
+            }
             if (!await this.ensureReady()) {
-                throw new Error('Database not ready. Try again in a moment.');
+                throw new Error('Database not ready. Please wait a few seconds and try again.');
             }
 
             // Validate inputs
@@ -122,19 +100,34 @@ const DatabaseHelper = {
                 .eq('employee_id', employeeId)
                 .maybeSingle();
 
-            if (findErr) throw findErr;
+            if (findErr && findErr.code !== 'PGRST116') throw findErr;
             if (existing) throw new Error('Employee ID already registered.');
 
             // Create Auth user with Supabase Auth
             const { data: signUp, error: signUpErr } = await window.supabase.auth.signUp({
                 email,
-                password
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        employee_id: employeeId
+                    }
+                }
             });
 
-            if (signUpErr) throw signUpErr;
+            if (signUpErr) {
+                // If user already exists, provide helpful message
+                if (signUpErr.message && signUpErr.message.includes('already registered')) {
+                    throw new Error('Email already registered. If registration failed previously, please contact support to complete your account setup.');
+                }
+                throw signUpErr;
+            }
 
             const user = signUp.user;
-            if (!user) throw new Error('Account creation failed. Check your email.');
+            if (!user) throw new Error('Account creation failed. Please try again.');
+
+            // IMPORTANT: The user is now authenticated after signUp (even without email confirmation)
+            // This allows the RLS policy (auth.uid() = id) to work for the insert
 
             // Insert admin record (linked to auth user)
             // The admins_insert policy requires auth.uid() = id
@@ -148,12 +141,35 @@ const DatabaseHelper = {
                     role: 'admin'
                 }]);
 
-            if (insertErr) throw insertErr;
+            if (insertErr) {
+                // Check for RLS/permission errors
+                if (insertErr.message && insertErr.message.toLowerCase().includes('row level security')) {
+                    throw new Error('Insert failed due to security policy. Please ensure you have confirmed your email and try again.');
+                }
+                console.error('Insert error details:', insertErr);
+                throw new Error(`Failed to create admin record: ${insertErr.message}`);
+            }
+
+            // Sign out the user after registration (they must confirm email before logging in)
+            await window.supabase.auth.signOut();
+
+            // Log the registration to audit trail
+            if (window.AuditLogger) {
+                await window.AuditLogger.logRegistration(employeeId, email, true);
+            }
 
             return { success: true, user };
         } catch (err) {
             console.error('registerAdmin error:', err);
-            return { success: false, error: err.message };
+            // Log failed registration
+            if (window.AuditLogger) {
+                await window.AuditLogger.logRegistration(
+                    employeeId, 
+                    email, 
+                    false
+                );
+            }
+            return { success: false, error: err.message || 'Unknown error during registration.' };
         }
     },
 

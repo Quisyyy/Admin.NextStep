@@ -22,13 +22,16 @@
                 <input name="fullName" type="text" placeholder="Jane Doe" required>
 
                 <label>Employee ID</label>
-                <input name="employeeId" type="text" placeholder="e.g. EMP-001" required>
+                <input name="employeeId" type="text" placeholder="e.g. DEV-001 or EMP-001" pattern="[A-Z]+-[0-9]+" title="Format: PREFIX-NUMBER (e.g., DEV-001, EMP-001)" required>
 
                 <label>Email</label>
                 <input name="email" type="email" placeholder="name@example.com" required>
 
                 <label>Password</label>
-                <input name="password" type="password" placeholder="Create a password" required>
+                <div class="password-input-wrapper">
+                    <input id="regPassword" name="password" type="password" placeholder="Create a password" required>
+                    <button type="button" id="toggleRegPassword" class="toggle-password-btn" title="Show/Hide Password">Show</button>
+                </div>
 
                 <div class="status" style="display:none"></div>
                 <button type="submit" class="btn">Create account</button>
@@ -43,6 +46,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js" defer></script>
+    <script src="audit-logger.js" defer></script>
     <script src="db-helper.js" defer></script>
     <script src="admin-register.js" defer></script>
 </body>

@@ -57,7 +57,7 @@ Your NextStep Admin application now has complete, production-ready Supabase RLS 
 ✅ **Data Protection**
 - User IDs matched to records
 - Role-based access control
-- Audit trail support
+<!-- Audit trail support removed -->
 
 ---
 

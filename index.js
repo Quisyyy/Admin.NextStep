@@ -236,7 +236,7 @@ async function handleDownload(event) {
 
         console.log('Filtered data:', filteredData.length, filteredData);
 
-        // Get current admin info for audit
+        // ...existing code...
         let employeeId = '';
         if (window.DatabaseHelper && typeof window.DatabaseHelper.getMyAdminRecord === 'function') {
             const admin = await window.DatabaseHelper.getMyAdminRecord();

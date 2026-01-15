@@ -34,6 +34,11 @@ async function handleCreateAccount(e) {
         const email = form.email.value.trim();
         const password = form.password.value;
 
+        // Check if DatabaseHelper is loaded
+        if (!window.DatabaseHelper || typeof window.DatabaseHelper.registerAdmin !== 'function') {
+            throw new Error('DatabaseHelper is not loaded. Please check your script order and file names.');
+        }
+
         // Use DatabaseHelper to register
         const result = await window.DatabaseHelper.registerAdmin(
             email,
@@ -58,4 +63,17 @@ async function handleCreateAccount(e) {
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('admin-register-form');
     if (form) form.addEventListener('submit', handleCreateAccount);
+
+    // Password toggle for registration
+    const toggleRegPassword = document.getElementById('toggleRegPassword');
+    const regPasswordInput = document.getElementById('regPassword');
+
+    if (toggleRegPassword) {
+        toggleRegPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = regPasswordInput.type === 'password' ? 'text' : 'password';
+            regPasswordInput.type = type;
+            toggleRegPassword.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
 });

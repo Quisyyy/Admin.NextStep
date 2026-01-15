@@ -24,6 +24,7 @@
             <nav>
                 <ul>
                     <li class="active"><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
+                    <li id="auditTrailLink" style="display:none;"><a href="audit-trail.html" style="color: white;"><span class="home-ico">📋</span> Audit Trail</a></li>
                 </ul>
             </nav>
         </aside>
@@ -210,6 +211,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="supabase-client.js" defer></script>
+    <script src="audit-logger.js" defer></script>
+    <script src="db-helper.js" defer></script>
+    <script src="admin-access-control.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="index.js" defer></script>
 
