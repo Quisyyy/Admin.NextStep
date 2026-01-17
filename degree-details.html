@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="adminstyle.css">
     <script src="logo-fallback.js" defer></script>
     <script src="user-menu.js" defer></script>
+    
+    <!-- Supabase Configuration -->
+    <script>
+        // Set Supabase credentials - Update with your actual values
+        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
+        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
+    </script>
+    
+    <script src="supabase-client.js" defer></script>
 </head>
 
 <body>
@@ -71,6 +80,11 @@
     <footer class="admin-footer">
         <div class="admin-footer-inner">© Next Step</div>
     </footer>
+    
+    <script src="degree-details.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDegreeDetails);
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js" defer></script>
