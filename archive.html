@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Archive - Admin</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="adminstyle.css">
+    <script src="logo-fallback.js" defer></script>
+    <script src="user-menu.js" defer></script>
+    <script src="supabase-client.js" defer></script>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+        </div>
+        <div class="header-center">NEXT STEP</div>
+        <div class="header-right"><button class="user-icon">👤</button></div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <a class="back-link" href="alumlist.html">← Back to Alumni List</a>
+            
+            <div class="archive-container">
+                <h1>📦 Alumni Archive</h1>
+                <p class="archive-description">Deleted alumni records are stored here and can be restored if needed.</p>
+                
+                <!-- Filter Section -->
+                <section class="archive-filters">
+                    <h3>Filters</h3>
+                    <div class="filter-group">
+                        <label for="searchArchive">Search Name/Email</label>
+                        <input type="text" id="searchArchive" placeholder="Enter name or email...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterArchiveStatus">Status</label>
+                        <select id="filterArchiveStatus">
+                            <option value="">All Records</option>
+                            <option value="archived">Archived</option>
+                            <option value="restored">Restored</option>
+                        </select>
+                    </div>
+                    <button id="resetArchiveFilters" class="btn btn-secondary">Reset Filters</button>
+                </section>
+
+                <!-- Archive Stats -->
+                <section class="archive-stats">
+                    <div class="stat-box">
+                        <h4>Total Archived</h4>
+                        <p id="totalArchived">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Restored</h4>
+                        <p id="totalRestored">0</p>
+                    </div>
+                </section>
+
+                <!-- Cleanup Notice -->
+                <section class="cleanup-notice">
+                    <div class="notice-content">
+                        <p><strong>⏰ Auto-Delete Notice:</strong> Archived records will be permanently deleted 30 days after archiving. You can restore them before the 30-day period ends.</p>
+                        <button id="cleanupBtn" class="btn btn-danger">🗑️ Cleanup Old Records Now</button>
+                    </div>
+                </section>
+
+                <!-- Archive Table -->
+                <section class="archive-table-section">
+                    <h3>Archived Records</h3>
+                    <div class="table-wrap">
+                        <table id="archiveTable">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Student Number</th>
+                                    <th>Degree</th>
+                                    <th>Archived Date</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Days Left / Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="empty">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Restore Modal -->
+    <div id="restoreModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Restore Alumni Record?</h2>
+            <p id="restoreMessage">Are you sure you want to restore this record?</p>
+            <div class="modal-actions">
+                <button id="confirmRestoreBtn" class="btn btn-primary">✓ Restore</button>
+                <button id="cancelRestoreBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Permanently Delete Record?</h2>
+            <p id="deleteMessage">Are you sure you want to permanently delete this record?</p>
+            <div class="modal-actions">
+                <button id="confirmDeleteBtn" class="btn btn-danger">✓ Delete Permanently</button>
+                <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="alumni-archive.js" defer></script>
+    <script src="logout.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,293 @@
+// Bulk Upload Handler for Alumni Records
+
+let selectedRecords = [];
+let uploadedRecords = [];
+
+// Initialize upload area
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadArea = document.getElementById('uploadArea');
+    const csvFile = document.getElementById('csvFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadPreviewBtn = document.getElementById('uploadPreviewBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const selectAll = document.getElementById('selectAll');
+
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFileSelect(e.dataTransfer.files[0]);
+    });
+
+    uploadArea.addEventListener('click', () => csvFile.click());
+    csvFile.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+
+    uploadBtn.addEventListener('click', handleUploadFile);
+    uploadPreviewBtn.addEventListener('click', uploadSelectedRecords);
+    cancelBtn.addEventListener('click', resetForm);
+    selectAll.addEventListener('change', (e) => {
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.checked = e.target.checked;
+        });
+        updateSelectedRecords();
+    });
+});
+
+function handleFileSelect(file) {
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+        alert('Please select a CSV file');
+        return;
+    }
+
+    const fileInfo = document.getElementById('fileInfo');
+    fileInfo.innerHTML = `<p>Selected: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(2)} KB)</p>`;
+    document.getElementById('uploadBtn').disabled = false;
+}
+
+async function handleUploadFile() {
+    const csvFile = document.getElementById('csvFile');
+    if (!csvFile.files[0]) {
+        alert('Please select a CSV file first');
+        return;
+    }
+
+    try {
+        const file = csvFile.files[0];
+        const text = await file.text();
+        const records = parseCSV(text);
+
+        if (records.length === 0) {
+            alert('No valid records found in CSV. Make sure your CSV has columns: Full Name, Email, Student Number');
+            return;
+        }
+
+        uploadedRecords = records; // Store for later
+        selectedRecords = records.map(r => ({ ...r, selected: true }));
+        displayPreview(records);
+    } catch (error) {
+        console.error('Error reading file:', error);
+        alert('Error reading file: ' + error.message);
+    }
+}
+
+function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+
+    // Parse headers - case insensitive
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const records = [];
+
+    // Find column indices
+    let fullNameIdx = -1, emailIdx = -1, studentNumberIdx = -1, degreeIdx = -1;
+    
+    headers.forEach((header, idx) => {
+        if (header.includes('full') || header.includes('name')) fullNameIdx = idx;
+        if (header.includes('email')) emailIdx = idx;
+        if (header.includes('student') || header.includes('id')) studentNumberIdx = idx;
+        if (header.includes('degree') || header.includes('program')) degreeIdx = idx;
+    });
+
+    // Parse data rows
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        
+        if (!values.some(v => v)) continue; // Skip empty rows
+
+        const fullName = fullNameIdx >= 0 ? values[fullNameIdx] : '';
+        const email = emailIdx >= 0 ? values[emailIdx] : '';
+        const studentNumber = studentNumberIdx >= 0 ? values[studentNumberIdx] : '';
+        const degree = degreeIdx >= 0 ? values[degreeIdx] : '';
+
+        // Validate required fields
+        if (fullName && email && studentNumber) {
+            records.push({
+                full_name: fullName,
+                email: email,
+                student_number: studentNumber,
+                degree: degree || ''
+            });
+        }
+    }
+
+    return records;
+}
+
+function displayPreview(records) {
+    const tbody = document.querySelector('#previewTable tbody');
+    tbody.innerHTML = '';
+
+    records.forEach((record, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="row-checkbox" data-idx="${idx}" checked>
+            </td>
+            <td>${record.full_name || ''}</td>
+            <td>${record.email || ''}</td>
+            <td>${record.student_number || ''}</td>
+            <td>${record.degree || ''}</td>
+            <td><span class="status-badge pending">Pending</span></td>
+        `;
+        tbody.appendChild(tr);
+
+        document.querySelector(`[data-idx="${idx}"]`).addEventListener('change', updateSelectedRecords);
+    });
+
+    document.getElementById('previewSection').style.display = 'block';
+    document.querySelector('.upload-section').style.display = 'none';
+
+    // Update count
+    document.querySelector('#previewSection h2').textContent = `Step 2: Preview Data (${records.length} records)`;
+}
+
+function updateSelectedRecords() {
+    selectedRecords = [];
+    document.querySelectorAll('.row-checkbox:checked').forEach(checkbox => {
+        const idx = parseInt(checkbox.dataset.idx);
+        selectedRecords.push(uploadedRecords[idx] || {});
+    });
+}
+
+async function uploadSelectedRecords() {
+    const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+    if (checkedBoxes.length === 0) {
+        alert('Please select at least one record');
+        return;
+    }
+
+    const recordsToUpload = checkedBoxes.map(checkbox => {
+        const idx = parseInt(checkbox.dataset.idx);
+        return uploadedRecords[idx];
+    }).filter(r => r); // Filter out undefined
+
+    if (recordsToUpload.length === 0) {
+        alert('No records selected');
+        return;
+    }
+
+    await processUpload(recordsToUpload);
+}
+
+async function processUpload(records) {
+    const supabaseReady = await ensureSupabaseReady();
+    if (!supabaseReady) {
+        alert('Database connection not ready');
+        return;
+    }
+
+    let successCount = 0;
+    let failureCount = 0;
+    const results = [];
+
+    document.getElementById('previewSection').style.display = 'none';
+    document.getElementById('resultsSection').style.display = 'block';
+
+    for (const record of records) {
+        try {
+            // Check for duplicates
+            const { data: existing, error: checkError } = await window.supabase
+                .from('alumni_profiles')
+                .select('*')
+                .or(`email.eq.${record.email},student_number.eq.${record.student_number}`)
+                .limit(1);
+
+            if (existing && existing.length > 0) {
+                failureCount++;
+                results.push({
+                    success: false,
+                    email: record.email,
+                    message: 'Duplicate email or student number'
+                });
+                continue;
+            }
+
+            // Insert record
+            const { data, error } = await window.supabase
+                .from('alumni_profiles')
+                .insert([record])
+                .select();
+
+            if (error) throw error;
+
+            successCount++;
+            results.push({
+                success: true,
+                email: record.email,
+                message: 'Uploaded successfully'
+            });
+
+        } catch (error) {
+            failureCount++;
+            results.push({
+                success: false,
+                email: record.email,
+                message: error.message || 'Upload failed'
+            });
+        }
+    }
+
+    displayResults(successCount, failureCount, results, records.length);
+}
+
+function displayResults(successCount, failureCount, results, totalProcessed) {
+    document.getElementById('totalProcessed').textContent = totalProcessed;
+    document.getElementById('successCount').textContent = successCount;
+    document.getElementById('failureCount').textContent = failureCount;
+
+    const resultsList = document.getElementById('resultsList');
+    
+    // Add success message at the top
+    let successMsg = '';
+    if (successCount > 0) {
+        successMsg = `<div class="success-message" style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #155724;">
+            <strong>✅ Upload Successful!</strong> ${successCount} record(s) have been added to the database.
+        </div>`;
+    }
+    
+    resultsList.innerHTML = successMsg + '<div class="results-detail"><h3>Details:</h3>';
+
+    results.forEach(result => {
+        const statusClass = result.success ? 'success' : 'error';
+        const icon = result.success ? '✅' : '❌';
+        resultsList.innerHTML += `
+            <div class="result-item ${statusClass}">
+                <span class="result-icon">${icon}</span>
+                <span class="result-email">${result.email}</span>
+                <span class="result-message">${result.message}</span>
+            </div>
+        `;
+    });
+
+    resultsList.innerHTML += '</div>';
+}
+
+function resetForm() {
+    document.getElementById('csvFile').value = '';
+    document.getElementById('fileInfo').innerHTML = '';
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('previewSection').style.display = 'none';
+    document.querySelector('.upload-section').style.display = 'block';
+    selectedRecords = [];
+}
+
+async function ensureSupabaseReady(timeout = 2000) {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+        if (window.supabase && window.supabase.from) return true;
+        if (window.supabaseClientReady === false) return false;
+        await new Promise(r => setTimeout(r, 100));
+    }
+    return !!(window.supabase && window.supabase.from);
+}

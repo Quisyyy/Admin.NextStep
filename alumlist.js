@@ -41,7 +41,7 @@ async function loadAlumni() {
             const {
                 data,
                 error
-            } = await window.supabase.from('alumni_profiles').select('*').order('created_at', {
+            } = await window.supabase.from('alumni_profiles').select('id, full_name, student_number, degree, graduated_year, created_at').order('created_at', {
                 ascending: false
             });
             
@@ -49,14 +49,19 @@ async function loadAlumni() {
             
             if (!error && Array.isArray(data)) {
                 console.log(`✅ Found ${data.length} alumni records`);
-                // Map to expected client fields
-                return data.map(r => ({
-                    fullName: r.full_name,
-                    studentNumber: r.student_number,
-                    // store the raw value but we'll render as label later
-                    degree: r.degree,
-                    graduationYear: r.graduated_year || r.graduatedYear || ''
+                // Fetch completion status for each alumni
+                const alumniWithStatus = await Promise.all(data.map(async (r) => {
+                    const status = await getAlumniCompletionStatus(r.id);
+                    return {
+                        id: r.id,
+                        fullName: r.full_name,
+                        studentNumber: r.student_number,
+                        degree: r.degree,
+                        graduationYear: r.graduated_year || r.graduatedYear || '',
+                        completionStatus: status
+                    };
                 }));
+                return alumniWithStatus;
             }
             
             if (error) {
@@ -82,30 +87,66 @@ async function loadAlumni() {
     }
 }
 
-function renderTable(alumni) {
+async function getAlumniCompletionStatus(alumniId) {
+    if (!window.alumniFormTracker) {
+        return { isAllComplete: false, completedForms: 0, totalForms: 0 };
+    }
+    return await window.alumniFormTracker.getAlumniCompletionStatus(alumniId);
+}
+
+async function renderTable(alumni) {
     const tbody = document.querySelector('#alumTable tbody');
     tbody.innerHTML = '';
     if (!alumni.length) {
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="4" class="empty">No alumni records</td>';
+        tr.innerHTML = '<td colspan="7" class="empty">No alumni records</td>';
         tbody.appendChild(tr);
         return;
     }
     alumni.forEach(a => {
         const tr = document.createElement('tr');
         const degreeLabel = labelForDegree(a.degree);
-        tr.innerHTML = `<td>${a.fullName||''}</td><td>${a.studentNumber||''}</td><td>${degreeLabel||''}</td><td>${a.graduationYear||''}</td>`;
+        const completionStatus = a.completionStatus || { isAllComplete: false, completedForms: 0, totalForms: 0 };
+        const statusClass = completionStatus.isAllComplete ? 'complete' : 'incomplete';
+        const statusText = completionStatus.isAllComplete 
+            ? `✅ Complete (${completionStatus.completedForms}/${completionStatus.totalForms})`
+            : `⏳ Incomplete (${completionStatus.completedForms}/${completionStatus.totalForms})`;
+        
+        const isChecked = selectedAlumni.has(a.id) ? 'checked' : '';
+        
+        tr.innerHTML = `
+            <td><input type="checkbox" class="row-checkbox" data-id="${a.id}" ${isChecked}></td>
+            <td>${a.fullName||''}</td>
+            <td>${a.studentNumber||''}</td>
+            <td>${degreeLabel||''}</td>
+            <td>${a.graduationYear||''}</td>
+            <td><span class="checklist-badge ${statusClass}">${statusText}</span></td>
+            <td><button class="btn-small btn-archive" onclick="archiveAlumni('${a.id}', '${a.fullName}')">Archive</button></td>
+        `;
+        
+        const checkbox = tr.querySelector('.row-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                selectedAlumni.add(a.id);
+            } else {
+                selectedAlumni.delete(a.id);
+            }
+            updateBulkActionsBar();
+        });
+        
         tbody.appendChild(tr);
     });
 }
 
 // Store original data for filtering
 let allAlumni = [];
+let selectedAlumni = new Set();
 
 // Apply filters
-function applyFilters() {
+async function applyFilters() {
     const degree = document.getElementById('filterDegree')?.value || '';
     const year = document.getElementById('filterYear')?.value || '';
+    const completion = document.getElementById('filterCompletion')?.value || '';
     const search = document.getElementById('searchName')?.value?.toLowerCase() || '';
 
     let filtered = allAlumni;
@@ -118,6 +159,13 @@ function applyFilters() {
         filtered = filtered.filter(a => String(a.graduationYear) === year);
     }
 
+    if (completion) {
+        filtered = filtered.filter(a => {
+            const isComplete = a.completionStatus?.isAllComplete || false;
+            return completion === 'complete' ? isComplete : !isComplete;
+        });
+    }
+
     if (search) {
         filtered = filtered.filter(a => 
             (a.fullName || '').toLowerCase().includes(search) ||
@@ -125,7 +173,7 @@ function applyFilters() {
         );
     }
 
-    renderTable(filtered);
+    await renderTable(filtered);
     
     // Update counts
     const showingCount = document.getElementById('showingCount');
@@ -157,6 +205,9 @@ function initFilters() {
     const yearFilter = document.getElementById('filterYear');
     const searchInput = document.getElementById('searchName');
     const resetBtn = document.getElementById('resetFilters');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const archiveSelectedBtn = document.getElementById('archiveSelectedBtn');
+    const cancelSelectBtn = document.getElementById('cancelSelectBtn');
 
     if (degreeFilter) degreeFilter.addEventListener('change', applyFilters);
     if (yearFilter) yearFilter.addEventListener('change', applyFilters);
@@ -169,6 +220,95 @@ function initFilters() {
             applyFilters();
         });
     }
+
+    // Select all checkbox
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            if (e.target.checked) {
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    selectedAlumni.add(cb.dataset.id);
+                });
+            } else {
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    selectedAlumni.delete(cb.dataset.id);
+                });
+            }
+            updateBulkActionsBar();
+        });
+    }
+
+    // Bulk archive button
+    if (archiveSelectedBtn) {
+        archiveSelectedBtn.addEventListener('click', bulkArchiveSelected);
+    }
+
+    if (cancelSelectBtn) {
+        cancelSelectBtn.addEventListener('click', () => {
+            selectedAlumni.clear();
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateBulkActionsBar();
+        });
+    }
+}
+
+function updateBulkActionsBar() {
+    const bar = document.getElementById('bulkActionsBar');
+    const count = document.getElementById('selectedCount');
+    
+    if (selectedAlumni.size > 0) {
+        count.textContent = selectedAlumni.size;
+        bar.style.display = 'flex';
+    } else {
+        bar.style.display = 'none';
+    }
+}
+
+async function bulkArchiveSelected() {
+    if (selectedAlumni.size === 0) {
+        alert('No records selected');
+        return;
+    }
+
+    const count = selectedAlumni.size;
+    if (!confirm(`Archive ${count} selected alumni record(s)?`)) {
+        return;
+    }
+
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const alumniId of selectedAlumni) {
+        try {
+            const { data, error } = await window.supabase.rpc('archive_alumni_record', {
+                p_alumni_id: alumniId,
+                p_reason: 'Bulk archived by admin'
+            });
+
+            if (error) throw error;
+
+            if (data.success) {
+                successCount++;
+            } else {
+                failureCount++;
+            }
+        } catch (error) {
+            failureCount++;
+            console.error('Error archiving:', error);
+        }
+    }
+
+    alert(`✓ ${successCount} record(s) archived\n${failureCount > 0 ? `✗ ${failureCount} failed` : ''}`);
+    
+    // Reload list
+    selectedAlumni.clear();
+    const updatedData = await loadAlumni();
+    allAlumni = updatedData;
+    applyFilters();
+    populateYearFilter(updatedData);
 }
 
 // Initialize on load
@@ -194,3 +334,33 @@ window.addEventListener('alumni:saved', async function(e) {
     applyFilters();
     populateYearFilter(data);
 });
+
+// Archive functionality
+async function archiveAlumni(alumniId, fullName) {
+    const reason = prompt(`Enter reason for archiving "${fullName}":`, 'Requested by admin');
+    if (reason === null) return; // User cancelled
+
+    try {
+        const { data, error } = await window.supabase.rpc('archive_alumni_record', {
+            p_alumni_id: alumniId,
+            p_reason: reason || 'No reason specified'
+        });
+
+        if (error) throw error;
+
+        const result = data;
+        if (result.success) {
+            alert('✓ ' + result.message);
+            // Reload the list
+            const updatedData = await loadAlumni();
+            allAlumni = updatedData;
+            applyFilters();
+            populateYearFilter(updatedData);
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error archiving alumni:', error);
+        alert('Error archiving record: ' + error.message);
+    }
+}

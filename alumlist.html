@@ -64,8 +64,19 @@
                             <option value="">All Years</option>
                         </select>
                     </div>
+
+                    <div class="filter-group">
+                        <label for="filterCompletion">Form Status</label>
+                        <select id="filterCompletion">
+                            <option value="">All Status</option>
+                            <option value="complete">Complete</option>
+                            <option value="incomplete">Incomplete</option>
+                        </select>
+                    </div>
                     
                     <button class="reset-btn" id="resetFilters">Reset Filters</button>
+                    <a href="bulk-upload.html" class="btn btn-primary" style="display: block; text-align: center; margin-top: 15px;">📁 Bulk Upload</a>
+                    <a href="archive.html" class="btn btn-secondary" style="display: block; text-align: center; margin-top: 10px;">📦 View Archive</a>
                 </aside>
                 
                 <div class="alumni-content">
@@ -75,20 +86,34 @@
                             Showing <strong id="showingCount">0</strong> of <strong id="totalCount">0</strong> alumni
                         </div>
                     </div>
+
+                    <!-- Bulk Actions Bar -->
+                    <div id="bulkActionsBar" class="bulk-actions-bar" style="display: none;">
+                        <div class="bulk-info">
+                            <span id="selectedCount">0</span> selected
+                        </div>
+                        <div class="bulk-buttons">
+                            <button id="archiveSelectedBtn" class="btn btn-danger">Archive Selected</button>
+                            <button id="cancelSelectBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
                     
                     <div class="table-wrap">
                         <table id="alumTable">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
                                     <th>Full Name</th>
                                     <th>Student Number</th>
                                     <th>Degree</th>
                                     <th>Graduation Year</th>
+                                    <th>Form Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="4" class="empty">Loading...</td>
+                                    <td colspan="7" class="empty">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -100,6 +125,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js" defer></script>
+    <script src="alumni-form-tracker.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="alumlist.js" defer></script>
 </body>

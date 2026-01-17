@@ -6,8 +6,14 @@
     // These should be defined in the environment or loaded from config
     
     // Try to get from window object first (in case they were injected)
-    const supabaseUrl = window.SUPABASE_URL || 'https://ziquhxrfxywsmvunuyzi.supabase.co';
-    const supabaseKey = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
+    const supabaseUrl = window.SUPABASE_URL;
+    const supabaseKey = window.SUPABASE_ANON_KEY;
+    
+    // Verify credentials are provided
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ SECURITY ERROR: Supabase credentials not configured. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.');
+        return;
+    }
 
     // Check if supabase library is available
     if (typeof supabase === 'undefined') {

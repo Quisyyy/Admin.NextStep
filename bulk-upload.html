@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Bulk Upload Alumni - Admin</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="adminstyle.css">
+    <script src="logo-fallback.js" defer></script>
+    <script src="user-menu.js" defer></script>
+    <script src="supabase-client.js" defer></script>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+        </div>
+        <div class="header-center">NEXT STEP</div>
+        <div class="header-right"><button class="user-icon">👤</button></div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <a class="back-link" href="homepage.html">←</a>
+            
+            <div class="bulk-upload-container">
+                <h1>Bulk Upload Alumni Records</h1>
+                
+                <!-- Upload Section -->
+                <section class="upload-section">
+                    <h2>Step 1: Upload CSV File</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag and drop CSV file here or click to select</p>
+                        <input type="file" id="csvFile" accept=".csv" hidden>
+                    </div>
+                    <div class="file-info" id="fileInfo"></div>
+                    <button id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
+                </section>
+
+                <!-- Preview Section -->
+                <section class="preview-section" id="previewSection" style="display:none;">
+                    <h2>Step 2: Preview Data ({{ count }} records)</h2>
+                    <div class="preview-controls">
+                        <label>
+                            <input type="checkbox" id="selectAll" checked> Select All
+                        </label>
+                        <button id="uploadPreviewBtn" class="btn btn-success">Upload Selected Records</button>
+                        <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="previewTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"><input type="checkbox" class="select-all-checkbox" checked></th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Student Number</th>
+                                    <th>Degree</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <section class="results-section" id="resultsSection" style="display:none;">
+                    <h2>Step 3: Upload Results</h2>
+                    <div class="results-summary">
+                        <div class="result-stat">
+                            <span class="stat-label">Total Processed:</span>
+                            <span class="stat-value" id="totalProcessed">0</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-label">Successful:</span>
+                            <span class="stat-value success" id="successCount">0</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-label">Failed:</span>
+                            <span class="stat-value error" id="failureCount">0</span>
+                        </div>
+                    </div>
+                    <div id="resultsList"></div>
+                    <div class="results-actions">
+                        <a href="alumlist.html" class="btn btn-primary">✓ View All Alumni</a>
+                        <a href="homepage.html" class="btn btn-secondary">← Back to Dashboard</a>
+                        <button id="uploadMoreBtn" class="btn btn-secondary" onclick="location.reload()">📁 Upload More</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="bulk-upload.js" defer></script>
+    <script src="logout.js" defer></script>
+</body>
+
+</html>

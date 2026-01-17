@@ -1,0 +1,85 @@
+-- ============================================================================
+-- SUPABASE EMAIL CONFIGURATION GUIDE
+-- ============================================================================
+-- If you're not receiving emails, the issue is EMAIL PROVIDER CONFIGURATION
+-- Supabase's default email has these limitations:
+-- - Only 6 emails per hour
+-- - Only sends to the Supabase account owner's email
+-- - Unreliable for production
+--
+-- SOLUTION: Configure an external email provider
+-- ============================================================================
+
+QUICK FIXES TO TRY:
+==================
+
+1. CHECK SPAM/JUNK FOLDER
+   - Emails from Supabase sometimes go to spam
+   - Check your spam folder first
+
+2. VERIFY YOUR EMAIL ADDRESS IN SUPABASE
+   - Go to Authentication → Users
+   - Make sure your test user's email is correct
+   - Look for "Email Verified" status
+
+3. CONFIGURE EXTERNAL EMAIL PROVIDER
+   
+   Option A: SendGrid (Recommended for beginners)
+   =============================================
+   1. Sign up: https://sendgrid.com (free tier)
+   2. Get your API key from Settings → API Keys
+   3. In Supabase, click "Email" provider
+   4. Select "SendGrid" as provider
+   5. Paste your API key
+   6. Click Save
+
+   Option B: Mailgun
+   ================
+   1. Sign up: https://mailgun.com (free tier available)
+   2. Get your API key and domain
+   3. In Supabase, click "Email" provider
+   4. Select "Mailgun" 
+   5. Enter API key and domain
+   6. Click Save
+
+   Option C: SMTP (Gmail, Office 365, Outlook)
+   ==========================================
+   1. In Supabase, click "Email" provider
+   2. Select "SMTP"
+   3. Enter these settings:
+      
+      FOR GMAIL:
+      - Host: smtp.gmail.com
+      - Port: 587
+      - Username: your.email@gmail.com
+      - Password: Your app-specific password (NOT regular password)
+        * Go to Google Account → Security → App passwords
+        * Generate one for "Mail" and "Windows"
+      
+      FOR OFFICE 365:
+      - Host: smtp.office365.com
+      - Port: 587
+      - Username: your.email@outlook.com
+      - Password: Your password
+
+4. TEST EMAIL CONFIGURATION
+   ========================
+   After configuring:
+   1. Go to Supabase Dashboard
+   2. Authentication → Users
+   3. Find a test user
+   4. Click the (...) menu
+   5. Select "Send password reset email"
+   6. Check if email arrives (give it 2-3 minutes)
+
+5. IF STILL NO EMAIL
+   ==================
+   - Check Supabase Logs: Go to Logs → Auth logs
+   - Check if there are error messages
+   - Verify the email provider configuration saved correctly
+   - Test with a different email address
+
+============================================================================
+KEY POINT: Supabase's DEFAULT email provider is NOT suitable for production
+You MUST configure an external email provider for emails to work reliably
+============================================================================

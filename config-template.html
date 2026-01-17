@@ -1,0 +1,16 @@
+<!-- 
+    SECURITY: Load Supabase credentials from environment
+    This should be at the TOP of your HTML, BEFORE other scripts
+-->
+<script>
+    // Set Supabase credentials from environment
+    // These should be injected by your backend/hosting provider
+    // DO NOT hardcode credentials in JavaScript files!
+    
+    window.SUPABASE_URL = '{{ SUPABASE_URL }}';
+    window.SUPABASE_ANON_KEY = '{{ SUPABASE_ANON_KEY }}';
+    
+    // For local development, you can set them here temporarily:
+    // window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
+    // window.SUPABASE_ANON_KEY = 'YOUR_NEW_ANON_KEY_HERE';
+</script>
