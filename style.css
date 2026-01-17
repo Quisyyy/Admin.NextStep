@@ -805,3 +805,227 @@ label {
 .user-menu-item:hover {
     background: #f0f4f8;
 }
+
+/* ============================================================================
+   MOBILE RESPONSIVE STYLES FOR LOGIN PAGE
+   ============================================================================ */
+
+/* Tablets and Smaller Screens (768px and below) */
+@media (max-width: 768px) {
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    .login-page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-page-wrapper .container {
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        border-radius: 12px;
+        padding: 30px 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo-wrapper {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .logo-wrapper img {
+        max-width: 100px;
+        height: auto;
+    }
+
+    .login-page-wrapper h2 {
+        font-size: 24px;
+        text-align: center;
+        margin: 15px 0 25px 0;
+        color: #222;
+    }
+
+    .login-page-wrapper form {
+        width: 100%;
+    }
+
+    .login-page-wrapper form input {
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+    }
+
+    .login-page-wrapper form input:focus {
+        outline: none;
+        border-color: #004AAD;
+        box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1);
+    }
+
+    .password-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .password-input-wrapper input {
+        width: 100%;
+        padding-right: 45px;
+    }
+
+    .toggle-password-btn {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: #004AAD;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 5px 10px;
+    }
+
+    .login-page-wrapper form button {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    .login-page-wrapper .status {
+        text-align: center;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .forgot-link {
+        display: block;
+        margin: 10px 0;
+        font-size: 13px;
+    }
+
+    .login-footer p {
+        font-size: 13px;
+        margin: 10px 0;
+    }
+
+    .login-footer .card-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+/* Mobile Phones (480px and below) */
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+
+    .login-page-wrapper {
+        padding: 15px;
+        min-height: 100vh;
+    }
+
+    .login-page-wrapper .container {
+        max-width: 100%;
+        padding: 20px 15px;
+        margin: auto;
+    }
+
+    .logo-wrapper img {
+        max-width: 80px;
+    }
+
+    .login-page-wrapper h2 {
+        font-size: 22px;
+        margin: 10px 0 20px 0;
+    }
+
+    .login-page-wrapper form input {
+        padding: 10px 12px;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .login-page-wrapper form button {
+        padding: 10px 12px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .password-input-wrapper {
+        margin-bottom: 12px;
+    }
+
+    .toggle-password-btn {
+        font-size: 12px;
+        right: 10px;
+        padding: 4px 6px;
+    }
+
+    .login-footer {
+        margin-top: 15px;
+    }
+
+    .forgot-link {
+        font-size: 12px;
+        margin: 8px 0;
+    }
+
+    .login-footer p {
+        font-size: 12px;
+        margin: 8px 0;
+    }
+
+    .login-footer .card-btn {
+        padding: 6px 14px;
+        font-size: 12px;
+    }
+
+    input, select, textarea {
+        font-size: 16px !important; /* Prevents iOS zoom */
+    }
+}
+
+/* Extra Small Phones (320px and below) */
+@media (max-width: 320px) {
+    .login-page-wrapper h2 {
+        font-size: 20px;
+        word-break: break-word;
+    }
+
+    .login-page-wrapper form input,
+    .login-page-wrapper form button {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+
+    .logo-wrapper img {
+        max-width: 70px;
+    }
+
+    .password-input-wrapper input {
+        font-size: 14px;
+    }
+}
