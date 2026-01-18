@@ -90,13 +90,15 @@ function parseCSV(text) {
     const records = [];
 
     // Find column indices
-    let fullNameIdx = -1, emailIdx = -1, studentNumberIdx = -1, degreeIdx = -1;
+    let fullNameIdx = -1, emailIdx = -1, phoneIdx = -1, studentNumberIdx = -1, degreeIdx = -1, yearIdx = -1;
     
     headers.forEach((header, idx) => {
         if (header.includes('full') || header.includes('name')) fullNameIdx = idx;
         if (header.includes('email')) emailIdx = idx;
-        if (header.includes('student') || header.includes('id')) studentNumberIdx = idx;
+        if (header.includes('phone')) phoneIdx = idx;
+        if (header.includes('student') || header.includes('student_number')) studentNumberIdx = idx;
         if (header.includes('degree') || header.includes('program')) degreeIdx = idx;
+        if (header.includes('year') || header.includes('graduation')) yearIdx = idx;
     });
 
     // Parse data rows
@@ -107,16 +109,21 @@ function parseCSV(text) {
 
         const fullName = fullNameIdx >= 0 ? values[fullNameIdx] : '';
         const email = emailIdx >= 0 ? values[emailIdx] : '';
+        const phone = phoneIdx >= 0 ? values[phoneIdx] : '';
         const studentNumber = studentNumberIdx >= 0 ? values[studentNumberIdx] : '';
         const degree = degreeIdx >= 0 ? values[degreeIdx] : '';
+        const year = yearIdx >= 0 ? parseInt(values[yearIdx]) : new Date().getFullYear();
 
         // Validate required fields
-        if (fullName && email && studentNumber) {
+        if (fullName && email) {
             records.push({
                 full_name: fullName,
                 email: email,
+                phone: phone,
                 student_number: studentNumber,
-                degree: degree || ''
+                degree: degree || '',
+                graduation_year: year,
+                is_active: true
             });
         }
     }
@@ -130,14 +137,17 @@ function displayPreview(records) {
 
     records.forEach((record, idx) => {
         const tr = document.createElement('tr');
+        const displayYear = record.graduation_year || new Date().getFullYear();
         tr.innerHTML = `
             <td>
                 <input type="checkbox" class="row-checkbox" data-idx="${idx}" checked>
             </td>
             <td>${record.full_name || ''}</td>
             <td>${record.email || ''}</td>
+            <td>${record.phone || ''}</td>
             <td>${record.student_number || ''}</td>
             <td>${record.degree || ''}</td>
+            <td>${displayYear}</td>
             <td><span class="status-badge pending">Pending</span></td>
         `;
         tbody.appendChild(tr);
@@ -196,11 +206,11 @@ async function processUpload(records) {
 
     for (const record of records) {
         try {
-            // Check for duplicates
+            // Check for duplicate email
             const { data: existing, error: checkError } = await window.supabase
                 .from('alumni_profiles')
                 .select('*')
-                .or(`email.eq.${record.email},student_number.eq.${record.student_number}`)
+                .eq('email', record.email)
                 .limit(1);
 
             if (existing && existing.length > 0) {
@@ -208,15 +218,27 @@ async function processUpload(records) {
                 results.push({
                     success: false,
                     email: record.email,
-                    message: 'Duplicate email or student number'
+                    message: 'Duplicate email already exists'
                 });
                 continue;
             }
 
+            // Prepare record for insertion
+            const recordToInsert = {
+                full_name: record.full_name,
+                email: record.email,
+                phone: record.phone || null,
+                student_number: record.student_number || null,
+                degree: record.degree || null,
+                graduation_year: parseInt(record.graduation_year) || new Date().getFullYear(),
+                is_active: true,
+                created_at: new Date().toISOString()
+            };
+
             // Insert record
             const { data, error } = await window.supabase
                 .from('alumni_profiles')
-                .insert([record])
+                .insert([recordToInsert])
                 .select();
 
             if (error) throw error;
@@ -227,6 +249,23 @@ async function processUpload(records) {
                 email: record.email,
                 message: 'Uploaded successfully'
             });
+
+            // Log to audit trail
+            try {
+                const { data: { user } } = await window.supabase.auth.getUser();
+                if (user) {
+                    await window.supabase
+                        .from('admin_audit_trail')
+                        .insert({
+                            admin_id: user.id,
+                            action: 'BULK_UPLOAD_ALUMNI',
+                            details: `Added alumni: ${record.full_name} (${record.email})`,
+                            timestamp: new Date().toISOString()
+                        });
+                }
+            } catch (auditError) {
+                console.warn('Could not log to audit trail:', auditError);
+            }
 
         } catch (error) {
             failureCount++;

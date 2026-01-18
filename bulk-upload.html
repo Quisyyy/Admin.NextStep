@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Bulk Upload Alumni - Admin</title>
+    <title>Bulk Upload Alumni Data - Admin</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="adminstyle.css">
     <script src="logo-fallback.js" defer></script>
@@ -42,11 +42,12 @@
             <a class="back-link" href="homepage.html">←</a>
             
             <div class="bulk-upload-container">
-                <h1>Bulk Upload Alumni Records</h1>
+                <h1>Bulk Upload Alumni Data</h1>
                 
                 <!-- Upload Section -->
                 <section class="upload-section">
                     <h2>Step 1: Upload CSV File</h2>
+                    <p style="color: #666; margin-bottom: 15px;"><strong>Required Columns:</strong> full_name, email | <strong>Optional:</strong> phone, student_number, degree, graduation_year</p>
                     <div class="upload-area" id="uploadArea">
                         <div class="upload-icon">📁</div>
                         <p>Drag and drop CSV file here or click to select</p>
@@ -73,8 +74,10 @@
                                     <th style="width: 30px;"><input type="checkbox" class="select-all-checkbox" checked></th>
                                     <th>Full Name</th>
                                     <th>Email</th>
+                                    <th>Phone</th>
                                     <th>Student Number</th>
                                     <th>Degree</th>
+                                    <th>Graduation Year</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>

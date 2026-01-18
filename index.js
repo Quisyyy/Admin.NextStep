@@ -544,22 +544,23 @@ async function loadCareerStats() {
         let mentorshipCount = 0;
 
         (careerData || []).forEach(d => {
-            // Check if career profile is complete - has key fields filled
-            const hasJobTitle = d.job_title && d.job_title.toString().trim();
-            const hasCompany = d.company && d.company.toString().trim();
-            const hasIndustry = d.industry && d.industry.toString().trim();
-            const hasEmploymentStatus = d.is_employed !== null && d.is_employed !== undefined;
+            // Track employment status for chart
+            const employed = d.is_employed === true || d.employed === true;
+            const unemployed = d.is_employed === false || d.employed === false;
             
-            // A profile is complete if it has at least 2 key fields filled
-            const fieldsCount = [hasJobTitle, hasCompany, hasIndustry, hasEmploymentStatus].filter(Boolean).length;
-            const isComplete = fieldsCount >= 2;
+            // Determine status category for chart
+            let statusLabel;
+            if (employed) {
+                statusLabel = 'Employed';
+            } else if (unemployed) {
+                statusLabel = 'Unemployed';
+            } else {
+                statusLabel = 'Unknown Status';
+            }
             
-            // Determine status category
-            let statusLabel = isComplete ? 'Complete Career Profile' : 'Incomplete Career Profile';
             statusCounts[statusLabel] = (statusCounts[statusLabel] || 0) + 1;
             
-            // Also track employment status
-            const employed = d.is_employed === true || d.employed === true;
+            // Also track employment metrics
             const mentorOpen = d.open_for_mentorship === true || d.open_mentorship === true;
             
             if (employed) {
@@ -658,15 +659,16 @@ function renderCareerStatusBars(statusCounts, total) {
         return;
     }
 
-    const order = ['Complete Career Profile', 'Incomplete Career Profile'];
+    const order = ['Employed', 'Unemployed', 'Unknown Status'];
     const colorMap = {
+        'Employed': 'linear-gradient(to top, #004AAD, #0066cc)',
+        'Unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
+        'Unknown Status': 'linear-gradient(to top, #ccc, #ddd)',
         'Complete Career Profile': 'linear-gradient(to top, #00a86b, #28d764)',
         'Incomplete Career Profile': 'linear-gradient(to top, #ffc107, #ffd454)',
         'Employed & Open for Mentorship': 'linear-gradient(to top, #00a86b, #28d764)',
-        'Employed': 'linear-gradient(to top, #004AAD, #0066cc)',
         'Open for Mentorship': 'linear-gradient(to top, #17a2b8, #20c997)',
-        'Not Currently Employed': 'linear-gradient(to top, #dc3545, #e8576a)',
-        'Unknown Status': 'linear-gradient(to top, #ccc, #ddd)'
+        'Not Currently Employed': 'linear-gradient(to top, #dc3545, #e8576a)'
     };
 
     // Filter and prepare data - start with predefined order

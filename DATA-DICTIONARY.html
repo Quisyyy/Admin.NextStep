@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep Alumni - Data Dictionary</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-png {
+            background: #004AAD;
+            color: white;
+        }
+        
+        .btn-png:hover {
+            background: #003080;
+        }
+        
+        .btn-pdf {
+            background: #c41e3a;
+            color: white;
+        }
+        
+        .btn-pdf:hover {
+            background: #a01830;
+        }
+        
+        .btn-print {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-print:hover {
+            background: #444;
+        }
+        
+        h1 {
+            color: #c41e3a;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        
+        .table-section {
+            margin-bottom: 60px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-left: 4px solid #004AAD;
+            padding-left: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        thead {
+            background: #c41e3a;
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #c41e3a;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        
+        tbody tr:nth-child(odd) {
+            background: #f9f9f9;
+        }
+        
+        tbody tr:hover {
+            background: #f0f0f0;
+        }
+        
+        .field-name {
+            font-weight: 600;
+            color: #c41e3a;
+        }
+        
+        .data-type {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .example {
+            font-family: 'Courier New', monospace;
+            background: #f9f9f9;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        .required {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .optional {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media print {
+            .controls {
+                display: none;
+            }
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="btn btn-png" onclick="savePNG()">📥 Save as PNG</button>
+        <button class="btn btn-pdf" onclick="savePDF()">📄 Save as PDF</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+    </div>
+    
+    <div id="content" class="container">
+        <h1>Data Dictionary</h1>
+        <p class="subtitle">NextStep Alumni Management System - Database Schema Documentation</p>
+        
+        <!-- ALUMNI PROFILES TABLE -->
+        <div class="table-section">
+            <h2 class="section-title">📚 alumni_profiles</h2>
+            <p style="color: #666; margin-bottom: 15px;">Core alumni personal information and profile data</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Data Type</th>
+                        <th>Data Format</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="field-name">id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Unique identifier for each alumni profile</td>
+                        <td><span class="example">52375ad8-53f2-4f1b-b4fe-023c410b4e8</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">full_name</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Text (max 255)</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Complete name of the alumnus</td>
+                        <td><span class="example">Joaquin John Martin C.</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">email</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Email format</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Alumni email address for contact</td>
+                        <td><span class="example">joaquin.martin@email.com</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">phone</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Phone number</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Contact phone number</td>
+                        <td><span class="example">+63 9123456789</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">student_number</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Format: NNNN-NNN-NN</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Unique student ID during enrollment</td>
+                        <td><span class="example">2022-00092-SM-0</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">degree</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Degree code</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Program code (BSA, BSCpE, BSIT, etc.)</td>
+                        <td><span class="example">Bachelor of Science in Accountancy</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">graduation_year</td>
+                        <td><span class="data-type">Integer</span></td>
+                        <td>YYYY</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Year of graduation</td>
+                        <td><span class="example">2026</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">is_active</td>
+                        <td><span class="data-type">Boolean</span></td>
+                        <td>true / false</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Whether profile is active</td>
+                        <td><span class="example">true</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">created_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Profile creation date</td>
+                        <td><span class="example">2026-01-18 15:54:23</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">updated_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Last profile update date</td>
+                        <td><span class="example">2026-01-19 10:30:15</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- CAREER INFO TABLE -->
+        <div class="table-section">
+            <h2 class="section-title">💼 career_info</h2>
+            <p style="color: #666; margin-bottom: 15px;">Employment and career tracking information for alumni</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Data Type</th>
+                        <th>Data Format</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="field-name">id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Unique identifier for career record</td>
+                        <td><span class="example">a1c3b2ec-6542-4c95-b826-641a63ddb582</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">alumni_id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Foreign key linking to alumni_profiles</td>
+                        <td><span class="example">52375ad8-53f2-4f1b-b4fe-023c410b4e8</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">job_title</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Text (max 255)</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Current or last job position</td>
+                        <td><span class="example">Software Engineer</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">company</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Text (max 255)</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Current or last employer name</td>
+                        <td><span class="example">Tech Company Inc</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">industry</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Text (max 100)</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Industry sector of employment</td>
+                        <td><span class="example">Information Technology</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">is_employed</td>
+                        <td><span class="data-type">Boolean</span></td>
+                        <td>true / false</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Current employment status</td>
+                        <td><span class="example">true</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">open_for_mentorship</td>
+                        <td><span class="data-type">Boolean</span></td>
+                        <td>true / false</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Whether available to mentor others</td>
+                        <td><span class="example">true</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">created_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Career record creation date</td>
+                        <td><span class="example">2026-01-18 15:54:23</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">updated_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Last career record update</td>
+                        <td><span class="example">2026-01-19 10:30:15</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ADMIN AUDIT TRAIL TABLE -->
+        <div class="table-section">
+            <h2 class="section-title">📋 admin_audit_trail</h2>
+            <p style="color: #666; margin-bottom: 15px;">Real-time tracking of all employee administrative activities</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Data Type</th>
+                        <th>Data Format</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="field-name">id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Unique audit log identifier</td>
+                        <td><span class="example">f8fdf1d-5249-4510-8c85-6df1d87da74f</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">user_id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Employee user ID from authentication</td>
+                        <td><span class="example">52375ad8-53f2-4f1b-b4fe-023c410b4e8</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">employee_id</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Format: EMP-###</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Employee identifier code</td>
+                        <td><span class="example">EMP-001</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">action</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Predefined values</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Type of action performed (LOGIN, VIEW_ALUMNI, DOWNLOAD_DATA, etc.)</td>
+                        <td><span class="example">DOWNLOAD_DATA</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">details</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Text (max 1000)</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Detailed description of the action</td>
+                        <td><span class="example">Downloaded alumni data - Filter: BSCpE, Year: 2026</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">status</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>success / failed</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Action completion status</td>
+                        <td><span class="example">success</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">ip_address</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>IPv4 format</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>IP address where action originated</td>
+                        <td><span class="example">192.168.1.100</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">user_agent</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Browser info</td>
+                        <td><span class="optional">NO</span></td>
+                        <td>Browser and device information</td>
+                        <td><span class="example">Chrome/120.0 Windows</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">created_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>When the activity occurred</td>
+                        <td><span class="example">2026-01-19 10:30:15</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ADMINS TABLE -->
+        <div class="table-section">
+            <h2 class="section-title">👤 admins</h2>
+            <p style="color: #666; margin-bottom: 15px;">Administrator user accounts and authentication</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Data Type</th>
+                        <th>Data Format</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="field-name">id</td>
+                        <td><span class="data-type">UUID</span></td>
+                        <td>Alphanumeric</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Unique admin user identifier</td>
+                        <td><span class="example">52375ad8-53f2-4f1b-b4fe-023c410b4e8</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">employee_id</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Format: ADM-### or EMP-###</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Unique employee identifier</td>
+                        <td><span class="example">ADM-001</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">email</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>Email format</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Admin email for login</td>
+                        <td><span class="example">admin@nextstep.edu</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">role</td>
+                        <td><span class="data-type">Text</span></td>
+                        <td>admin / developer</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Administrative role level</td>
+                        <td><span class="example">admin</span></td>
+                    </tr>
+                    <tr>
+                        <td class="field-name">created_at</td>
+                        <td><span class="data-type">Timestamp</span></td>
+                        <td>ISO 8601</td>
+                        <td><span class="required">YES</span></td>
+                        <td>Account creation date</td>
+                        <td><span class="example">2026-01-15 09:00:00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p><strong>NextStep Alumni Management System</strong></p>
+            <p style="margin-top: 10px; font-size: 12px;">Generated: January 19, 2026 | Version: 1.0</p>
+        </div>
+    </div>
+    
+    <script>
+        // Save as PNG
+        async function savePNG() {
+            const element = document.getElementById('content');
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'NextStep-Data-Dictionary.png';
+            link.click();
+            
+            alert('✅ Data Dictionary saved as PNG!');
+        }
+        
+        // Save as PDF
+        function savePDF() {
+            const element = document.getElementById('content');
+            const opt = {
+                margin: 10,
+                filename: 'NextStep-Data-Dictionary.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>

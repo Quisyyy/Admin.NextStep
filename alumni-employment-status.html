@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Employment Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            color: #764ba2;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-card .percentage {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-employed {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-unemployed {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-mentorship {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .no-data {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a class="back-link" href="homepage.html">←</a>
+            <h1>Alumni Employment Status</h1>
+            <p>View and manage employment status for all registered alumni</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="statusFilter">Employment Status:</label>
+                <select id="statusFilter">
+                    <option value="all">All</option>
+                    <option value="employed">Employed</option>
+                    <option value="unemployed">Unemployed</option>
+                    <option value="mentorship">Open for Mentorship</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="yearFilter">Graduation Year:</label>
+                <select id="yearFilter">
+                    <option value="all">All Years</option>
+                </select>
+            </div>
+            <div class="filter-group search-box">
+                <label for="searchBox">Search:</label>
+                <input type="text" id="searchBox" placeholder="Search by name or email...">
+            </div>
+        </div>
+
+        <div class="stats-section" id="statsSection">
+            <div class="stat-card">
+                <h3>Total Alumni</h3>
+                <div class="number" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Employed</h3>
+                <div class="number" id="employedCount">0</div>
+                <div class="percentage" id="employedPercentage">0%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Unemployed</h3>
+                <div class="number" id="unemployedCount">0</div>
+                <div class="percentage" id="unemployedPercentage">0%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Open for Mentorship</h3>
+                <div class="number" id="mentorshipCount">0</div>
+                <div class="percentage" id="mentorshipPercentage">0%</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingDiv" class="loading">
+                <div class="spinner"></div>
+                Loading alumni data...
+            </div>
+            <table id="alumniTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Graduation Year</th>
+                        <th>Employment Status</th>
+                        <th>Open for Mentorship</th>
+                    </tr>
+                </thead>
+                <tbody id="alumniTableBody">
+                </tbody>
+            </table>
+            <div id="noDataDiv" class="no-data" style="display:none;">
+                No alumni records found.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="logout.js" defer></script>
+    <script>
+        let allAlumni = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAlumniData();
+            setupEventListeners();
+        });
+
+        async function loadAlumniData() {
+            try {
+                const { data: alumniData, error } = await window.supabase
+                    .from('alumni_profiles')
+                    .select('*')
+                    .order('full_name');
+
+                if (error) throw error;
+
+                const { data: careerData } = await window.supabase
+                    .from('career_info')
+                    .select('alumni_id, is_employed, open_for_mentorship');
+
+                allAlumni = alumniData.map(alumni => {
+                    const career = careerData?.find(c => c.alumni_id === alumni.id);
+                    return {
+                        ...alumni,
+                        is_employed: career?.is_employed ?? null,
+                        open_for_mentorship: career?.open_for_mentorship ?? false
+                    };
+                });
+
+                populateYearFilter();
+                displayAlumni(allAlumni);
+                updateStats();
+                
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('alumniTable').style.display = 'table';
+
+            } catch (error) {
+                console.error('Error loading alumni data:', error);
+                document.getElementById('loadingDiv').innerHTML = '<p style="color: red;">Error loading data. Please refresh the page.</p>';
+            }
+        }
+
+        function populateYearFilter() {
+            const years = [...new Set(allAlumni.map(a => a.graduation_year))].sort((a, b) => b - a);
+            const yearFilter = document.getElementById('yearFilter');
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('yearFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchBox').addEventListener('input', applyFilters);
+        }
+
+        function applyFilters() {
+            let filtered = allAlumni;
+
+            const statusFilter = document.getElementById('statusFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(alumni => {
+                    if (statusFilter === 'employed') return alumni.is_employed === true;
+                    if (statusFilter === 'unemployed') return alumni.is_employed === false;
+                    if (statusFilter === 'mentorship') return alumni.open_for_mentorship === true;
+                    return true;
+                });
+            }
+
+            if (yearFilter !== 'all') {
+                filtered = filtered.filter(alumni => alumni.graduation_year === parseInt(yearFilter));
+            }
+
+            if (searchTerm) {
+                filtered = filtered.filter(alumni => 
+                    alumni.full_name.toLowerCase().includes(searchTerm) ||
+                    alumni.email.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            displayAlumni(filtered);
+            updateStats(filtered);
+        }
+
+        function displayAlumni(alumni) {
+            const tbody = document.getElementById('alumniTableBody');
+            tbody.innerHTML = '';
+
+            if (alumni.length === 0) {
+                document.getElementById('alumniTable').style.display = 'none';
+                document.getElementById('noDataDiv').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('alumniTable').style.display = 'table';
+            document.getElementById('noDataDiv').style.display = 'none';
+
+            alumni.forEach(alumnus => {
+                const row = document.createElement('tr');
+                const statusText = alumnus.is_employed === true ? 'Employed' : 
+                                   alumnus.is_employed === false ? 'Unemployed' : 
+                                   'Not Specified';
+                const statusClass = alumnus.is_employed === true ? 'status-employed' : 
+                                    alumnus.is_employed === false ? 'status-unemployed' : 
+                                    'status-mentorship';
+                const mentorshipText = alumnus.open_for_mentorship ? '✓ Yes' : '✗ No';
+                const mentorshipClass = alumnus.open_for_mentorship ? 'status-mentorship' : '';
+
+                row.innerHTML = `
+                    <td>${alumnus.full_name}</td>
+                    <td>${alumnus.email}</td>
+                    <td>${alumnus.graduation_year || 'N/A'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td><span class="status-badge ${mentorshipClass}">${mentorshipText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats(alumni = allAlumni) {
+            const total = alumni.length;
+            const employed = alumni.filter(a => a.is_employed === true).length;
+            const unemployed = alumni.filter(a => a.is_employed === false).length;
+            const mentorship = alumni.filter(a => a.open_for_mentorship === true).length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('employedCount').textContent = employed;
+            document.getElementById('unemployedCount').textContent = unemployed;
+            document.getElementById('mentorshipCount').textContent = mentorship;
+
+            document.getElementById('employedPercentage').textContent = 
+                total > 0 ? `${Math.round((employed / total) * 100)}%` : '0%';
+            document.getElementById('unemployedPercentage').textContent = 
+                total > 0 ? `${Math.round((unemployed / total) * 100)}%` : '0%';
+            document.getElementById('mentorshipPercentage').textContent = 
+                total > 0 ? `${Math.round((mentorship / total) * 100)}%` : '0%';
+        }
+    </script>
+</body>
+</html>
