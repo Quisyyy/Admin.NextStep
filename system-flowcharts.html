@@ -117,8 +117,11 @@
         </div>
 
         <!-- FLOWCHART 1: SYSTEM ACCESS FLOW -->
-        <div class="flowchart-section">
-            <h2>1️⃣ System Access Flow</h2>
+        <div class="flowchart-section" id="section-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>1️⃣ System Access Flow</h2>
+                <button onclick="downloadSection('section-1', 'System-Access-Flow')">⬇️ Save as PNG</button>
+            </div>
             <p>Shows the three main user types and their entry points into the NextStep system.</p>
             
             <div class="mermaid">
@@ -172,8 +175,11 @@
         </div>
 
         <!-- FLOWCHART 2: ALUMNI SYSTEM FLOW -->
-        <div class="flowchart-section">
-            <h2>2️⃣ Alumni System Flow</h2>
+        <div class="flowchart-section" id="section-2">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>2️⃣ Alumni System Flow</h2>
+                <button onclick="downloadSection('section-2', 'Alumni-System-Flow')">⬇️ Save as PNG</button>
+            </div>
             <p>Complete alumni lifecycle from registration through career tracking and archival.</p>
             
             <div class="mermaid">
@@ -226,8 +232,11 @@
         </div>
 
         <!-- FLOWCHART 3: ADMIN/STAFF ACCESS FLOW -->
-        <div class="flowchart-section">
-            <h2>3️⃣ Admin/Staff Access Flow</h2>
+        <div class="flowchart-section" id="section-3">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>3️⃣ Admin/Staff Access Flow</h2>
+                <button onclick="downloadSection('section-3', 'Admin-Staff-Access-Flow')">⬇️ Save as PNG</button>
+            </div>
             <p>Staff and developer access control with audit trail logging.</p>
             
             <div class="mermaid">
@@ -293,8 +302,11 @@
         </div>
 
         <!-- FLOWCHART 4: CAREER TRACKING FLOW -->
-        <div class="flowchart-section">
-            <h2>4️⃣ Career Tracking Flow</h2>
+        <div class="flowchart-section" id="section-4">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>4️⃣ Career Tracking Flow</h2>
+                <button onclick="downloadSection('section-4', 'Career-Tracking-Flow')">⬇️ Save as PNG</button>
+            </div>
             <p>How alumni career data is collected, tracked, and visualized.</p>
             
             <div class="mermaid">
@@ -410,6 +422,36 @@
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function downloadSection(sectionId, sectionName) {
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '⏳ Saving...';
+
+                const element = document.getElementById(sectionId);
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `NextStep-${sectionName}-${new Date().toISOString().slice(0, 10)}.png`;
+                link.click();
+
+                btn.disabled = false;
+                btn.textContent = '⬇️ Save as PNG';
+                alert('✅ ' + sectionName + ' saved successfully!');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '⬇️ Save as PNG';
+            }
         }
 
         async function downloadAsImage() {
