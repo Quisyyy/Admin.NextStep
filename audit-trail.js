@@ -207,6 +207,42 @@ function exportAuditTrail() {
     document.body.removeChild(link);
 }
 
+// Filter by employee ID
+function applyEmployeeFilter() {
+    const employeeId = document.getElementById('employeeFilter').value.trim().toUpperCase();
+    
+    if (!employeeId) {
+        renderAuditTable(allAuditRecords);
+        return;
+    }
+    
+    const filtered = allAuditRecords.filter(record => {
+        const empId = (record.employee_id || '').toUpperCase();
+        return empId === employeeId || empId.includes(employeeId);
+    });
+    
+    console.log(`🔍 Filtering by ${employeeId}: ${filtered.length} records found`);
+    renderAuditTable(filtered);
+}
+
+// Clear filter and show all
+function clearEmployeeFilter() {
+    document.getElementById('employeeFilter').value = '';
+    renderAuditTable(allAuditRecords);
+    console.log('✅ Filter cleared - showing all records');
+}
+
+// Allow Enter key to apply filter
+document.addEventListener('DOMContentLoaded', () => {
+    const filterInput = document.getElementById('employeeFilter');
+    if (filterInput) {
+        filterInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                applyEmployeeFilter();
+            }
+        });
+    }
+});
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 Audit trail page loaded');

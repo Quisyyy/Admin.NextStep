@@ -246,17 +246,32 @@
         <a class="back-link" href="homepage.html">←</a>
         <div class="page-card">
           <h2>Audit Trail - Employee Activity Log</h2>
+          
+          <!-- Employee Filter -->
+          <div class="audit-filters">
+            <div class="filter-group">
+              <label for="employeeFilter">Filter by Employee ID (e.g., EMP-001)</label>
+              <input 
+                type="text" 
+                id="employeeFilter" 
+                placeholder="Enter employee ID (EMP-###) or leave blank to show all"
+              >
+            </div>
+            <button class="btn btn-primary" onclick="applyEmployeeFilter()">Filter</button>
+            <button class="btn btn-secondary" onclick="clearEmployeeFilter()">Clear</button>
+          </div>
+          
           <div class="table-wrap">
             <table id="auditTable" class="audit-table">
               <thead>
                 <tr>
+                  <th>Time</th>
                   <th>Employee ID</th>
                   <th>Action</th>
                   <th>Details</th>
-                  <th>Time</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="auditTableBody">
                 <tr>
                   <td colspan="4">Loading…</td>
                 </tr>
