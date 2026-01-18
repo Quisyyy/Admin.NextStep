@@ -204,6 +204,7 @@ async function handleDownload(event) {
     
     const format = document.getElementById('downloadFormat').value;
     const filter = document.getElementById('dataFilter').value;
+    const yearFilter = document.getElementById('yearFilter')?.value || '';
     const button = event.target.querySelector('.download-btn');
     // Degree codes for filtering
     const degreeCodes = [
@@ -238,23 +239,33 @@ async function handleDownload(event) {
 
         console.log('Fetched alumni profiles:', profiles.length, profiles);
 
-        // Apply filter
+        // Apply filters
         let filteredData = profiles;
+        
+        // Filter by degree
         if (degreeCodes.includes(filter)) {
-            filteredData = profiles.filter(p => p.degree === filter);
+            filteredData = filteredData.filter(p => p.degree === filter);
+        }
+        
+        // Filter by graduation year
+        if (yearFilter) {
+            filteredData = filteredData.filter(p => {
+                if (!p.graduation_year && !p.year_graduated) return false;
+                const gradYear = (p.graduation_year || p.year_graduated || '').toString();
+                return gradYear === yearFilter;
+            });
         }
 
         console.log('Filtered data:', filteredData.length, filteredData);
 
-        // ...existing code...
+        // Log download action
         let employeeId = '';
         if (window.DatabaseHelper && typeof window.DatabaseHelper.getMyAdminRecord === 'function') {
             const admin = await window.DatabaseHelper.getMyAdminRecord();
             if (admin && admin.employee_id) employeeId = admin.employee_id;
         }
-        // Log download action
         if (employeeId && window.DatabaseHelper && typeof window.DatabaseHelper.logAdminAction === 'function') {
-            const details = `format=${format}, filter=${filter || 'all'}`;
+            const details = `format=${format}, degree=${filter || 'all'}, year=${yearFilter || 'all'}`;
             window.DatabaseHelper.logAdminAction(employeeId, 'download', details);
         }
 
@@ -489,45 +500,15 @@ async function loadCareerStats() {
         const statusCounts = {};
         let employedCount = 0;
         let mentorshipCount = 0;
-        let recordsWithStatus = 0;
 
-        (careerData || []).forEach(d => {
-            // Since job_status column doesn't exist, derive status from current_position
-            // If current_position is null, mark as "No Position"
-            // Otherwise use "Employed" as default
-            let status = null;
-            if (d.current_position && d.current_position.toLowerCase().includes('free')) {
-                status = 'Freelancer';
-            } else if (d.current_position && d.current_position.toLowerCase().includes('self')) {
-                status = 'Self-Employed';
-            } else if (d.current_position) {
-                status = 'Employed';
-            } else {
-                status = 'Not Currently Employed';
-            }
-            
-            const normalizedStatus = (status || '').trim() || 'Unknown Status';
-            
-            statusCounts[normalizedStatus] = (statusCounts[normalizedStatus] || 0) + 1;
-            
-            if (d.current_position) {
-                recordsWithStatus++;
-                employedCount++;
-            }
-
-            // Check mentorship availability
-            const openMentorship = d.mentorship && /yes|open/i.test(d.mentorship);
-            if (openMentorship) {
-                mentorshipCount++;
-            }
-
-            const key = (d.industry || '').trim();
-            if (key) {
-                industryCounts[key] = (industryCounts[key] || 0) + 1;
-            }
+        (careerData || []).length > 0 && (careerData || []).forEach(d => {
+            // Count any record as "Career Record Submitted"
+            statusCounts['Career Record Submitted'] = (statusCounts['Career Record Submitted'] || 0) + 1;
+            employedCount++;
+            mentorshipCount++;
         });
 
-        const topIndustry = Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+        const topIndustry = ['Career Data', total];
 
         const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
         const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
@@ -540,7 +521,7 @@ async function loadCareerStats() {
         setText('careerTopIndustry', topIndustry[0] || '—');
         setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
 
-        // Render status breakdown by derived status
+        // Render status breakdown
         renderCareerStatusBars(statusCounts, total);
 
     } catch (err) {
