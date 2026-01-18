@@ -518,19 +518,69 @@ async function loadCareerStats() {
             return;
         }
 
+        // SET UP REAL-TIME SUBSCRIPTION - Updates when alumni submit new data
+        if (window.careerSubscription) {
+            window.careerSubscription.unsubscribe();
+        }
+        
+        window.careerSubscription = window.supabase
+            .channel('career_info_changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'career_info' },
+                (payload) => {
+                    console.log('🔄 Real-time update received:', payload.eventType, payload.new);
+                    // Reload career stats when data changes
+                    setTimeout(() => loadCareerStats(), 500);
+                }
+            )
+            .subscribe();
+        
+        console.log('📡 Real-time subscription active - dashboard will update when alumni submit data');
+
         const industryCounts = {};
         const statusCounts = {};
         let employedCount = 0;
         let mentorshipCount = 0;
 
-        (careerData || []).length > 0 && (careerData || []).forEach(d => {
-            // Count any record as "Career Record Submitted"
-            statusCounts['Career Record Submitted'] = (statusCounts['Career Record Submitted'] || 0) + 1;
-            employedCount++;
-            mentorshipCount++;
+        (careerData || []).forEach(d => {
+            // Check if career profile is complete - has key fields filled
+            const hasJobTitle = d.job_title && d.job_title.toString().trim();
+            const hasCompany = d.company && d.company.toString().trim();
+            const hasIndustry = d.industry && d.industry.toString().trim();
+            const hasEmploymentStatus = d.is_employed !== null && d.is_employed !== undefined;
+            
+            // A profile is complete if it has at least 2 key fields filled
+            const fieldsCount = [hasJobTitle, hasCompany, hasIndustry, hasEmploymentStatus].filter(Boolean).length;
+            const isComplete = fieldsCount >= 2;
+            
+            // Determine status category
+            let statusLabel = isComplete ? 'Complete Career Profile' : 'Incomplete Career Profile';
+            statusCounts[statusLabel] = (statusCounts[statusLabel] || 0) + 1;
+            
+            // Also track employment status
+            const employed = d.is_employed === true || d.employed === true;
+            const mentorOpen = d.open_for_mentorship === true || d.open_mentorship === true;
+            
+            if (employed) {
+                employedCount++;
+            }
+            
+            if (mentorOpen) {
+                mentorshipCount++;
+            }
+            
+            // Count industries
+            const industry = d.industry || 'Not Specified';
+            if (industry && industry.trim()) {
+                industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+            }
         });
 
-        const topIndustry = ['Career Data', total];
+        // Get top industry
+        const topIndustry = Object.entries(industryCounts).length > 0
+            ? Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0]
+            : ['Career Data', total];
 
         const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
         const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
@@ -608,19 +658,15 @@ function renderCareerStatusBars(statusCounts, total) {
         return;
     }
 
-    const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'pursuing-further-studies', 'Other', 'No Status Specified'];
+    const order = ['Complete Career Profile', 'Incomplete Career Profile'];
     const colorMap = {
+        'Complete Career Profile': 'linear-gradient(to top, #00a86b, #28d764)',
+        'Incomplete Career Profile': 'linear-gradient(to top, #ffc107, #ffd454)',
+        'Employed & Open for Mentorship': 'linear-gradient(to top, #00a86b, #28d764)',
         'Employed': 'linear-gradient(to top, #004AAD, #0066cc)',
-        'Self-Employed': 'linear-gradient(to top, #2e6edc, #5b8ee0)',
-        'self-employed': 'linear-gradient(to top, #2e6edc, #5b8ee0)',
-        'Freelancer': 'linear-gradient(to top, #FF6B35, #ff8c5a)',
-        'Unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
-        'unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
-        'Student': 'linear-gradient(to top, #ffc107, #ffd454)',
-        'Career Break': 'linear-gradient(to top, #6f5ac8, #8a7cd8)',
-        'pursuing-further-studies': 'linear-gradient(to top, #17a2b8, #20c997)',
-        'Other': 'linear-gradient(to top, #666, #888)',
-        'No Status Specified': 'linear-gradient(to top, #ccc, #ddd)'
+        'Open for Mentorship': 'linear-gradient(to top, #17a2b8, #20c997)',
+        'Not Currently Employed': 'linear-gradient(to top, #dc3545, #e8576a)',
+        'Unknown Status': 'linear-gradient(to top, #ccc, #ddd)'
     };
 
     // Filter and prepare data - start with predefined order
