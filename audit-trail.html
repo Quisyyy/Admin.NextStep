@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="adminstyle.css">
     <script src="logo-fallback.js" defer></script>
     <script src="user-menu.js" defer></script>
-    
+
     <!-- Supabase Configuration -->
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,114 +204,67 @@
 
 <body>
     <header class="admin-header">
-        <div class="header-left">
-            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+      <div class="header-left">
+        <div class="logo-circle small">
+          <img
+            src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg"
+            class="nav-logo"
+            alt="logo"
+            onerror="
+              this.onerror = null;
+              this.src =
+                '../logo/557536151_1257403522824074_2017646524872962832_n.png';
+            "
+          />
         </div>
-        <div class="header-center">NEXT STEP - AUDIT TRAIL</div>
-        <div class="header-right"><button class="user-icon">👤</button></div>
+      </div>
+      <div class="header-center">NEXT STEP</div>
+      <div class="header-right">
+        <button class="user-icon" title="Click to logout">👤</button>
+      </div>
     </header>
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <nav>
-                <ul>
-                    <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
-                    <li><a href="alumlist.html"><span class="home-ico">👥</span> Alumni</a></li>
-                    <li><a href="archive.html"><span class="home-ico">📦</span> Archive</a></li>
-                    <li class="active"><a href="audit-trail.html"><span class="home-ico">📋</span> Audit Trail</a></li>
-                </ul>
-            </nav>
-        </aside>
+      <aside class="admin-sidebar">
+        <nav>
+          <ul>
+            <li>
+              <a href="homepage.html" style="color: white"
+                ><span class="home-ico">🏠</span> Dashboard</a
+              >
+            </li>
+            <li class="active">
+              <a href="audit-trail.html" style="color: white"
+                ><span class="home-ico">📋</span> Audit Trail</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-        <main class="admin-main">
-            <div class="audit-container">
-                <h1>📋 Audit Trail</h1>
-                <p style="color: #666; margin-bottom: 30px;">Track all admin and developer actions on the system</p>
-
-                <!-- Statistics -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Actions</h3>
-                        <div class="value" id="totalActions">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Archives</h3>
-                        <div class="value" id="archiveCount">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Restores</h3>
-                        <div class="value" id="restoreCount">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Deletes</h3>
-                        <div class="value" id="deleteCount">0</div>
-                    </div>
-                </div>
-
-                <!-- Filters -->
-                <div class="audit-filters">
-                    <h3>Filters</h3>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label for="filterAction">Action Type</label>
-                            <select id="filterAction">
-                                <option value="">All Actions</option>
-                                <option value="ARCHIVE">Archive</option>
-                                <option value="RESTORE">Restore</option>
-                                <option value="DELETE">Delete</option>
-                                <option value="UPDATE">Update</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterEntity">Entity Type</label>
-                            <select id="filterEntity">
-                                <option value="">All Entities</option>
-                                <option value="ALUMNI">Alumni</option>
-                                <option value="FORM">Form</option>
-                                <option value="CAREER">Career</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterUser">User Email</label>
-                            <input type="text" id="filterUser" placeholder="Search user...">
-                        </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-secondary" onclick="applyFilters()">🔍 Apply Filters</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="exportAuditTrail()">📥 Export as CSV</button>
-                    <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
-                </div>
-
-                <!-- Audit Table -->
-                <div class="audit-table">
-                    <div class="table-wrap">
-                        <table id="auditTable">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Entity</th>
-                                    <th>Entity Name</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody id="auditTableBody">
-                                <tr>
-                                    <td colspan="6" class="empty-message">Loading audit trail...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
+      <main class="admin-main">
+        <a class="back-link" href="homepage.html">←</a>
+        <div class="page-card">
+          <h2>Audit Trail - Employee Activity Log</h2>
+          <div class="table-wrap">
+            <table id="auditTable" class="audit-table">
+              <thead>
+                <tr>
+                  <th>Employee ID</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -322,14 +275,19 @@
 </html>
 
     <footer class="admin-footer">
-        <div class="admin-footer-inner">© Next Step</div>
+      <div class="admin-footer-inner">© Next Step</div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js" defer></script>
+    <script>
+      window.SUPABASE_URL = "https://ziquhxrfxywsmvunuyzi.supabase.co";
+      window.SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc";
+    </script>
+    <script src="supabase-client.js"></script>
     <script src="audit-logger.js" defer></script>
     <script src="db-helper.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="audit-trail.js" defer></script>
-</body>
+  </body>
 </html>
