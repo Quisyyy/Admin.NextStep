@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep - Program Flow (Simple)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #004AAD; margin-bottom: 30px; }
+        .flow-section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .flow-section h2 {
+            color: #004AAD;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flow-section h2 button {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #004AAD;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .flow-section h2 button:hover {
+            background: #003080;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NextStep - Program Flow (Simple)</h1>
+
+        <!-- 1. SIMPLE ARCHITECTURE -->
+        <div class="flow-section" id="section-1">
+            <h2>
+                System Architecture
+                <button onclick="downloadSection('section-1', 'Architecture')">⬇️ Save PNG</button>
+            </h2>
+            <div class="mermaid">
+                graph LR
+                    Browser["🖥️ Browser<br/>(Frontend)"] 
+                    API["🌐 Supabase API"]
+                    DB["💾 Database<br/>(PostgreSQL)"]
+                    
+                    Browser -->|HTTP| API
+                    API -->|SQL| DB
+                    DB -->|Data| API
+                    API -->|JSON| Browser
+            </div>
+        </div>
+
+        <!-- 2. USER FLOW -->
+        <div class="flow-section" id="section-2">
+            <h2>
+                User Access Flow
+                <button onclick="downloadSection('section-2', 'User-Flow')">⬇️ Save PNG</button>
+            </h2>
+            <div class="mermaid">
+                graph TD
+                    User["👤 User"] --> Login{"Login"}
+                    Login -->|Email/Pass| Auth["🔐 Authenticate"]
+                    Auth -->|Valid| Dashboard["📊 Dashboard"]
+                    Auth -->|Invalid| Login
+                    Dashboard --> Action["👆 User Action"]
+                    Action --> API["API Call"]
+                    API --> DB["Save to DB"]
+                    DB --> Update["Update Display"]
+                    Update --> Dashboard
+            </div>
+        </div>
+
+        <!-- 3. DATA FLOW -->
+        <div class="flow-section" id="section-3">
+            <h2>
+                Data Flow
+                <button onclick="downloadSection('section-3', 'Data-Flow')">⬇️ Save PNG</button>
+            </h2>
+            <div class="mermaid">
+                graph LR
+                    Input["📥 User Input<br/>(Form)"]
+                    Validate["✅ Validate"]
+                    Save["💾 Save to DB"]
+                    Process["🔧 Process Data"]
+                    Display["📊 Show Charts"]
+                    
+                    Input --> Validate
+                    Validate --> Save
+                    Save --> Process
+                    Process --> Display
+            </div>
+        </div>
+
+        <!-- 4. ADMIN FLOW -->
+        <div class="flow-section" id="section-4">
+            <h2>
+                Admin/Staff Access
+                <button onclick="downloadSection('section-4', 'Admin-Flow')">⬇️ Save PNG</button>
+            </h2>
+            <div class="mermaid">
+                graph TD
+                    Staff["👤 Staff Login"] --> Check{"DEV or ADM<br/>Employee ID?"}
+                    Check -->|No| Deny["❌ Access Denied"]
+                    Check -->|Yes| Grant["✅ Access Granted"]
+                    Grant --> Log["📝 Log to Audit Trail"]
+                    Log --> Admin["⚙️ Admin Panel"]
+                    Admin --> Action["Manage Alumni<br/>View Reports"]
+            </div>
+        </div>
+
+        <!-- 5. DATABASE TABLES -->
+        <div class="flow-section" id="section-5">
+            <h2>
+                Main Tables
+                <button onclick="downloadSection('section-5', 'Database-Tables')">⬇️ Save PNG</button>
+            </h2>
+            <div class="mermaid">
+                graph LR
+                    Admins["👨‍💼 Admins<br/>DEV/ADM"]
+                    Alumni["👥 Alumni<br/>Profiles"]
+                    Career["📈 Career Info<br/>Job Status"]
+                    Archive["📦 Archived<br/>Alumni"]
+                    Audit["📝 Audit Trail<br/>Logs"]
+                    
+                    Admins -->|manages| Alumni
+                    Alumni -->|has| Career
+                    Alumni -->|goes to| Archive
+                    Admins -->|logs| Audit
+                    Career -->|tracked in| Audit
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'base' });
+        mermaid.contentLoaded();
+
+        async function downloadSection(sectionId, sectionName) {
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '⏳ Saving...';
+
+                const element = document.getElementById(sectionId);
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                });
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `NextStep-${sectionName}-${new Date().toISOString().slice(0, 10)}.png`;
+                link.click();
+
+                btn.disabled = false;
+                btn.textContent = '⬇️ Save PNG';
+            } catch (error) {
+                alert('Error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '⬇️ Save PNG';
+            }
+        }
+    </script>
+</body>
+</html>
