@@ -58,6 +58,30 @@ async function loadAuditTrail() {
         renderAuditTable(allAuditRecords);
         updateAuditStats(allAuditRecords);
 
+        // SET UP REAL-TIME SUBSCRIPTION - Monitoring employee activities
+        if (window.auditSubscription) {
+            window.auditSubscription.unsubscribe();
+        }
+        
+        window.auditSubscription = window.supabase
+            .channel('admin_audit_trail_changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'admin_audit_trail' },
+                (payload) => {
+                    console.log('🔴 REAL-TIME: Employee activity detected:', payload.new);
+                    // Add new record to the top of the list
+                    if (payload.eventType === 'INSERT') {
+                        allAuditRecords.unshift(payload.new);
+                        renderAuditTable(allAuditRecords);
+                        updateAuditStats(allAuditRecords);
+                    }
+                }
+            )
+            .subscribe();
+        
+        console.log('📡 REAL-TIME MONITORING ACTIVE - Tracking all employee activities in real-time');
+
     } catch (error) {
         console.error('❌ Error loading audit trail:', error);
         showEmptyState('Error loading audit trail');
