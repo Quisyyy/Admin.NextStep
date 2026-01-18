@@ -486,29 +486,34 @@ async function loadCareerStats() {
         const activeAlumniIds = (activeAlumni || []).map(a => a.id);
         const totalAlumni = activeAlumniIds.length;
 
-        // Then get career info for active alumni - try flexible query
-        const { data: careerData, error: careerError } = await window.supabase
-            .from('career_info')
-            .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry')
-            .in('alumni_id', activeAlumniIds);
+        // Then get career info - try with ID filter first, fallback to all records
+        let careerData, careerError;
+        
+        if (activeAlumniIds.length > 0) {
+            const result = await window.supabase
+                .from('career_info')
+                .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry')
+                .in('alumni_id', activeAlumniIds);
+            careerData = result.data;
+            careerError = result.error;
+        } else {
+            // If no active alumni IDs, fetch all career data
+            const result = await window.supabase
+                .from('career_info')
+                .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry');
+            careerData = result.data;
+            careerError = result.error;
+        }
 
         if (careerError) {
             console.warn('❌ Career info error:', careerError.message);
-            // Show stats based on alumni count only
-            setText('careerTotal', totalAlumni.toLocaleString());
-            setText('careerEmployedPercent', '0%');
-            setText('careerEmployedCount', `0 of ${totalAlumni}`);
-            setText('careerMentorshipPercent', '0%');
-            setText('careerMentorshipCount', `0 of ${totalAlumni}`);
-            setText('careerTopIndustry', '—');
-            setText('careerTopIndustryCount', '0 submissions');
-            renderCareerStatusBars({ 'No Data': totalAlumni }, totalAlumni);
+            showCareerStatsError(`Database error: ${careerError.message}`);
             return;
         }
 
         console.log(`✅ Found ${(careerData || []).length} career records`);
         
-        const total = (careerData || []).length || totalAlumni;
+        const total = (careerData || []).length;
 
         if (total === 0) {
             console.warn('⚠️ No career data found in database');
@@ -520,11 +525,18 @@ async function loadCareerStats() {
         const statusCounts = {};
         let employedCount = 0;
         let mentorshipCount = 0;
+        let recordsWithStatus = 0;
 
         (careerData || []).forEach(d => {
-            // Normalize and count job status
-            const status = (d.job_status || 'Other').trim();
-            statusCounts[status] = (statusCounts[status] || 0) + 1;
+            // Normalize and count job status - handle NULL values
+            const status = (d.job_status || '').trim();
+            const normalizedStatus = status || 'No Status Specified';
+            
+            statusCounts[normalizedStatus] = (statusCounts[normalizedStatus] || 0) + 1;
+            
+            if (status) {
+                recordsWithStatus++;
+            }
 
             // Check is_employed (boolean) or job_status (text)
             const isEmployed = d.is_employed === true || 
@@ -551,7 +563,7 @@ async function loadCareerStats() {
         const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
         const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
 
-        setText('careerTotal', totalAlumni.toLocaleString());
+        setText('careerTotal', total.toLocaleString());
         setText('careerEmployedPercent', `${employedPct}%`);
         setText('careerEmployedCount', `${employedCount} of ${total}`);
         setText('careerMentorshipPercent', `${mentorshipPct}%`);
@@ -624,15 +636,19 @@ function renderCareerStatusBars(statusCounts, total) {
         return;
     }
 
-    const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'Other'];
+    const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'pursuing-further-studies', 'Other', 'No Status Specified'];
     const colorMap = {
         'Employed': 'linear-gradient(to top, #004AAD, #0066cc)',
         'Self-Employed': 'linear-gradient(to top, #2e6edc, #5b8ee0)',
+        'self-employed': 'linear-gradient(to top, #2e6edc, #5b8ee0)',
         'Freelancer': 'linear-gradient(to top, #FF6B35, #ff8c5a)',
         'Unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
+        'unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
         'Student': 'linear-gradient(to top, #ffc107, #ffd454)',
         'Career Break': 'linear-gradient(to top, #6f5ac8, #8a7cd8)',
-        'Other': 'linear-gradient(to top, #666, #888)'
+        'pursuing-further-studies': 'linear-gradient(to top, #17a2b8, #20c997)',
+        'Other': 'linear-gradient(to top, #666, #888)',
+        'No Status Specified': 'linear-gradient(to top, #ccc, #ddd)'
     };
 
     // Filter and prepare data - start with predefined order
@@ -656,7 +672,7 @@ function renderCareerStatusBars(statusCounts, total) {
             chartData.push({ 
                 label, 
                 count, 
-                color: colorMap['Other']
+                color: colorMap[label] || colorMap['Other']
             });
         }
     });
