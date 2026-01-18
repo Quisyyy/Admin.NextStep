@@ -464,7 +464,7 @@ async function loadCareerStats() {
         console.log('🔍 Fetching career stats...');
         
         // First get active alumni IDs
-        const { data: activeAlumni, error: alumniError } = await window.supabase
+        let { data: activeAlumni, error: alumniError } = await window.supabase
             .from('alumni_profiles')
             .select('id')
             .eq('is_active', true);
@@ -517,10 +517,15 @@ async function loadCareerStats() {
         }
 
         const industryCounts = {};
+        const statusCounts = {};
         let employedCount = 0;
         let mentorshipCount = 0;
 
         (careerData || []).forEach(d => {
+            // Normalize and count job status
+            const status = (d.job_status || 'Other').trim();
+            statusCounts[status] = (statusCounts[status] || 0) + 1;
+
             // Check is_employed (boolean) or job_status (text)
             const isEmployed = d.is_employed === true || 
                 (d.job_status && /employ|self|freelan|working/i.test(d.job_status));
@@ -554,12 +559,7 @@ async function loadCareerStats() {
         setText('careerTopIndustry', topIndustry[0] || '—');
         setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
 
-        // Render status breakdown
-        const statusCounts = {
-            'Employed': employedCount,
-            'Unemployed': total - employedCount,
-            'Open for Mentorship': mentorshipCount
-        };
+        // Render status breakdown by actual job statuses
         renderCareerStatusBars(statusCounts, total);
 
     } catch (err) {
@@ -572,7 +572,7 @@ async function loadCareerStats() {
 function showCareerStatsError(message) {
     const container = document.getElementById('careerStatusChart');
     if (container) {
-        container.innerHTML = `<div class="status-placeholder" style="color: #dc3545;">⚠️ ${message}</div>`;
+        container.innerHTML = `<div class="status-placeholder" style="color: #dc3545; padding: 20px;">⚠️ ${message || 'Unable to load career data'}</div>`;
     }
     
     const setText = (id, text) => {
@@ -580,20 +580,20 @@ function showCareerStatsError(message) {
         if (el) el.textContent = text;
     };
     
-    setText('careerTotal', '0');
-    setText('careerEmployedPercent', '0%');
-    setText('careerEmployedCount', '0 of 0');
-    setText('careerMentorshipPercent', '0%');
-    setText('careerMentorshipCount', '0 of 0');
+    setText('careerTotal', '—');
+    setText('careerEmployedPercent', '—');
+    setText('careerEmployedCount', '— of —');
+    setText('careerMentorshipPercent', '—');
+    setText('careerMentorshipCount', '— of —');
     setText('careerTopIndustry', '—');
-    setText('careerTopIndustryCount', '0 submissions');
+    setText('careerTopIndustryCount', '—');
 }
 
 // Show empty state for career stats
 function showCareerStatsEmpty() {
     const container = document.getElementById('careerStatusChart');
     if (container) {
-        container.innerHTML = '<div class="status-placeholder">No career data available yet.</div>';
+        container.innerHTML = '<div class="status-placeholder" style="padding: 40px 20px; color: #999;">📊 No career data submitted yet.<br>Alumni need to fill out their career information to see statistics here.</div>';
     }
     
     const setText = (id, text) => {
@@ -602,12 +602,12 @@ function showCareerStatsEmpty() {
     };
     
     setText('careerTotal', '0');
-    setText('careerEmployedPercent', '0%');
-    setText('careerEmployedCount', '0 of 0');
-    setText('careerMentorshipPercent', '0%');
-    setText('careerMentorshipCount', '0 of 0');
+    setText('careerEmployedPercent', '—');
+    setText('careerEmployedCount', '0 submissions');
+    setText('careerMentorshipPercent', '—');
+    setText('careerMentorshipCount', '0 submissions');
     setText('careerTopIndustry', '—');
-    setText('careerTopIndustryCount', '0 submissions');
+    setText('careerTopIndustryCount', 'No data');
 }
 
 // Render vertical bar chart for career status breakdown
@@ -619,35 +619,45 @@ function renderCareerStatusBars(statusCounts, total) {
     container.innerHTML = '';
     if (legendContainer) legendContainer.innerHTML = '';
 
-    if (!total) {
+    if (!total || !statusCounts || Object.keys(statusCounts).length === 0) {
         container.innerHTML = '<div class="status-placeholder">No career data available yet.</div>';
         return;
     }
 
     const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'Other'];
-    const colors = [
-        'linear-gradient(to top, #004AAD, #0066cc)',
-        'linear-gradient(to top, #2e6edc, #5b8ee0)',
-        'linear-gradient(to top, #FF6B35, #ff8c5a)',
-        'linear-gradient(to top, #dc3545, #e8576a)',
-        'linear-gradient(to top, #ffc107, #ffd454)',
-        'linear-gradient(to top, #6f5ac8, #8a7cd8)',
-        'linear-gradient(to top, #666, #888)'
-    ];
+    const colorMap = {
+        'Employed': 'linear-gradient(to top, #004AAD, #0066cc)',
+        'Self-Employed': 'linear-gradient(to top, #2e6edc, #5b8ee0)',
+        'Freelancer': 'linear-gradient(to top, #FF6B35, #ff8c5a)',
+        'Unemployed': 'linear-gradient(to top, #dc3545, #e8576a)',
+        'Student': 'linear-gradient(to top, #ffc107, #ffd454)',
+        'Career Break': 'linear-gradient(to top, #6f5ac8, #8a7cd8)',
+        'Other': 'linear-gradient(to top, #666, #888)'
+    };
 
-    // Filter and prepare data
+    // Filter and prepare data - start with predefined order
     const chartData = [];
-    order.forEach((label, index) => {
+    
+    // First add statuses in order that have data
+    order.forEach((label) => {
         const count = statusCounts[label] || 0;
         if (count > 0) {
-            chartData.push({ label, count, color: colors[index] });
+            chartData.push({ 
+                label, 
+                count, 
+                color: colorMap[label] || colorMap['Other']
+            });
         }
     });
 
     // Add any additional statuses not in order
     Object.entries(statusCounts).forEach(([label, count]) => {
         if (!order.includes(label) && count > 0) {
-            chartData.push({ label, count, color: colors[6] });
+            chartData.push({ 
+                label, 
+                count, 
+                color: colorMap['Other']
+            });
         }
     });
 
