@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep System Flowcharts</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #004AAD;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .flowchart-section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
+        }
+        .flowchart-section h2 {
+            color: #004AAD;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #004AAD;
+            font-size: 1.8em;
+        }
+        .flowchart-section p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #004AAD;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #003080;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .note {
+            background: #e3f2fd;
+            border-left: 4px solid #004AAD;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #333;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .controls {
+                display: none;
+            }
+            .flowchart-section {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 NextStep Alumni System</h1>
+        <p class="subtitle">Complete System Flowcharts & Architecture</p>
+
+        <div class="controls">
+            <button onclick="printPage()">🖨️ Print/Save as PDF</button>
+            <button onclick="window.print()">📄 Print Page</button>
+            <button onclick="scrollToTop()">⬆️ Back to Top</button>
+        </div>
+
+        <!-- FLOWCHART 1: SYSTEM ACCESS FLOW -->
+        <div class="flowchart-section">
+            <h2>1️⃣ System Access Flow</h2>
+            <p>Shows the three main user types and their entry points into the NextStep system.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    Start([Start]) --> UserType{User Type?}
+                    
+                    UserType -->|Business Owner| BO[Business Owner<br/>Register/Login]
+                    UserType -->|Staff/Developer| Staff[Staff Login<br/>DEV- or ADM-]
+                    UserType -->|Alumni/Customer| Alumni[Alumni<br/>Scan QR Code]
+                    
+                    BO --> BOHasAcct{Has Business<br/>Account?}
+                    BOHasAcct -->|No| CreateBiz[Create Business Profile]
+                    BOHasAcct -->|Yes| SetupServices[Setup Services]
+                    
+                    CreateBiz --> SetupServices
+                    SetupServices --> AddStaff[Add Staff Members]
+                    AddStaff --> GenerateCode[Generate QR Code]
+                    GenerateCode --> ViewDash[View Dashboard]
+                    
+                    Staff --> ValidLogin{Valid Login?}
+                    ValidLogin -->|No| StaffFail[Access Denied]
+                    ValidLogin -->|Yes| CheckRole[Check Role<br/>DEV or ADM]
+                    
+                    CheckRole --> ViewDash
+                    CheckRole --> AuditLog[Audit Trail Logged]
+                    
+                    Alumni --> SelectService[Select Service]
+                    SelectService --> EnterDetails[Enter Personal Details]
+                    EnterDetails --> JoinWaitlist[Join Waitlist/Queue]
+                    JoinWaitlist --> GetNumber[Get Service Number]
+                    GetNumber --> WaitYourTurn{Your Turn?}
+                    
+                    WaitYourTurn -->|No| ReceiveNotif[Receive Notification]
+                    WaitYourTurn -->|Yes| GetService[Get Service]
+                    ReceiveNotif --> GetService
+                    GetService --> Done([End])
+                    
+                    ViewDash --> Done
+                    StaffFail --> Done
+            </div>
+            
+            <div class="note">
+                <strong>Key Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Three main user roles: Business Owner, Staff (DEV-/ADM-), and Alumni</li>
+                    <li>Staff access tracked via audit trail with employee ID</li>
+                    <li>Alumni access via QR code scanning and service queue</li>
+                    <li>Business owners manage staff and generate access codes</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FLOWCHART 2: ALUMNI SYSTEM FLOW -->
+        <div class="flowchart-section">
+            <h2>2️⃣ Alumni System Flow</h2>
+            <p>Complete alumni lifecycle from registration through career tracking and archival.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    Start([Alumni Registration]) --> Register[Register Account]
+                    Register --> CreateProfile[Create Alumni Profile]
+                    CreateProfile --> BasicInfo[Enter Basic Information<br/>Name, Email, Phone]
+                    
+                    BasicInfo --> EducationForm[Fill Education Details<br/>Degree, Graduation Date]
+                    EducationForm --> CareerForm[Complete Career Form<br/>Job Status, Industry]
+                    
+                    CareerForm --> ProfileComplete{All Forms<br/>Complete?}
+                    ProfileComplete -->|No| Incomplete[Profile Incomplete]
+                    ProfileComplete -->|Yes| ViewProfile[View Full Profile]
+                    
+                    ViewProfile --> Dashboard[Alumni Dashboard]
+                    Dashboard --> Stats[View Career Statistics]
+                    Stats --> NetworkView[Browse Alumni Network]
+                    NetworkView --> MentorshipCheck{Open for<br/>Mentorship?}
+                    
+                    MentorshipCheck -->|Yes| BeMentor[Become Mentor]
+                    MentorshipCheck -->|No| Continue[Skip Mentorship]
+                    
+                    BeMentor --> MentorProfile[Create Mentor Profile]
+                    MentorProfile --> Dashboard2[Updated Dashboard]
+                    Continue --> Dashboard2
+                    
+                    Dashboard2 --> UpdateCareer[Update Career Information]
+                    UpdateCareer --> ChangeStatus[Change Job Status]
+                    ChangeStatus --> CareerChart[View Career Chart]
+                    
+                    CareerChart --> LongInactive{Inactive<br/>6+ Months?}
+                    LongInactive -->|No| Active[Active Alumni]
+                    LongInactive -->|Yes| Archive[Archive Profile]
+                    
+                    Active --> End1([Alumni Portal])
+                    Archive --> End2([Archived Alumni])
+            </div>
+            
+            <div class="note">
+                <strong>Key Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Alumni registration with multi-step form (Basic, Education, Career)</li>
+                    <li>Career status tracking with mentorship availability</li>
+                    <li>Career statistics and breakdown charts</li>
+                    <li>Automatic archival after 6+ months of inactivity</li>
+                    <li>Audit trail logs all alumni actions</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FLOWCHART 3: ADMIN/STAFF ACCESS FLOW -->
+        <div class="flowchart-section">
+            <h2>3️⃣ Admin/Staff Access Flow</h2>
+            <p>Staff and developer access control with audit trail logging.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    Start([Staff/Developer Access]) --> Login[Login Page]
+                    Login --> Email[Enter Email]
+                    Email --> Password[Enter Password]
+                    
+                    Password --> ValidateEmail{Email<br/>Registered?}
+                    ValidateEmail -->|No| ErrorEmail[Email Not Found]
+                    ValidateEmail -->|Yes| ValidatePass{Password<br/>Correct?}
+                    
+                    ValidatePass -->|No| ErrorPass[Invalid Password]
+                    ValidatePass -->|Yes| GetAdmin[Fetch Admin Record]
+                    
+                    GetAdmin --> CheckEmpID{Employee ID<br/>Starts DEV/ADM?}
+                    CheckEmpID -->|No| DenyAccess[Access Denied<br/>Not Staff]
+                    CheckEmpID -->|Yes| LogAudit1[Log Login to Audit Trail]
+                    
+                    ErrorEmail --> Login
+                    ErrorPass --> Login
+                    DenyAccess --> Login
+                    
+                    LogAudit1 --> CheckRole{Check Role}
+                    CheckRole -->|DEV-###| DevAccess[Developer Access]
+                    CheckRole -->|ADM-###| AdminAccess[Admin Access]
+                    
+                    DevAccess --> DevDash[View Dev Dashboard<br/>Limited Features]
+                    AdminAccess --> AdminDash[View Admin Dashboard<br/>Full Features]
+                    
+                    DevDash --> ViewAudit[View Audit Trail]
+                    AdminDash --> ManageStaff[Manage Staff]
+                    AdminDash --> ViewAudit
+                    
+                    ManageStaff --> AddStaff[Add Staff Member]
+                    AddStaff --> GenEmpID[Generate Employee ID<br/>DEV-### or ADM-###]
+                    GenEmpID --> SendInvite[Send Login Invite]
+                    SendInvite --> LogAudit2[Log Action to Audit Trail]
+                    
+                    ViewAudit --> AuditDisplay[Display Audit Records<br/>With DEV-/ADM- Prefix]
+                    AuditDisplay --> SeeActions[View All Staff Actions<br/>Timestamp, Action, Details]
+                    
+                    LogAudit2 --> AdminDash
+                    SeeActions --> Logout{Continue?}
+                    DevDash --> Logout
+                    
+                    Logout -->|Yes| CheckRole
+                    Logout -->|No| LogoutAudit[Log Logout to Audit Trail]
+                    LogoutAudit --> End([Session End])
+            </div>
+            
+            <div class="note">
+                <strong>Key Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Staff identified by employee ID: DEV-### or ADM-###</li>
+                    <li>All login/logout/actions logged to audit trail</li>
+                    <li>Audit trail displays user with role prefix (DEV-123, ADM-456)</li>
+                    <li>Different access levels: DEV (limited) vs ADM (full)</li>
+                    <li>Admin can manage staff and generate new employee IDs</li>
+                    <li>All actions tracked with timestamp and details</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FLOWCHART 4: CAREER TRACKING FLOW -->
+        <div class="flowchart-section">
+            <h2>4️⃣ Career Tracking Flow</h2>
+            <p>How alumni career data is collected, tracked, and visualized.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    Start([Career Form Submission]) --> FillForm[Alumni Fills Career Form]
+                    FillForm --> JobStatus[Select Job Status<br/>Employed, Unemployed,<br/>Self-Employed, Student, Other]
+                    
+                    JobStatus --> Industry[Enter Industry]
+                    Industry --> Position[Enter Current Position]
+                    Position --> Mentorship[Available for Mentorship?<br/>Yes/No/Maybe]
+                    
+                    Mentorship --> Submit[Submit Form]
+                    Submit --> ValidateData{Data Valid?}
+                    
+                    ValidateData -->|No| Error[Show Error Message]
+                    Error --> FillForm
+                    ValidateData -->|Yes| SaveDB[Save to career_info Table]
+                    
+                    SaveDB --> UpdateTimestamp[Update Modified Timestamp]
+                    UpdateTimestamp --> LogActivity[Log Activity to Audit Trail]
+                    
+                    LogActivity --> RecordSaved[Career Record Saved]
+                    RecordSaved --> TriggerCharts[Update Career Charts]
+                    
+                    TriggerCharts --> CountStatus[Count Each Job Status]
+                    CountStatus --> CalcPercent[Calculate Percentages]
+                    CalcPercent --> TopIndustry[Find Top Industry]
+                    
+                    TopIndustry --> BuildChart[Build Status Breakdown Chart]
+                    BuildChart --> DisplayStats[Display Career Statistics<br/>Employment Rate, Mentorship %, etc.]
+                    
+                    DisplayStats --> DashboardRefresh[Dashboard Updated]
+                    DashboardRefresh --> Alumni[Alumni Sees Updated Profile]
+                    Alumni --> Admin[Admin Sees Updated Stats]
+                    
+                    Admin --> Archive{Alumni Inactive<br/>6+ Months?}
+                    Archive -->|Yes| MoveArchive[Move to Archive Table]
+                    Archive -->|No| Active[Keep Active]
+                    
+                    MoveArchive --> LogArchive[Log Archive Action]
+                    Active --> End([Data Tracking Complete])
+                    LogArchive --> End
+            </div>
+            
+            <div class="note">
+                <strong>Key Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Career form captures: Job Status, Industry, Position, Mentorship</li>
+                    <li>All submissions validated and stored in career_info table</li>
+                    <li>Real-time chart updates with employment breakdown</li>
+                    <li>Tracks mentorship availability (Yes/No/Maybe)</li>
+                    <li>Inactive alumni automatically archived after 6+ months</li>
+                    <li>All changes logged to audit trail</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="flowchart-section">
+            <h2>📊 System Summary</h2>
+            <p>The NextStep Alumni System has four main components:</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div style="border-left: 4px solid #004AAD; padding-left: 15px;">
+                    <h3 style="color: #004AAD; margin-bottom: 10px;">👥 User Management</h3>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Business Owners</li>
+                        <li>Staff (DEV-###, ADM-###)</li>
+                        <li>Alumni/Customers</li>
+                    </ul>
+                </div>
+                <div style="border-left: 4px solid #004AAD; padding-left: 15px;">
+                    <h3 style="color: #004AAD; margin-bottom: 10px;">🎓 Alumni Profiles</h3>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Basic Information</li>
+                        <li>Education Details</li>
+                        <li>Career Information</li>
+                    </ul>
+                </div>
+                <div style="border-left: 4px solid #004AAD; padding-left: 15px;">
+                    <h3 style="color: #004AAD; margin-bottom: 10px;">📈 Analytics & Tracking</h3>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Career Status Breakdown</li>
+                        <li>Employment Rate</li>
+                        <li>Mentorship Availability</li>
+                    </ul>
+                </div>
+                <div style="border-left: 4px solid #004AAD; padding-left: 15px;">
+                    <h3 style="color: #004AAD; margin-bottom: 10px;">🔐 Security & Audit</h3>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Audit Trail Logging</li>
+                        <li>Role-Based Access</li>
+                        <li>Activity Tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls" style="margin-top: 40px;">
+            <button onclick="printPage()">🖨️ Print/Save as PDF</button>
+            <button onclick="window.print()">📄 Print Page</button>
+            <button onclick="downloadAsImage()">📸 Save as Image</button>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'base' });
+        mermaid.contentLoaded();
+
+        function printPage() {
+            window.print();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function downloadAsImage() {
+            alert('To save as JPEG:\n1. Press Ctrl+P (Print)\n2. Select "Save as PDF"\n3. Then use a converter to JPG\n\nOr right-click any diagram and select "Save image as"');
+        }
+    </script>
+</body>
+</html>
