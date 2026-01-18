@@ -10,14 +10,10 @@
     <script src="logo-fallback.js" defer></script>
     <script src="user-menu.js" defer></script>
     
-    <!-- Supabase Configuration -->
-    <script>
-        // Set Supabase credentials - Update with your actual values
-        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
-        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
-    </script>
-    
-    <script src="supabase-client.js" defer></script>
+    <!-- Supabase Configuration (loads correct credentials) -->
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
 </head>
 
 <body>
@@ -28,6 +24,11 @@
         <div class="header-center">NEXT STEP</div>
         <div class="header-right"><button class="user-icon">👤</button></div>
     </header>
+
+    <!-- Error/Success Messages Container -->
+    <div id="messageContainer" style="position: fixed; top: 0; left: 0; right: 0; z-index: 9998; display: none;">
+        <div id="message" style="padding: 15px 20px; text-align: center; font-weight: 500;"></div>
+    </div>
 
     <div class="admin-layout">
         <aside class="admin-sidebar">
@@ -137,8 +138,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js" defer></script>
-    <script src="alumni-archive.js" defer></script>
+    <script src="archive.js" defer></script>
     <script src="logout.js" defer></script>
 </body>
 

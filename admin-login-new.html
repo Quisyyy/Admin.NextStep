@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - NextStep</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Admin Login</h1>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email or Employee ID:</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div id="statusMessage" class="status"></div>
+            
+            <button type="submit">Sign In</button>
+        </form>
+        
+        <p>Don't have an account? <a href="admin-register.html">Register here</a></p>
+    </div>
+
+    <!-- ========================================================================
+         IMPORTANT: Script Loading Order
+         1. Config (must be first)
+         2. Supabase library (from CDN)
+         3. Supabase client initialization
+         4. Database helper
+         5. Page-specific scripts
+         ======================================================================== -->
+
+    <!-- 1. Load Configuration FIRST -->
+    <script src="config.js"></script>
+
+    <!-- 2. Load Supabase Library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 3. Initialize Supabase Client -->
+    <script src="supabase-client.js"></script>
+
+    <!-- 4. Load Database Helper -->
+    <script src="db-helper.js"></script>
+
+    <!-- 5. Load Page-Specific Script -->
+    <script>
+        // Helper functions for UI feedback
+        function setStatus(el, msg, type = 'info') {
+            if (!el) return;
+            el.textContent = msg || '';
+            el.className = `status ${type}`;
+            el.style.display = msg ? 'block' : 'none';
+        }
+
+        function setBusy(btn, busy) {
+            if (!btn) return;
+            btn.disabled = !!busy;
+            btn.dataset.loading = busy ? '1' : '';
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = this;
+            const statusEl = document.getElementById('statusMessage');
+            const btn = form.querySelector('button[type="submit"]');
+
+            setStatus(statusEl, 'Signing in…');
+            setBusy(btn, true);
+            
+            try {
+                const email = form.querySelector('[name="email"]').value.trim();
+                const password = form.querySelector('[name="password"]').value;
+
+                if (!email || !password) {
+                    throw new Error('Enter your Email or Employee ID and Password.');
+                }
+
+                // Call DatabaseHelper to login
+                const result = await window.DatabaseHelper.loginAdmin(email, password);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Login failed');
+                }
+
+                setStatus(statusEl, '✅ Signed in. Redirecting…', 'success');
+                setTimeout(() => { 
+                    window.location.href = './homepage.html'; 
+                }, 1000);
+            } catch (err) {
+                console.error('Login error:', err);
+                setStatus(statusEl, err.message || 'Login failed', 'error');
+            } finally {
+                setBusy(btn, false);
+            }
+        });
+
+        console.log('✅ Admin login page loaded');
+    </script>
+</body>
+</html>

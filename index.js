@@ -34,20 +34,30 @@ async function loadDashboardData() {
             return;
         }
 
-        // Get all alumni profiles
-        const {
-            data: profiles,
-            error
-        } = await window.supabase
+        // Get only active alumni profiles
+        let { data: profiles, error } = await window.supabase
             .from('alumni_profiles')
-            .select('*');
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+
+        // If is_active column doesn't exist, get all profiles
+        if (error && error.message.includes('is_active')) {
+            console.warn('is_active column not found, loading all profiles');
+            const result = await window.supabase
+                .from('alumni_profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            profiles = result.data;
+            error = result.error;
+        }
 
         if (error) {
             console.error('Error fetching alumni data:', error);
             return;
         }
 
-        console.log('Loaded alumni profiles:', profiles.length);
+        console.log('Loaded active alumni profiles:', (profiles || []).length);
 
         // Calculate statistics
         const total = profiles.length;
@@ -437,6 +447,12 @@ function createSimplePDF(data) {
 
 // Load career stats percentages from Supabase career_info table
 async function loadCareerStats() {
+    // Define setText at the beginning to avoid initialization issues
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    };
+
     try {
         const ready = await ensureSupabaseReady();
         if (!ready) {
@@ -445,23 +461,54 @@ async function loadCareerStats() {
             return;
         }
 
-        console.log('🔍 Fetching career stats from alumni_profiles table...');
-        const { data, error } = await window.supabase
+        console.log('🔍 Fetching career stats...');
+        
+        // First get active alumni IDs
+        const { data: activeAlumni, error: alumniError } = await window.supabase
             .from('alumni_profiles')
-            .select('job_status, industry, open_for_mentorship');
+            .select('id')
+            .eq('is_active', true);
 
-        if (error) {
-            console.error('❌ Error fetching career stats:', error);
-            if (error.code === '42P01') {
-                showCareerStatsError('Table "alumni_profiles" does not exist. Please create it first.');
-            } else {
-                showCareerStatsError(`Database error: ${error.message}`);
+        if (alumniError) {
+            console.error('❌ Error fetching active alumni:', alumniError);
+            // Try without is_active filter (column might not exist)
+            const { data: allAlumni, error: allError } = await window.supabase
+                .from('alumni_profiles')
+                .select('id');
+            
+            if (allError) {
+                showCareerStatsError(`Database error: ${allError.message}`);
+                return;
             }
+            activeAlumni = allAlumni;
+        }
+
+        const activeAlumniIds = (activeAlumni || []).map(a => a.id);
+        const totalAlumni = activeAlumniIds.length;
+
+        // Then get career info for active alumni - try flexible query
+        const { data: careerData, error: careerError } = await window.supabase
+            .from('career_info')
+            .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry')
+            .in('alumni_id', activeAlumniIds);
+
+        if (careerError) {
+            console.warn('❌ Career info error:', careerError.message);
+            // Show stats based on alumni count only
+            setText('careerTotal', totalAlumni.toLocaleString());
+            setText('careerEmployedPercent', '0%');
+            setText('careerEmployedCount', `0 of ${totalAlumni}`);
+            setText('careerMentorshipPercent', '0%');
+            setText('careerMentorshipCount', `0 of ${totalAlumni}`);
+            setText('careerTopIndustry', '—');
+            setText('careerTopIndustryCount', '0 submissions');
+            renderCareerStatusBars({ 'No Data': totalAlumni }, totalAlumni);
             return;
         }
 
-        console.log(`✅ Found ${data.length} career records:`, data);
-        const total = data.length;
+        console.log(`✅ Found ${(careerData || []).length} career records`);
+        
+        const total = (careerData || []).length || totalAlumni;
 
         if (total === 0) {
             console.warn('⚠️ No career data found in database');
@@ -469,32 +516,22 @@ async function loadCareerStats() {
             return;
         }
 
-        const statusCounts = {};
         const industryCounts = {};
         let employedCount = 0;
         let mentorshipCount = 0;
 
-        const normalizeStatus = (raw) => {
-            const s = (raw || '').trim().toLowerCase();
-            if (!s) return 'Other';
-            if (s.includes('self')) return 'Self-Employed';
-            if (s.includes('free')) return 'Freelancer';
-            if (s.includes('unemploy')) return 'Unemployed';
-            if (s.includes('student')) return 'Student';
-            if (s.includes('career')) return 'Career Break';
-            if (s.includes('employ')) return 'Employed';
-            return (raw || '').trim() || 'Other';
-        };
-
-        data.forEach(d => {
-            const normStatus = normalizeStatus(d.job_status);
-            statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
-
-            if (['Employed', 'Self-Employed', 'Freelancer'].includes(normStatus)) {
+        (careerData || []).forEach(d => {
+            // Check is_employed (boolean) or job_status (text)
+            const isEmployed = d.is_employed === true || 
+                (d.job_status && /employ|self|freelan|working/i.test(d.job_status));
+            if (isEmployed) {
                 employedCount++;
             }
 
-            if ((d.open_for_mentorship || '').trim().toLowerCase() === 'yes') {
+            // Check open_for_mentorship (boolean) or mentorship (text)
+            const openMentorship = d.open_for_mentorship === true ||
+                (d.mentorship && /yes|open/i.test(d.mentorship));
+            if (openMentorship) {
                 mentorshipCount++;
             }
 
@@ -509,12 +546,7 @@ async function loadCareerStats() {
         const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
         const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
 
-        const setText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-
-        setText('careerTotal', total.toLocaleString());
+        setText('careerTotal', totalAlumni.toLocaleString());
         setText('careerEmployedPercent', `${employedPct}%`);
         setText('careerEmployedCount', `${employedCount} of ${total}`);
         setText('careerMentorshipPercent', `${mentorshipPct}%`);
@@ -522,6 +554,12 @@ async function loadCareerStats() {
         setText('careerTopIndustry', topIndustry[0] || '—');
         setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
 
+        // Render status breakdown
+        const statusCounts = {
+            'Employed': employedCount,
+            'Unemployed': total - employedCount,
+            'Open for Mentorship': mentorshipCount
+        };
         renderCareerStatusBars(statusCounts, total);
 
     } catch (err) {

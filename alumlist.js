@@ -38,17 +38,19 @@ async function loadAlumni() {
         const ok = await ensureSupabaseReady(2000);
         console.log('✅ Supabase ready:', ok);
         if (ok) {
+            // Only load active alumni (is_active = true or null for older records)
             const {
                 data,
                 error
-            } = await window.supabase.from('alumni_profiles').select('id, full_name, student_number, degree, graduated_year, created_at').order('created_at', {
-                ascending: false
-            });
+            } = await window.supabase.from('alumni_profiles')
+                .select('id, full_name, student_number, degree, graduated_year, created_at, is_active')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false });
             
             console.log('📊 Supabase response:', { data, error });
             
             if (!error && Array.isArray(data)) {
-                console.log(`✅ Found ${data.length} alumni records`);
+                console.log(`✅ Found ${data.length} active alumni records`);
                 // Fetch completion status for each alumni
                 const alumniWithStatus = await Promise.all(data.map(async (r) => {
                     const status = await getAlumniCompletionStatus(r.id);
@@ -280,35 +282,63 @@ async function bulkArchiveSelected() {
 
     let successCount = 0;
     let failureCount = 0;
+    const archivedIds = [];
+
+    console.log('🔄 Starting bulk archive for', count, 'records...');
 
     for (const alumniId of selectedAlumni) {
         try {
+            // Visual feedback - mark as processing
+            const rowCheckbox = document.querySelector(`input.row-checkbox[data-id="${alumniId}"]`);
+            if (rowCheckbox) {
+                const row = rowCheckbox.closest('tr');
+                if (row) {
+                    row.style.opacity = '0.5';
+                }
+            }
+
             const { data, error } = await window.supabase.rpc('archive_alumni_record', {
                 p_alumni_id: alumniId,
                 p_reason: 'Bulk archived by admin'
             });
 
-            if (error) throw error;
-
-            if (data.success) {
+            if (error) {
+                console.warn('❌ RPC Error for', alumniId, ':', error);
+                failureCount++;
+            } else if (data && data.success) {
                 successCount++;
+                archivedIds.push(alumniId);
+                console.log('✅ Archived:', alumniId);
             } else {
+                console.warn('Failed to archive:', alumniId, data?.message);
                 failureCount++;
             }
         } catch (error) {
             failureCount++;
             console.error('Error archiving:', error);
         }
+
+        // Small delay between operations for stability
+        await new Promise(r => setTimeout(r, 200));
     }
 
     alert(`✓ ${successCount} record(s) archived\n${failureCount > 0 ? `✗ ${failureCount} failed` : ''}`);
     
-    // Reload list
+    console.log('🔄 Reloading alumni list...');
+    
+    // Reload list after all operations complete
     selectedAlumni.clear();
     const updatedData = await loadAlumni();
     allAlumni = updatedData;
-    applyFilters();
+    await applyFilters();
     populateYearFilter(updatedData);
+    
+    // Update UI
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    updateBulkActionsBar();
+    
+    console.log('✅ Bulk archive complete. Total alumni now:', allAlumni.length);
 }
 
 // Initialize on load
@@ -335,32 +365,59 @@ window.addEventListener('alumni:saved', async function(e) {
     populateYearFilter(data);
 });
 
-// Archive functionality
+// Archive functionality with improved error handling
 async function archiveAlumni(alumniId, fullName) {
     const reason = prompt(`Enter reason for archiving "${fullName}":`, 'Requested by admin');
     if (reason === null) return; // User cancelled
 
     try {
+        console.log('🔄 Archiving alumni:', alumniId, 'Reason:', reason);
+        
         const { data, error } = await window.supabase.rpc('archive_alumni_record', {
             p_alumni_id: alumniId,
             p_reason: reason || 'No reason specified'
         });
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ RPC Error:', error);
+            throw error;
+        }
 
-        const result = data;
-        if (result.success) {
-            alert('✓ ' + result.message);
+        console.log('✅ Archive response:', data);
+        
+        // Check if archive was successful
+        if (data && data.success) {
+            console.log('✅ Archive successful:', data.message);
+            alert('✓ ' + data.message);
+            
+            // Immediate UI update - remove from table
+            const rowCheckbox = document.querySelector(`input.row-checkbox[data-id="${alumniId}"]`);
+            if (rowCheckbox) {
+                const row = rowCheckbox.closest('tr');
+                if (row) {
+                    row.style.opacity = '0.5';
+                    row.style.textDecoration = 'line-through';
+                }
+            }
+            
+            // Wait a short moment for visual feedback
+            await new Promise(r => setTimeout(r, 500));
+            
             // Reload the list
+            console.log('🔄 Reloading alumni list...');
             const updatedData = await loadAlumni();
             allAlumni = updatedData;
-            applyFilters();
+            await applyFilters();
             populateYearFilter(updatedData);
+            
+            console.log('✅ List reloaded. Total alumni now:', allAlumni.length);
         } else {
-            alert('Error: ' + result.message);
+            const errorMsg = data?.message || 'Unknown error occurred';
+            console.error('❌ Archive failed:', errorMsg);
+            alert('Error: ' + errorMsg);
         }
     } catch (error) {
-        console.error('Error archiving alumni:', error);
-        alert('Error archiving record: ' + error.message);
+        console.error('❌ Exception during archive:', error);
+        alert('Error archiving record: ' + (error.message || error));
     }
 }

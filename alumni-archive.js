@@ -30,7 +30,7 @@ async function loadArchivedRecords() {
             return;
         }
 
-        // Simple query - just get everything
+        // Query from alumni_archive table (the correct source)
         const { data, error } = await window.supabase
             .from('alumni_archive')
             .select('*')
@@ -66,7 +66,7 @@ async function loadArchivedRecords() {
             return {
                 ...record,
                 days_until_deletion: record.is_restored ? null : daysRemaining,
-                archive_status: record.is_restored ? 'Restored' : (daysRemaining <= 0 ? 'Pending Deletion' : 'Active Archive')
+                archive_status: record.is_restored ? 'Restored' : (daysRemaining <= 0 ? 'Pending Deletion' : 'Archived')
             };
         });
 
@@ -100,6 +100,7 @@ function renderArchiveTable(records) {
         console.log(`Record ${idx}: id=${record.id}, name=${record.full_name}`);
         
         const tr = document.createElement('tr');
+        tr.setAttribute('data-archive-id', record.id);
         const archivedDate = new Date(record.archived_at).toLocaleDateString();
         const statusBadge = record.is_restored 
             ? '<span class="status-badge complete">Restored</span>'
@@ -303,70 +304,40 @@ async function restoreSelectedRecord() {
     try {
         closeRestoreModal();
 
-        // First, get the archive record
-        const { data: archiveRecord, error: fetchError } = await window.supabase
-            .from('alumni_archive')
-            .select('*')
-            .eq('id', selectedArchiveId)
-            .single();
+        // Call RPC function to restore
+        const { data, error } = await window.supabase.rpc('restore_archived_alumni', {
+            p_archive_id: selectedArchiveId
+        });
 
-        if (fetchError) {
-            console.error('Error fetching archive record:', fetchError);
-            showErrorMessage('Error fetching archive record: ' + fetchError.message);
+        if (error) {
+            console.error('Error restoring record:', error);
+            showErrorMessage('Error restoring record: ' + error.message);
             return;
         }
 
-        if (!archiveRecord) {
-            console.error('Archive record not found for ID:', selectedArchiveId);
-            showErrorMessage('Archive record not found');
-            return;
+        if (data && data.success) {
+            console.log('Record restored successfully');
+            showSuccessMessage('✓ Successfully restored');
+            
+            // Remove from table immediately (real-time)
+            const rowToRemove = document.querySelector(`tr[data-archive-id="${selectedArchiveId}"]`);
+            if (rowToRemove) {
+                rowToRemove.style.opacity = '0.5';
+                rowToRemove.style.textDecoration = 'line-through';
+                setTimeout(() => rowToRemove.remove(), 500);
+            }
+            
+            // Update the record in memory
+            allArchivedRecords = allArchivedRecords.filter(r => r.id !== selectedArchiveId);
+            
+            // Update UI counts immediately
+            updateArchiveStats();
+            
+            // Refresh in background (optional - for consistency)
+            setTimeout(() => loadArchivedRecords(), 2000);
+        } else {
+            showErrorMessage(data?.message || 'Failed to restore record');
         }
-
-        console.log('Found archive record:', archiveRecord);
-
-        // Generate new UUID for the restored record
-        const newId = generateUUID();
-        console.log('Generated new UUID:', newId);
-        
-        // Insert back into alumni_profiles
-        const { data: insertedRecord, error: insertError } = await window.supabase
-            .from('alumni_profiles')
-            .insert([{
-                id: newId,
-                full_name: archiveRecord.full_name,
-                email: archiveRecord.email,
-                student_number: archiveRecord.student_number,
-                degree: archiveRecord.degree || null,
-                created_at: archiveRecord.original_created_at || new Date().toISOString()
-            }])
-            .select();
-
-        if (insertError) {
-            console.error('Error inserting restored record:', insertError);
-            showErrorMessage('Error restoring record: ' + insertError.message);
-            return;
-        }
-
-        console.log('Record inserted successfully');
-
-        // Mark archive record as restored
-        const { error: updateError } = await window.supabase
-            .from('alumni_archive')
-            .update({ 
-                is_restored: true, 
-                restored_at: new Date().toISOString() 
-            })
-            .eq('id', selectedArchiveId);
-
-        if (updateError) {
-            console.error('Error marking as restored:', updateError);
-            showErrorMessage('Warning: Record restored but status update failed');
-            return;
-        }
-
-        console.log('Archive record marked as restored');
-        showSuccessMessage('✓ Successfully restored: ' + archiveRecord.full_name);
-        setTimeout(() => loadArchivedRecords(), 1500);
 
     } catch (error) {
         console.error('Unexpected error during restore:', error);
@@ -426,11 +397,10 @@ async function deleteSelectedRecord() {
     try {
         closeDeleteModal();
 
-        // Delete directly from database
-        const { error } = await window.supabase
-            .from('alumni_archive')
-            .delete()
-            .eq('id', selectedArchiveId);
+        // Call RPC function to delete
+        const { data, error } = await window.supabase.rpc('delete_archived_alumni', {
+            p_archive_id: selectedArchiveId
+        });
 
         if (error) {
             console.error('Error deleting record:', error);
@@ -438,11 +408,29 @@ async function deleteSelectedRecord() {
             return;
         }
 
-        console.log('Record permanently deleted');
-        showSuccessMessage('✓ Archive record permanently deleted');
-        setTimeout(() => {
-            loadArchivedRecords();
-        }, 1500);
+        if (data && data.success) {
+            console.log('Record permanently deleted');
+            showSuccessMessage('✓ Archive record permanently deleted');
+            
+            // Remove from table immediately (real-time)
+            const rowToRemove = document.querySelector(`tr[data-archive-id="${selectedArchiveId}"]`);
+            if (rowToRemove) {
+                rowToRemove.style.opacity = '0.5';
+                rowToRemove.style.textDecoration = 'line-through';
+                setTimeout(() => rowToRemove.remove(), 500);
+            }
+            
+            // Update the record in memory
+            allArchivedRecords = allArchivedRecords.filter(r => r.id !== selectedArchiveId);
+            
+            // Update UI counts immediately
+            updateArchiveStats();
+            
+            // Refresh in background (optional - for consistency)
+            setTimeout(() => loadArchivedRecords(), 2000);
+        } else {
+            showErrorMessage(data?.message || 'Failed to delete record');
+        }
     } catch (error) {
         console.error('Unexpected error during delete:', error);
         showErrorMessage('Unexpected error: ' + error.message);

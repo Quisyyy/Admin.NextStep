@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execute Career Fix SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .sql-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .primary {
+            background: #4CAF50;
+            color: white;
+        }
+        .primary:hover {
+            background: #45a049;
+        }
+        .secondary {
+            background: #2196F3;
+            color: white;
+        }
+        .secondary:hover {
+            background: #0b7dda;
+        }
+        .output {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .output.show {
+            display: block;
+        }
+        .output pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .steps {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Execute Career Info SQL Fix</h1>
+        
+        <div class="info">
+            <strong>Status Check:</strong> This will create career_info records for all 20 alumni with:
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>is_employed = false (not employed)</li>
+                <li>open_for_mentorship = true (open for mentorship)</li>
+            </ul>
+        </div>
+
+        <div class="steps">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Click "Copy SQL to Clipboard"</li>
+                <li>Go to <a href="https://app.supabase.com/project/_/sql/new" target="_blank">Supabase SQL Editor</a></li>
+                <li>Paste the SQL</li>
+                <li>Click "Run" button</li>
+                <li>Refresh the dashboard page</li>
+            </ol>
+        </div>
+
+        <h2>SQL to Execute:</h2>
+        <div class="sql-box" id="sqlContent">-- ============================================================================
+-- SIMPLE CAREER INFO SETUP - Just create the records
+-- ============================================================================
+
+-- Step 1: Check if columns exist
+SELECT column_name FROM information_schema.columns 
+WHERE table_name = 'career_info' AND table_schema = 'public';
+
+-- Step 2: Add columns if missing
+ALTER TABLE public.career_info ADD COLUMN IF NOT EXISTS is_employed BOOLEAN DEFAULT false;
+ALTER TABLE public.career_info ADD COLUMN IF NOT EXISTS open_for_mentorship BOOLEAN DEFAULT true;
+
+-- Step 3: Delete old records if any
+DELETE FROM public.career_info WHERE alumni_id IS NULL;
+
+-- Step 4: Create career records for ALL alumni
+INSERT INTO public.career_info (alumni_id, is_employed, open_for_mentorship)
+SELECT id, false, true FROM public.alumni_profiles
+ON CONFLICT (alumni_id) DO NOTHING;
+
+-- Step 5: Verify
+SELECT COUNT(*) as total_career_records FROM public.career_info;
+SELECT COUNT(*) as total_alumni FROM public.alumni_profiles;</div>
+
+        <div class="button-group">
+            <button class="secondary" onclick="copySQLToClipboard()">📋 Copy SQL to Clipboard</button>
+            <button class="primary" onclick="executeSQLVisualize()">🚀 Execute (with instructions)</button>
+        </div>
+
+        <div class="output" id="output">
+            <strong>Next Steps:</strong>
+            <pre id="outputContent"></pre>
+        </div>
+
+        <div class="info" style="margin-top: 30px;">
+            <strong>What this does:</strong>
+            <ul>
+                <li>✅ Ensures is_employed and open_for_mentorship columns exist</li>
+                <li>✅ Creates 20 career_info records (one per alumni)</li>
+                <li>✅ Dashboard will then show "20 Total Profiles" and "0% Employed, 100% Open for Mentorship"</li>
+                <li>✅ Fixes the "Cannot access 'setText' before initialization" error (code already fixed)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function copySQLToClipboard() {
+            const sqlContent = document.getElementById('sqlContent').textContent;
+            navigator.clipboard.writeText(sqlContent).then(() => {
+                alert('✅ SQL copied to clipboard!\n\nNow:\n1. Go to Supabase SQL Editor\n2. Paste the SQL\n3. Click Run\n4. Refresh dashboard');
+            }).catch(err => {
+                alert('❌ Failed to copy: ' + err);
+            });
+        }
+
+        function executeSQLVisualize() {
+            const output = document.getElementById('output');
+            const outputContent = document.getElementById('outputContent');
+            
+            output.classList.add('show');
+            outputContent.innerHTML = `<span class="success">✅ SQL Ready to Execute!</span>
+
+📋 INSTRUCTIONS:
+1. Click "Copy SQL to Clipboard" button
+2. Go to: https://app.supabase.com/project/_/sql/new
+3. Paste the SQL in the editor
+4. Click the "Run" button (or press Ctrl+Enter)
+5. Wait for completion (should show 2 rows selected)
+6. Return to admin dashboard
+7. Refresh the page (Ctrl+R or F5)
+8. Dashboard Career Overview should now show:
+   - 20 Total Career Profiles
+   - 0% Currently Employed
+   - 100% Open for Mentorship
+
+If you see errors:
+- Check that career_info table exists
+- Check that alumni_profiles has 20 records
+- Try running just: SELECT COUNT(*) FROM alumni_profiles;`;
+        }
+    </script>
+</body>
+</html>

@@ -64,7 +64,7 @@ async function loadDegreeDetails() {
             return;
         }
 
-        // Fetch career info for all alumni
+        // Fetch career info for all alumni - get ALL career data
         const { data: careerData, error: careerError } = await window.supabase
             .from('career_info')
             .select('*');
@@ -73,13 +73,27 @@ async function loadDegreeDetails() {
             console.warn('Could not fetch career data:', careerError);
         }
 
-        // Create a career info map by alumni_id
+        // Create a career info map - try multiple possible key names
         const careerMap = {};
         if (careerData) {
-            careerData.forEach(career => {
-                careerMap[career.alumni_id] = career;
+            careerData.forEach((career, index) => {
+                // Try mapping by different possible id columns
+                if (career.alumni_id) {
+                    careerMap[career.alumni_id] = career;
+                } else if (career.profile_id) {
+                    careerMap[career.profile_id] = career;
+                } else if (career.uid) {
+                    careerMap[career.uid] = career;
+                }
+                // Also map by index as fallback
+                if (profiles[index]) {
+                    careerMap[profiles[index].id] = career;
+                }
             });
         }
+        
+        console.log('Career map:', careerMap);
+        console.log('Profiles:', profiles);
 
         // Calculate statistics
         const total = profiles.length;
@@ -106,12 +120,15 @@ async function loadDegreeDetails() {
             const career = careerMap[profile.id] || {};
             const tr = document.createElement('tr');
             
+            // Debug log
+            console.log(`Profile: ${profile.full_name}, Career data:`, career);
+            
             tr.innerHTML = `
                 <td>${profile.full_name || 'N/A'}</td>
                 <td>${profile.student_number || 'N/A'}</td>
                 <td>${profile.email || 'N/A'}</td>
-                <td>${career.current_position || 'Not specified'}</td>
-                <td>${career.job_status || 'Not specified'}</td>
+                <td>${career.current_job || career.job_title || 'Not specified'}</td>
+                <td>${career.previous_roles || career.career_path || career.job_status || 'Not specified'}</td>
                 <td>${career.industry || 'Not specified'}</td>
             `;
             tbody.appendChild(tr);

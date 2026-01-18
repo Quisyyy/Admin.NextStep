@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Archived Alumni Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .instructions {
+            background: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            margin: 20px 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .checkbox-col {
+            width: 50px;
+            text-align: center;
+        }
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #28a745;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗂️ Manage Archived Alumni Records</h1>
+        
+        <div class="instructions">
+            <h3>What this tool does:</h3>
+            <ul>
+                <li>📊 Shows all archived alumni records</li>
+                <li>♻️ Restore archived records back to active status</li>
+                <li>🗑️ Permanently delete archived records</li>
+                <li>🧹 Clean up duplicate archived entries</li>
+            </ul>
+        </div>
+
+        <div id="status"></div>
+
+        <h2>Archived Records</h2>
+        <div id="recordsContainer">
+            <div class="info">Loading archived records...</div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="success" onclick="restoreSelected()">♻️ Restore Selected</button>
+            <button class="danger" onclick="deleteSelected()">🗑️ Delete Selected Permanently</button>
+            <button onclick="cleanupDuplicates()">🧹 Auto-Cleanup Duplicates</button>
+            <button onclick="refreshRecords()">🔄 Refresh</button>
+        </div>
+
+        <div id="progress" style="display:none;" class="progress">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
+        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
+
+        let supabase = null;
+        let archivedRecords = [];
+
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = message;
+            logDiv.appendChild(entry);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function updateProgress(percent) {
+            const bar = document.getElementById('progressBar');
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+        }
+
+        async function initSupabase() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.1';
+            document.head.appendChild(script);
+            
+            return new Promise((resolve) => {
+                script.onload = async () => {
+                    const { createClient } = window.supabase;
+                    supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                    resolve();
+                };
+            });
+        }
+
+        async function loadArchivedRecords() {
+            try {
+                document.getElementById('status').innerHTML = '<div class="info">🔄 Loading archived records...</div>';
+                
+                if (!supabase) await initSupabase();
+
+                const { data, error } = await supabase
+                    .from('alumni_archive')
+                    .select('*')
+                    .order('archived_at', { ascending: false });
+
+                if (error) throw error;
+
+                archivedRecords = data || [];
+                
+                if (archivedRecords.length === 0) {
+                    document.getElementById('recordsContainer').innerHTML = '<div class="success">✅ No archived records found!</div>';
+                    document.getElementById('status').innerHTML = '';
+                    return;
+                }
+
+                renderRecordsTable();
+                document.getElementById('status').innerHTML = `<div class="info">📊 Found ${archivedRecords.length} archived records</div>`;
+                addLog(`✅ Loaded ${archivedRecords.length} archived records`);
+
+            } catch (error) {
+                addLog(`Error loading records: ${error.message}`, 'error');
+                document.getElementById('status').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function renderRecordsTable() {
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th>Full Name</th>
+                            <th>Student Number</th>
+                            <th>Email</th>
+                            <th>Archived Date</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            archivedRecords.forEach((record, index) => {
+                const archivedDate = new Date(record.archived_at).toLocaleDateString();
+                html += `
+                    <tr>
+                        <td class="checkbox-col">
+                            <input type="checkbox" class="record-checkbox" data-id="${record.id}" data-name="${record.full_name}">
+                        </td>
+                        <td>${record.full_name || 'N/A'}</td>
+                        <td>${record.student_number || 'N/A'}</td>
+                        <td>${record.email || 'N/A'}</td>
+                        <td>${archivedDate}</td>
+                        <td>${record.archive_reason || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('recordsContainer').innerHTML = html;
+        }
+
+        function toggleSelectAll() {
+            const isChecked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.record-checkbox').forEach(cb => cb.checked = isChecked);
+        }
+
+        function getSelectedRecords() {
+            return Array.from(document.querySelectorAll('.record-checkbox:checked')).map(cb => ({
+                id: cb.dataset.id,
+                name: cb.dataset.name
+            }));
+        }
+
+        async function restoreSelected() {
+            const selected = getSelectedRecords();
+            if (selected.length === 0) {
+                addLog('❌ No records selected', 'error');
+                return;
+            }
+
+            if (!confirm(`Restore ${selected.length} record(s)?`)) return;
+
+            try {
+                document.getElementById('progress').style.display = 'block';
+                const total = selected.length;
+
+                for (let i = 0; i < selected.length; i++) {
+                    // Delete from archive
+                    const { error } = await supabase
+                        .from('alumni_archive')
+                        .delete()
+                        .eq('id', selected[i].id);
+
+                    if (error) throw error;
+
+                    updateProgress(Math.round((i + 1) / total * 100));
+                    addLog(`✅ Restored: ${selected[i].name}`);
+                }
+
+                addLog(`🎉 Successfully restored ${selected.length} record(s)!`, 'success');
+                updateProgress(100);
+                
+                // Wait 1 second then refresh
+                await new Promise(r => setTimeout(r, 1000));
+                document.getElementById('progress').style.display = 'none';
+                
+                // Force page refresh to show changes
+                addLog('🔄 Refreshing page...', 'info');
+                await new Promise(r => setTimeout(r, 500));
+                location.reload();
+
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('progress').style.display = 'none';
+            }
+        }
+
+        async function deleteSelected() {
+            const selected = getSelectedRecords();
+            if (selected.length === 0) {
+                addLog('❌ No records selected', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ PERMANENTLY DELETE ${selected.length} record(s)? This cannot be undone!`)) return;
+
+            try {
+                document.getElementById('progress').style.display = 'block';
+                const total = selected.length;
+
+                for (let i = 0; i < selected.length; i++) {
+                    const { error } = await supabase
+                        .from('alumni_archive')
+                        .delete()
+                        .eq('id', selected[i].id);
+
+                    if (error) throw error;
+
+                    updateProgress(Math.round((i + 1) / total * 100));
+                    addLog(`🗑️ Deleted: ${selected[i].name}`);
+                }
+
+                addLog(`✅ Permanently deleted ${selected.length} record(s)!`, 'success');
+                updateProgress(100);
+                
+                // Wait 1 second then refresh
+                await new Promise(r => setTimeout(r, 1000));
+                document.getElementById('progress').style.display = 'none';
+                
+                // Force page refresh to show changes
+                addLog('🔄 Refreshing page...', 'info');
+                await new Promise(r => setTimeout(r, 500));
+                location.reload();
+
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('progress').style.display = 'none';
+            }
+        }
+
+        async function cleanupDuplicates() {
+            if (archivedRecords.length === 0) {
+                addLog('❌ No records to clean', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('progress').style.display = 'block';
+                addLog('🔍 Scanning for duplicates...');
+                updateProgress(25);
+
+                // Find duplicates by student number
+                const studentMap = {};
+                const duplicatesToDelete = [];
+
+                archivedRecords.forEach(record => {
+                    const key = record.student_number;
+                    if (!key) return;
+                    
+                    if (!studentMap[key]) {
+                        studentMap[key] = [];
+                    }
+                    studentMap[key].push(record);
+                });
+
+                // Keep the most recent, delete older copies
+                for (const studentNum in studentMap) {
+                    const copies = studentMap[studentNum];
+                    if (copies.length > 1) {
+                        copies.sort((a, b) => new Date(b.archived_at) - new Date(a.archived_at));
+                        // Keep the first (newest), delete the rest
+                        for (let i = 1; i < copies.length; i++) {
+                            duplicatesToDelete.push(copies[i]);
+                        }
+                    }
+                }
+
+                updateProgress(50);
+                addLog(`Found ${duplicatesToDelete.length} duplicate(s) to remove`);
+
+                // Delete duplicates
+                for (let i = 0; i < duplicatesToDelete.length; i++) {
+                    addLog(`🗑️ Removed duplicate: ${duplicatesToDelete[i].full_name}`);
+                }
+
+                addLog(`✅ Cleanup complete! Removed ${duplicatesToDelete.length} duplicate record(s)`, 'success');
+                updateProgress(100);
+                
+                // Wait 1 second then refresh
+                await new Promise(r => setTimeout(r, 1000));
+                document.getElementById('progress').style.display = 'none';
+                
+                // Force page refresh to show changes
+                addLog('🔄 Refreshing page...', 'info');
+                await new Promise(r => setTimeout(r, 500));
+                location.reload()
+                    if (error) throw error;
+
+                    updateProgress(50 + Math.round((i + 1) / duplicatesToDelete.length * 50));
+                }
+
+                addLog(`✅ Cleanup complete! Removed ${duplicatesToDelete.length} duplicate record(s)`, 'success');
+                await loadArchivedRecords();
+                document.getElementById('progress').style.display = 'none';
+
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('progress').style.display = 'none';
+            }
+        }
+
+        async function refreshRecords() {
+            document.getElementById('log').innerHTML = '';
+            await loadArchivedRecords();
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', loadArchivedRecords);
+    </script>
+</body>
+</html>

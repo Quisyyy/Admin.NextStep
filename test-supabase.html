@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success { background: #e8f5e9; border-left: 4px solid #4CAF50; color: #2e7d32; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; color: #c62828; }
+        .info { background: #e3f2fd; border-left: 4px solid #2196F3; color: #1565c0; }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #0b7dda; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supabase Connection Diagnostic</h1>
+        
+        <div id="statusDiv" class="status info">
+            Initializing test...
+        </div>
+        
+        <button onclick="runDiagnostics()">Run Diagnostics</button>
+        <button onclick="testArchiveQuery()">Test Archive Query</button>
+        <button onclick="location.reload()">Reload Page</button>
+    </div>
+
+    <!-- Load the same scripts as archive.html -->
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+
+    <script>
+        async function runDiagnostics() {
+            const div = document.getElementById('statusDiv');
+            let output = '';
+
+            output += '=== DIAGNOSTICS ===\n\n';
+            output += `1. window.supabase exists: ${!!window.supabase}\n`;
+            output += `2. window.supabase.from exists: ${!!window.supabase?.from}\n`;
+            output += `3. window.supabaseClientReady: ${window.supabaseClientReady}\n`;
+            output += `4. window.supabaseInitError: ${window.supabaseInitError || 'none'}\n\n`;
+
+            if (window.supabase && window.supabase.from) {
+                output += '✅ Supabase client is properly initialized!\n\n';
+
+                try {
+                    output += 'Testing simple query...\n';
+                    const { data, error } = await window.supabase
+                        .from('alumni_archive')
+                        .select('id, original_alumni_id, is_restored')
+                        .limit(5);
+
+                    if (error) {
+                        output += `❌ Query Error: ${error.message}\n`;
+                        output += `Code: ${error.code}\n`;
+                        output += `Details: ${JSON.stringify(error)}\n`;
+                    } else {
+                        output += `✅ Query successful!\n`;
+                        output += `Returned ${(data || []).length} records\n`;
+                        output += `Data: ${JSON.stringify(data, null, 2)}\n`;
+                    }
+                } catch (e) {
+                    output += `❌ Exception: ${e.message}\n`;
+                    output += `${e.stack}\n`;
+                }
+            } else {
+                output += '❌ Supabase client not initialized!\n';
+                output += 'Waiting for client...\n\n';
+
+                const startTime = Date.now();
+                while (Date.now() - startTime < 5000) {
+                    if (window.supabase && window.supabase.from) {
+                        output += '✅ Client initialized after waiting!\n';
+                        await new Promise(r => setTimeout(r, 500));
+                        return runDiagnostics();
+                    }
+                    await new Promise(r => setTimeout(r, 100));
+                }
+
+                output += '❌ Client still not ready after 5 seconds\n';
+            }
+
+            div.innerHTML = output;
+            div.className = 'status info';
+        }
+
+        async function testArchiveQuery() {
+            const div = document.getElementById('statusDiv');
+            div.innerHTML = 'Testing archive query...';
+            div.className = 'status info';
+
+            try {
+                if (!window.supabase || !window.supabase.from) {
+                    div.innerHTML = '❌ Supabase not initialized';
+                    div.className = 'status error';
+                    return;
+                }
+
+                const { data, error } = await window.supabase
+                    .from('alumni_archive')
+                    .select('*')
+                    .eq('is_restored', false);
+
+                if (error) {
+                    div.innerHTML = `❌ Error: ${error.message}\n\nCode: ${error.code}\n\nDetails:\n${JSON.stringify(error, null, 2)}`;
+                    div.className = 'status error';
+                } else {
+                    div.innerHTML = `✅ Success!\n\nRecords returned: ${(data || []).length}\n\nData:\n${JSON.stringify(data, null, 2)}`;
+                    div.className = 'status success';
+                }
+            } catch (e) {
+                div.innerHTML = `❌ Exception: ${e.message}\n\n${e.stack}`;
+                div.className = 'status error';
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 1000);
+        });
+    </script>
+</body>
+</html>

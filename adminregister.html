@@ -44,10 +44,21 @@
         </div>
     </div>
 
+    <!-- IMPORTANT: Script Loading Order -->
+    <!-- 1. Configuration FIRST (must be before supabase library) -->
+    <script src="config.js"></script>
+    
+    <!-- 2. Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 3. Supabase Client Initialization -->
     <script src="supabase-client.js" defer></script>
-    <script src="audit-logger.js" defer></script>
+    
+    <!-- 4. Database Helper -->
     <script src="db-helper.js" defer></script>
+    
+    <!-- 5. Page-Specific Scripts -->
+    <script src="audit-logger.js" defer></script>
     <script src="admin-register.js" defer></script>
 </body>
 

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Audit Trail</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .feature-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #666;
+        }
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .step {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .step strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .code-block {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 4px;
+            color: #2e7d32;
+            margin-top: 20px;
+        }
+        .textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Audit Trail Setup</h1>
+            <p>Track all admin and developer actions</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 What is the Audit Trail?</h2>
+                <p>The Audit Trail system tracks and logs all admin and developer actions including:</p>
+                <ul class="feature-list">
+                    <li>Alumni archive operations</li>
+                    <li>Alumni restore operations</li>
+                    <li>Alumni permanent deletions</li>
+                    <li>All data modifications</li>
+                    <li>User login/logout activities</li>
+                    <li>System updates and changes</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>✨ Features</h2>
+                <ul class="feature-list">
+                    <li>Real-time action logging</li>
+                    <li>User email tracking</li>
+                    <li>Timestamp recording for all actions</li>
+                    <li>Action filtering and search</li>
+                    <li>CSV export capability</li>
+                    <li>Auto-refresh every 30 seconds</li>
+                    <li>Statistics dashboard showing total actions, archives, restores, and deletes</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Setup Instructions</h2>
+                <div class="step">
+                    <strong>Step 1: Copy the SQL Script</strong>
+                    <p>Click the "Copy Audit Trail SQL" button below and copy the setup script</p>
+                </div>
+
+                <div class="step">
+                    <strong>Step 2: Go to Supabase SQL Editor</strong>
+                    <p>Open <a href="https://app.supabase.com/project/_/sql/new" target="_blank">Supabase SQL Editor</a></p>
+                </div>
+
+                <div class="step">
+                    <strong>Step 3: Paste and Execute</strong>
+                    <p>Paste the SQL script in the editor and click "Run" button</p>
+                </div>
+
+                <div class="step">
+                    <strong>Step 4: Access Audit Trail</strong>
+                    <p>After setup is complete, go to the Audit Trail page in the admin dashboard</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📝 Tables and Functions</h2>
+                <p>The audit trail setup creates:</p>
+                <ul class="feature-list">
+                    <li><strong>audit_trail table</strong> - Stores all action logs with user info, action type, entity details</li>
+                    <li><strong>log_audit_trail function</strong> - Helper function to insert audit records</li>
+                    <li><strong>Updated RLS policies</strong> - Ensures admin users can view audit logs</li>
+                    <li><strong>Indexes</strong> - For fast querying of audit records</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>📊 What Gets Logged</h2>
+                <div class="code-block">
+Each audit record includes:
+- User ID and email
+- Action type (ARCHIVE, RESTORE, DELETE, UPDATE, CREATE, LOGIN)
+- Entity type (ALUMNI, FORM, CAREER, ADMIN)
+- Entity ID and name
+- Description of the action
+- Old and new values (for updates)
+- Timestamp with timezone
+- Additional metadata
+- User agent information
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 View Audit Trail</h2>
+                <p>After setup:</p>
+                <ul class="feature-list">
+                    <li>Click "Audit Trail" in admin sidebar</li>
+                    <li>View all logged actions with timestamps</li>
+                    <li>Filter by action type, entity type, or user email</li>
+                    <li>Export audit logs to CSV file</li>
+                    <li>Auto-refreshes every 30 seconds</li>
+                </ul>
+            </div>
+
+            <div class="success-box">
+                <strong>✅ Benefits:</strong><br>
+                ✓ Complete record of all admin actions<br>
+                ✓ User accountability and tracking<br>
+                ✓ Compliance and audit requirements<br>
+                ✓ Easy troubleshooting and investigation<br>
+                ✓ Data security and integrity verification
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-primary" onclick="viewSQL()">👁️ View SQL Script</button>
+                <button class="btn btn-primary" onclick="copySQLToClipboard()">📋 Copy SQL to Clipboard</button>
+                <button class="btn btn-secondary" onclick="window.location.href='homepage.html'">🏠 Go to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SQL Modal -->
+    <div id="sqlModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; padding: 20px; overflow-y: auto;">
+        <div style="background: white; border-radius: 8px; max-width: 900px; margin: 20px auto; padding: 30px;">
+            <h2 style="margin-bottom: 20px;">Audit Trail SQL Setup Script</h2>
+            <textarea class="textarea" id="sqlContent" readonly></textarea>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-primary" onclick="copySQLToClipboard()">📋 Copy to Clipboard</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('sqlModal').style.display='none'">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SQL = `-- ============================================================================
+-- AUDIT TRAIL SETUP - Track all admin and developer actions
+-- ============================================================================
+
+-- Create audit_trail table if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.audit_trail (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    user_email TEXT,
+    action_type TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id UUID,
+    entity_name TEXT,
+    old_value JSONB,
+    new_value JSONB,
+    description TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    status TEXT DEFAULT 'success',
+    error_message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_audit_trail_user_id ON public.audit_trail(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_trail_entity_id ON public.audit_trail(entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_trail_action_type ON public.audit_trail(action_type);
+CREATE INDEX IF NOT EXISTS idx_audit_trail_created_at ON public.audit_trail(created_at);
+
+-- Enable RLS
+ALTER TABLE public.audit_trail ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Enable read access for admins" ON public.audit_trail
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.admin_profiles
+            WHERE admin_profiles.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Enable insert for authenticated" ON public.audit_trail
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Logging function
+CREATE OR REPLACE FUNCTION public.log_audit_trail(
+    p_action_type TEXT,
+    p_entity_type TEXT,
+    p_entity_id UUID,
+    p_entity_name TEXT,
+    p_description TEXT,
+    p_old_value JSONB DEFAULT NULL,
+    p_new_value JSONB DEFAULT NULL,
+    p_metadata JSONB DEFAULT NULL
+) RETURNS UUID AS $$
+DECLARE
+    v_audit_id UUID;
+    v_user_email TEXT;
+BEGIN
+    SELECT email INTO v_user_email FROM auth.users WHERE id = auth.uid();
+    
+    INSERT INTO public.audit_trail (
+        user_id, user_email, action_type, entity_type, entity_id,
+        entity_name, description, old_value, new_value, metadata
+    ) VALUES (
+        auth.uid(), v_user_email, p_action_type, p_entity_type, p_entity_id,
+        p_entity_name, p_description, p_old_value, p_new_value, p_metadata
+    )
+    RETURNING id INTO v_audit_id;
+    
+    RETURN v_audit_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+SELECT 'Audit trail setup complete!' as message;`;
+
+        function copySQLToClipboard() {
+            navigator.clipboard.writeText(SQL).then(() => {
+                alert('✅ SQL copied to clipboard!\n\nGo to Supabase SQL Editor and paste it.');
+            }).catch(err => {
+                alert('❌ Failed to copy: ' + err);
+            });
+        }
+
+        function viewSQL() {
+            document.getElementById('sqlContent').value = SQL;
+            document.getElementById('sqlModal').style.display = 'block';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('sqlModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'sqlModal') {
+                document.getElementById('sqlModal').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
