@@ -203,9 +203,11 @@ async function handleDownload(event) {
     event.preventDefault();
     
     const format = document.getElementById('downloadFormat').value;
-    const filter = document.getElementById('dataFilter').value;
+    const filterSelect = document.getElementById('dataFilter');
+    const filter = filterSelect.value;
     const yearFilter = document.getElementById('yearFilter')?.value || '';
     const button = event.target.querySelector('.download-btn');
+    
     // Degree codes for filtering
     const degreeCodes = [
         'BSA', 'BSCpE', 'BSENTREP', 'BSHM', 'BSIT', 'BSEDEN', 'BSEDMT', 'DOMTLOM'
@@ -224,6 +226,8 @@ async function handleDownload(event) {
         const ready = await ensureSupabaseReady();
         if (!ready) {
             alert('Database connection failed');
+            button.textContent = 'Download Data';
+            button.disabled = false;
             return;
         }
 
@@ -234,29 +238,58 @@ async function handleDownload(event) {
         if (error) {
             console.error('Error fetching data:', error);
             alert('Failed to fetch data: ' + error.message);
+            button.textContent = 'Download Data';
+            button.disabled = false;
             return;
         }
 
-        console.log('Fetched alumni profiles:', profiles.length, profiles);
+        console.log('📊 Fetched alumni profiles:', profiles.length);
+        console.log('🔍 Filter:', filter, 'Year:', yearFilter);
 
         // Apply filters
         let filteredData = profiles;
+        let appliedFilters = [];
         
-        // Filter by degree
-        if (degreeCodes.includes(filter)) {
-            filteredData = filteredData.filter(p => p.degree === filter);
+        // Filter by degree - only if a valid degree code is selected
+        if (filter && filter !== 'all' && degreeCodes.includes(filter)) {
+            const countBefore = filteredData.length;
+            filteredData = filteredData.filter(p => {
+                // Try multiple possible degree field names
+                const degree = p.degree || p.program || p.degree_code || '';
+                return degree.toUpperCase() === filter.toUpperCase();
+            });
+            console.log(`✅ Degree filter "${filter}": ${countBefore} → ${filteredData.length}`);
+            appliedFilters.push(filter);
         }
         
         // Filter by graduation year
-        if (yearFilter) {
+        if (yearFilter && yearFilter !== '') {
+            const countBefore = filteredData.length;
             filteredData = filteredData.filter(p => {
-                if (!p.graduation_year && !p.year_graduated) return false;
-                const gradYear = (p.graduation_year || p.year_graduated || '').toString();
-                return gradYear === yearFilter;
+                // Try multiple possible year field names
+                const year = (p.graduation_year || p.year_graduated || p.graduated_year || '').toString().trim();
+                return year === yearFilter;
             });
+            console.log(`✅ Year filter "${yearFilter}": ${countBefore} → ${filteredData.length}`);
+            appliedFilters.push(`Year: ${yearFilter}`);
         }
 
-        console.log('Filtered data:', filteredData.length, filteredData);
+        console.log('📋 Final filtered data:', filteredData.length, 'records');
+
+        // Check if we have data
+        if (!filteredData || filteredData.length === 0) {
+            let errorMsg = 'No data found';
+            if (appliedFilters.length > 0) {
+                errorMsg += ` for: ${appliedFilters.join(', ')}`;
+            } else {
+                errorMsg += ' in database';
+            }
+            console.warn(errorMsg);
+            alert(`❌ ${errorMsg}.\n\nTry removing filters or selecting "All Alumni".`);
+            button.textContent = 'Download Data';
+            button.disabled = false;
+            return;
+        }
 
         // Log download action
         let employeeId = '';
@@ -265,7 +298,7 @@ async function handleDownload(event) {
             if (admin && admin.employee_id) employeeId = admin.employee_id;
         }
         if (employeeId && window.DatabaseHelper && typeof window.DatabaseHelper.logAdminAction === 'function') {
-            const details = `format=${format}, degree=${filter || 'all'}, year=${yearFilter || 'all'}`;
+            const details = `format=${format}, degree=${filter || 'all'}, year=${yearFilter || 'all'}, records=${filteredData.length}`;
             window.DatabaseHelper.logAdminAction(employeeId, 'download', details);
         }
 
@@ -279,7 +312,7 @@ async function handleDownload(event) {
         button.disabled = false;
 
     } catch (error) {
-        console.error('Download error:', error);
+        console.error('❌ Download error:', error);
         alert('Error downloading data: ' + error.message);
         button.textContent = 'Download Data';
         button.disabled = false;
@@ -289,18 +322,7 @@ async function handleDownload(event) {
 // Generate and download CSV file
 function downloadAsCSV(data) {
     if (!data || data.length === 0) {
-        // Check if a degree is selected for filtering
-        const filterSelect = document.getElementById('dataFilter');
-        let filterLabel = '';
-        if (filterSelect) {
-            const selectedOption = filterSelect.options[filterSelect.selectedIndex];
-            filterLabel = selectedOption && selectedOption.value !== 'all' ? selectedOption.text : '';
-        }
-        if (filterLabel) {
-            alert(`❌ No information found for "${filterLabel}".`);
-        } else {
-            alert('❌ No data to download.');
-        }
+        alert('❌ No data available to download.');
         return;
     }
     
