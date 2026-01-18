@@ -193,7 +193,8 @@ async function uploadSelectedRecords() {
 async function processUpload(records) {
     const supabaseReady = await ensureSupabaseReady();
     if (!supabaseReady) {
-        alert('Database connection not ready');
+        alert('Database connection not ready. Please check your internet connection and refresh the page.');
+        console.error('Supabase not ready:', window.supabase, window.supabaseClientReady);
         return;
     }
 
@@ -206,12 +207,27 @@ async function processUpload(records) {
 
     for (const record of records) {
         try {
+            // Validate required fields
+            if (!record.full_name || !record.email) {
+                failureCount++;
+                results.push({
+                    success: false,
+                    email: record.email || 'N/A',
+                    message: 'Missing full name or email'
+                });
+                continue;
+            }
+
             // Check for duplicate email
             const { data: existing, error: checkError } = await window.supabase
                 .from('alumni_profiles')
                 .select('*')
                 .eq('email', record.email)
                 .limit(1);
+
+            if (checkError) {
+                throw new Error(`Database check failed: ${checkError.message}`);
+            }
 
             if (existing && existing.length > 0) {
                 failureCount++;
@@ -224,13 +240,10 @@ async function processUpload(records) {
             }
 
             // Prepare record for insertion
+            // Only include columns that definitely exist in alumni_profiles table
             const recordToInsert = {
-                full_name: record.full_name,
-                email: record.email,
-                phone: record.phone || null,
-                student_number: record.student_number || null,
-                degree: record.degree || null,
-                graduation_year: parseInt(record.graduation_year) || new Date().getFullYear(),
+                full_name: record.full_name.trim(),
+                email: record.email.trim(),
                 is_active: true,
                 created_at: new Date().toISOString()
             };
@@ -241,7 +254,9 @@ async function processUpload(records) {
                 .insert([recordToInsert])
                 .select();
 
-            if (error) throw error;
+            if (error) {
+                throw new Error(`Insert failed: ${error.message}`);
+            }
 
             successCount++;
             results.push({
@@ -268,10 +283,11 @@ async function processUpload(records) {
             }
 
         } catch (error) {
+            console.error('Upload error for record:', record, error);
             failureCount++;
             results.push({
                 success: false,
-                email: record.email,
+                email: record.email || 'Unknown',
                 message: error.message || 'Upload failed'
             });
         }
@@ -321,12 +337,29 @@ function resetForm() {
     selectedRecords = [];
 }
 
-async function ensureSupabaseReady(timeout = 2000) {
+async function ensureSupabaseReady(timeout = 5000) {
     const start = Date.now();
+    let attempts = 0;
+    
     while (Date.now() - start < timeout) {
-        if (window.supabase && window.supabase.from) return true;
-        if (window.supabaseClientReady === false) return false;
-        await new Promise(r => setTimeout(r, 100));
+        attempts++;
+        
+        if (window.supabase && window.supabase.from) {
+            console.log('✅ Supabase ready after', attempts, 'attempts');
+            return true;
+        }
+        
+        if (window.supabaseClientReady === false) {
+            console.error('❌ Supabase client initialization failed');
+            return false;
+        }
+        
+        await new Promise(r => setTimeout(r, 200));
     }
+    
+    console.error('❌ Supabase timeout after', attempts, 'attempts');
+    console.error('window.supabase:', window.supabase);
+    console.error('window.supabaseClientReady:', window.supabaseClientReady);
+    
     return !!(window.supabase && window.supabase.from);
 }
