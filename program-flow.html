@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep - Complete Program Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .flow-section {
+            background: white;
+            padding: 40px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
+        }
+        .flow-section h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flow-section h2 button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .flow-section p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .note {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #333;
+        }
+        .note strong {
+            color: #667eea;
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .component-box {
+            background: #f9f9f9;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .component-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .component-box ul {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.8;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .controls {
+                display: none !important;
+            }
+            .flow-section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 NextStep Complete Program Flow</h1>
+        <p class="subtitle">Technical Architecture & Data Flow Overview</p>
+
+        <div class="controls">
+            <button onclick="downloadAllSections()">📥 Download All as PNG</button>
+            <button onclick="scrollToTop()">⬆️ Back to Top</button>
+        </div>
+
+        <!-- 1. SYSTEM ARCHITECTURE -->
+        <div class="flow-section" id="section-1">
+            <h2>
+                🏗️ System Architecture
+                <button onclick="downloadSection('section-1', 'System-Architecture')">⬇️ PNG</button>
+            </h2>
+            <p>High-level overview of all system components and their relationships.</p>
+            
+            <div class="mermaid">
+                graph TB
+                    subgraph Client["🖥️ Client Layer (Frontend)"]
+                        HTML["📄 HTML Pages<br/>index.html<br/>alumni-list.html<br/>archive.html<br/>audit-trail.html"]
+                        JS["⚙️ JavaScript<br/>Modules"]
+                        UI["🎨 UI Components<br/>Charts, Forms<br/>Dashboards"]
+                    end
+                    
+                    subgraph API["🔌 API Layer (Supabase)"]
+                        AUTH["🔐 Authentication<br/>Email/Password<br/>JWT Tokens"]
+                        REALTIME["⚡ Real-time<br/>Subscriptions"]
+                        REST["🌐 REST API<br/>HTTP Requests"]
+                    end
+                    
+                    subgraph DB["💾 Database Layer"]
+                        TABLES["📊 Tables<br/>admins<br/>alumni<br/>career_info<br/>audit_trail<br/>archived_alumni"]
+                        RLS["🔒 Row Level<br/>Security"]
+                        FUNC["🔧 Functions<br/>Triggers<br/>Procedures"]
+                    end
+                    
+                    subgraph LOGIC["🧠 Business Logic"]
+                        AUTH_LOGIC["✔️ Access Control<br/>Role-based"]
+                        CAREER["📈 Career Stats<br/>Processing"]
+                        ARCHIVE["📦 Archive Logic<br/>Automation"]
+                        AUDIT["📝 Audit Logging"]
+                    end
+                    
+                    HTML --> JS
+                    JS --> UI
+                    UI --> AUTH
+                    JS --> REST
+                    JS --> REALTIME
+                    AUTH --> TABLES
+                    REST --> FUNC
+                    REALTIME --> TABLES
+                    TABLES --> RLS
+                    FUNC --> LOGIC
+                    LOGIC --> TABLES
+                    
+                    style Client fill:#e3f2fd,stroke:#667eea,stroke-width:2px
+                    style API fill:#f3e5f5,stroke:#764ba2,stroke-width:2px
+                    style DB fill:#fff3e0,stroke:#ff6f00,stroke-width:2px
+                    style LOGIC fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+            </div>
+            
+            <div class="note">
+                <strong>Key Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Frontend communicates with Supabase via REST API and Real-time subscriptions</li>
+                    <li>All database operations protected by Row-Level Security (RLS)</li>
+                    <li>Business logic enforced at both frontend and database levels</li>
+                    <li>Audit trail logs all significant operations</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 2. DATA FLOW DIAGRAM -->
+        <div class="flow-section" id="section-2">
+            <h2>
+                🔄 Data Flow Diagram
+                <button onclick="downloadSection('section-2', 'Data-Flow')">⬇️ PNG</button>
+            </h2>
+            <p>How data moves through the system from input to storage and display.</p>
+            
+            <div class="mermaid">
+                graph LR
+                    subgraph Input["📥 Data Input"]
+                        ALUMNI_REG["Alumni<br/>Registration"]
+                        CAREER_FORM["Career<br/>Form"]
+                        EDU_FORM["Education<br/>Form"]
+                        BASIC_FORM["Basic Info<br/>Form"]
+                    end
+                    
+                    subgraph Validation["✅ Validation"]
+                        V1["Check Email<br/>Exists"]
+                        V2["Validate<br/>Fields"]
+                        V3["Sanitize<br/>Input"]
+                    end
+                    
+                    subgraph Storage["💾 Storage"]
+                        TABLE1["alumni<br/>Table"]
+                        TABLE2["career_info<br/>Table"]
+                        TABLE3["education_details<br/>Table"]
+                    end
+                    
+                    subgraph Processing["🔧 Processing"]
+                        CALC["Calculate<br/>Stats"]
+                        COUNT["Count<br/>Records"]
+                        AGG["Aggregate<br/>Data"]
+                    end
+                    
+                    subgraph Display["📊 Display"]
+                        CHART["Render<br/>Charts"]
+                        DASH["Update<br/>Dashboard"]
+                        STATS["Show<br/>Statistics"]
+                    end
+                    
+                    subgraph Logging["📝 Logging"]
+                        AUDIT_LOG["Log to<br/>audit_trail"]
+                        TIMESTAMP["Record<br/>Timestamp"]
+                    end
+                    
+                    ALUMNI_REG --> V1
+                    CAREER_FORM --> V2
+                    EDU_FORM --> V2
+                    BASIC_FORM --> V2
+                    V1 --> V3
+                    V2 --> V3
+                    
+                    V3 --> TABLE1
+                    V3 --> TABLE2
+                    V3 --> TABLE3
+                    
+                    TABLE1 --> CALC
+                    TABLE2 --> COUNT
+                    TABLE3 --> AGG
+                    
+                    CALC --> CHART
+                    COUNT --> DASH
+                    AGG --> STATS
+                    
+                    TABLE1 --> AUDIT_LOG
+                    TABLE2 --> TIMESTAMP
+                    
+                    CHART --> DISPLAY
+                    DASH --> DISPLAY
+                    STATS --> DISPLAY
+                    
+                    style Input fill:#e3f2fd,stroke:#667eea,stroke-width:2px
+                    style Validation fill:#fff3e0,stroke:#ff6f00,stroke-width:2px
+                    style Storage fill:#f3e5f5,stroke:#764ba2,stroke-width:2px
+                    style Processing fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                    style Display fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                    style Logging fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+            </div>
+            
+            <div class="note">
+                <strong>Data Journey:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>User input → Validation → Database storage</li>
+                    <li>Raw data → Processing → Aggregation</li>
+                    <li>Processed data → Chart rendering → Dashboard display</li>
+                    <li>All operations → Audit trail logging</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. FUNCTIONAL MODULES -->
+        <div class="flow-section" id="section-3">
+            <h2>
+                📦 Functional Modules & Components
+                <button onclick="downloadSection('section-3', 'Modules-Components')">⬇️ PNG</button>
+            </h2>
+            <p>Overview of all major modules and their responsibilities.</p>
+            
+            <div class="mermaid">
+                graph TB
+                    subgraph AUTH["🔐 Authentication Module"]
+                        LOGIN["login.js<br/>- Email/Password check<br/>- JWT generation"]
+                        REGISTER["register.js<br/>- Account creation<br/>- Email verification"]
+                        SESSION["session.js<br/>- Token validation<br/>- Auto logout"]
+                    end
+                    
+                    subgraph ALUMNI["👥 Alumni Module"]
+                        PROFILE["profile.js<br/>- Create profile<br/>- Update info"]
+                        FORMS["forms.js<br/>- Basic info form<br/>- Education form<br/>- Career form"]
+                        LIST["alumni-list.js<br/>- Display alumni<br/>- Search/filter"]
+                    end
+                    
+                    subgraph CAREER["📈 Career Module"]
+                        CAREER_FORM["career-form.js<br/>- Collect job status<br/>- Industry data"]
+                        CAREER_CALC["career-calc.js<br/>- Calculate stats<br/>- Build charts"]
+                        CAREER_CHART["career-chart.js<br/>- Render visuals<br/>- Update display"]
+                    end
+                    
+                    subgraph ARCHIVE["📦 Archive Module"]
+                        ARCHIVE_CHECK["archive-check.js<br/>- Inactivity check<br/>- 6+ month rule"]
+                        ARCHIVE_MOVE["archive-move.js<br/>- Move to archive<br/>- Update status"]
+                        ARCHIVE_VIEW["archive-view.js<br/>- Display archived<br/>- Restore function"]
+                    end
+                    
+                    subgraph ADMIN["⚙️ Admin Module"]
+                        ACCESS["access-control.js<br/>- Role verification<br/>- DEV/ADM check"]
+                        MANAGE["manage-staff.js<br/>- Add staff<br/>- Generate employee ID"]
+                        AUDIT_VIEW["audit-trail.js<br/>- Display logs<br/>- Filter records"]
+                    end
+                    
+                    subgraph DB_LAYER["💾 Database Module"]
+                        DB_HELPER["db-helper.js<br/>- Query builder<br/>- Connection pool"]
+                        SUPABASE["supabase-client.js<br/>- Client init<br/>- Config setup"]
+                    end
+                    
+                    AUTH --> DB_LAYER
+                    ALUMNI --> DB_LAYER
+                    CAREER --> DB_LAYER
+                    ARCHIVE --> DB_LAYER
+                    ADMIN --> DB_LAYER
+                    
+                    LOGIN -.-> REGISTER
+                    FORMS --> PROFILE
+                    LIST --> PROFILE
+                    CAREER_FORM --> CAREER_CALC
+                    CAREER_CALC --> CAREER_CHART
+                    ARCHIVE_CHECK --> ARCHIVE_MOVE
+                    ARCHIVE_MOVE --> ARCHIVE_VIEW
+                    
+                    style AUTH fill:#e3f2fd,stroke:#667eea,stroke-width:2px
+                    style ALUMNI fill:#f3e5f5,stroke:#764ba2,stroke-width:2px
+                    style CAREER fill:#fff3e0,stroke:#ff6f00,stroke-width:2px
+                    style ARCHIVE fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                    style ADMIN fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                    style DB_LAYER fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+            </div>
+            
+            <div class="note">
+                <strong>Module Responsibilities:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Each module handles specific business domain</li>
+                    <li>All modules communicate through database layer</li>
+                    <li>Clear separation of concerns</li>
+                    <li>Reusable components across modules</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 4. REQUEST/RESPONSE CYCLE -->
+        <div class="flow-section" id="section-4">
+            <h2>
+                🔁 Request/Response Cycle
+                <button onclick="downloadSection('section-4', 'Request-Response')">⬇️ PNG</button>
+            </h2>
+            <p>Complete lifecycle of a typical user action in the system.</p>
+            
+            <div class="mermaid">
+                sequenceDiagram
+                    participant User as 👤 User
+                    participant Browser as 🖥️ Browser<br/>JavaScript
+                    participant API as 🌐 Supabase<br/>REST API
+                    participant Auth as 🔐 Auth<br/>Service
+                    participant DB as 💾 Database
+                    participant RLS as 🔒 RLS<br/>Policies
+                    participant Audit as 📝 Audit<br/>Trail
+                    
+                    User->>Browser: Fill Form & Submit
+                    Browser->>Browser: Validate Input
+                    Browser->>API: POST Request
+                    API->>Auth: Verify JWT Token
+                    Auth->>Auth: Token Valid?
+                    alt Token Invalid
+                        Auth-->>Browser: 401 Unauthorized
+                        Browser->>User: Show Login Page
+                    else Token Valid
+                        Auth->>API: Allow Request
+                        API->>RLS: Check Row Policies
+                        RLS->>RLS: User Role OK?
+                        alt Policy Denied
+                            RLS-->>API: 403 Forbidden
+                            API-->>Browser: Access Denied
+                            Browser->>User: Show Error
+                        else Policy Allowed
+                            RLS->>DB: Execute Query
+                            DB->>DB: Process & Save
+                            DB-->>Audit: Log Action
+                            Audit->>Audit: Record Details
+                            DB-->>API: Return Result
+                            API-->>Browser: 200 Success
+                            Browser->>Browser: Update UI
+                            Browser->>User: Show Result
+                        end
+                    end
+            </div>
+            
+            <div class="note">
+                <strong>Security Layers:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Input validation at browser level</li>
+                    <li>JWT token verification at API level</li>
+                    <li>Role-Based Access Control (RBAC)</li>
+                    <li>Row-Level Security (RLS) policies at database</li>
+                    <li>All operations logged to audit trail</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. DATABASE SCHEMA FLOW -->
+        <div class="flow-section" id="section-5">
+            <h2>
+                🗄️ Database Schema & Relationships
+                <button onclick="downloadSection('section-5', 'Database-Schema')">⬇️ PNG</button>
+            </h2>
+            <p>How tables relate and interact with each other.</p>
+            
+            <div class="mermaid">
+                erDiagram
+                    ADMINS ||--o{ ALUMNI : manages
+                    ADMINS ||--o{ AUDIT_TRAIL : "logs actions"
+                    ALUMNI ||--o{ CAREER_INFO : "has"
+                    ALUMNI ||--o{ EDUCATION_DETAILS : "has"
+                    ALUMNI ||--o{ ARCHIVED_ALUMNI : "archived_from"
+                    CAREER_INFO ||--o{ AUDIT_TRAIL : "change_tracked"
+                    EDUCATION_DETAILS ||--o{ AUDIT_TRAIL : "change_tracked"
+                    
+                    ADMINS {
+                        uuid id PK
+                        uuid user_id FK
+                        string employee_id UK "DEV-### or ADM-###"
+                        string name
+                        string email
+                        string role
+                        timestamp created_at
+                    }
+                    
+                    ALUMNI {
+                        uuid id PK
+                        string first_name
+                        string last_name
+                        string email UK
+                        string phone
+                        string status
+                        boolean is_archived
+                        timestamp created_at
+                        timestamp updated_at
+                    }
+                    
+                    CAREER_INFO {
+                        uuid id PK
+                        uuid alumni_id FK
+                        string job_status
+                        string industry
+                        string current_position
+                        string mentorship
+                        boolean is_employed
+                        timestamp updated_at
+                    }
+                    
+                    EDUCATION_DETAILS {
+                        uuid id PK
+                        uuid alumni_id FK
+                        string degree_type
+                        string field_of_study
+                        string institution
+                        string graduation_date
+                        timestamp submitted_at
+                    }
+                    
+                    ARCHIVED_ALUMNI {
+                        uuid id PK
+                        uuid original_alumni_id FK
+                        string first_name
+                        string last_name
+                        string reason
+                        string archived_date
+                        timestamp created_at
+                    }
+                    
+                    AUDIT_TRAIL {
+                        uuid id PK
+                        uuid user_id FK
+                        string employee_id
+                        string action_type
+                        string entity_type
+                        string entity_id
+                        string description
+                        string changes
+                        timestamp created_at
+                    }
+            </div>
+            
+            <div class="note">
+                <strong>Schema Design:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Admins table stores staff with unique employee IDs (DEV-###, ADM-###)</li>
+                    <li>Alumni table is central hub for all alumni data</li>
+                    <li>Career info and education linked to alumni (1-to-many)</li>
+                    <li>Archive table maintains historical data</li>
+                    <li>Audit trail tracks all changes across tables</li>
+                    <li>Primary and Foreign Keys maintain referential integrity</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 6. PROGRAM EXECUTION FLOW -->
+        <div class="flow-section" id="section-6">
+            <h2>
+                ▶️ Program Execution Flow
+                <button onclick="downloadSection('section-6', 'Execution-Flow')">⬇️ PNG</button>
+            </h2>
+            <p>Typical execution path from page load to user interaction.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    START["📄 Page Loads"] --> LOAD_CONFIG["Load Configuration<br/>config.js"]
+                    LOAD_CONFIG --> INIT_SUPABASE["Initialize Supabase<br/>supabase-client.js"]
+                    INIT_SUPABASE --> CHECK_SESSION["Check User Session<br/>JWT Token Valid?"]
+                    
+                    CHECK_SESSION -->|No Valid Token| REDIRECT_LOGIN["Redirect to Login"]
+                    CHECK_SESSION -->|Token Valid| GET_USER["Get Current User<br/>from Auth"]
+                    
+                    REDIRECT_LOGIN --> LOGIN_PAGE["Show Login Page"]
+                    LOGIN_PAGE --> USER_LOGIN["User Enters Credentials"]
+                    USER_LOGIN --> VERIFY_LOGIN["Verify Email & Password"]
+                    
+                    VERIFY_LOGIN -->|Login Failed| LOGIN_ERROR["Show Error Message"]
+                    LOGIN_ERROR --> LOGIN_PAGE
+                    VERIFY_LOGIN -->|Login Success| CREATE_TOKEN["Create JWT Token"]
+                    CREATE_TOKEN --> STORE_TOKEN["Store Token in Session"]
+                    STORE_TOKEN --> GET_USER
+                    
+                    GET_USER --> CHECK_ROLE["Check User Role<br/>DEV/ADM/Alumni"]
+                    CHECK_ROLE -->|Admin| LOAD_ADMIN_DASH["Load Admin Dashboard"]
+                    CHECK_ROLE -->|Alumni| LOAD_ALUMNI_DASH["Load Alumni Dashboard"]
+                    
+                    LOAD_ADMIN_DASH --> FETCH_DATA1["Fetch Admin Data<br/>from Database"]
+                    LOAD_ALUMNI_DASH --> FETCH_DATA2["Fetch Alumni Data<br/>from Database"]
+                    
+                    FETCH_DATA1 --> APPLY_RLS["Apply Row Level<br/>Security Policies"]
+                    FETCH_DATA2 --> APPLY_RLS
+                    
+                    APPLY_RLS --> RENDER_PAGE["Render Page<br/>with Data"]
+                    RENDER_PAGE --> SETUP_LISTENERS["Setup Event Listeners<br/>on Components"]
+                    SETUP_LISTENERS --> SUBSCRIBE_REALTIME["Subscribe to Real-time<br/>Updates"]
+                    SUBSCRIBE_REALTIME --> PAGE_READY["✅ Page Ready<br/>for User Interaction"]
+                    
+                    PAGE_READY --> USER_ACTION["👤 User Action<br/>Click, Submit, etc"]
+                    USER_ACTION --> VALIDATE["Validate Input<br/>Client-side"]
+                    VALIDATE -->|Invalid| SHOW_ERROR["Show Validation<br/>Error"]
+                    SHOW_ERROR --> USER_ACTION
+                    VALIDATE -->|Valid| API_CALL["Make API Call<br/>to Supabase"]
+                    
+                    API_CALL --> SERVER_VALIDATE["Server-side<br/>Validation"]
+                    SERVER_VALIDATE -->|Validation Fails| API_ERROR["Return Error<br/>to Client"]
+                    API_ERROR --> SHOW_API_ERROR["Show Error<br/>to User"]
+                    SHOW_API_ERROR --> USER_ACTION
+                    
+                    SERVER_VALIDATE -->|Valid| EXEC_QUERY["Execute Database<br/>Query"]
+                    EXEC_QUERY --> LOG_AUDIT["Log to Audit Trail"]
+                    LOG_AUDIT --> RETURN_DATA["Return Result<br/>to Client"]
+                    RETURN_DATA --> UPDATE_UI["Update UI<br/>with Result"]
+                    UPDATE_UI --> TRIGGER_REALTIME["Trigger Real-time<br/>Updates"]
+                    TRIGGER_REALTIME --> SHOW_SUCCESS["Show Success<br/>Message"]
+                    SHOW_SUCCESS --> USER_ACTION
+                    
+                    style START fill:#e3f2fd,stroke:#667eea,stroke-width:2px
+                    style PAGE_READY fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                    style USER_ACTION fill:#fff3e0,stroke:#ff6f00,stroke-width:2px
+                    style UPDATE_UI fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+            </div>
+            
+            <div class="note">
+                <strong>Key Steps:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Configuration → Initialization → Authentication</li>
+                    <li>Role-based dashboard loading</li>
+                    <li>Data fetching with RLS enforcement</li>
+                    <li>Page rendering with event listeners</li>
+                    <li>Real-time subscription setup</li>
+                    <li>User interaction → Validation → API call</li>
+                    <li>Result processing → UI update → Success feedback</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 7. SYSTEM COMPONENTS SUMMARY -->
+        <div class="flow-section" id="section-7">
+            <h2>
+                📊 System Components Summary
+                <button onclick="downloadSection('section-7', 'Components-Summary')">⬇️ PNG</button>
+            </h2>
+            <p>All major components and their interactions at a glance.</p>
+            
+            <div class="component-grid">
+                <div class="component-box">
+                    <h3>🖥️ Frontend</h3>
+                    <ul>
+                        <li>HTML Pages</li>
+                        <li>JavaScript Modules</li>
+                        <li>CSS Styling</li>
+                        <li>Charts & Graphs</li>
+                        <li>Forms & Validation</li>
+                        <li>Event Handlers</li>
+                    </ul>
+                </div>
+                
+                <div class="component-box">
+                    <h3>🌐 API Layer</h3>
+                    <ul>
+                        <li>Supabase REST API</li>
+                        <li>Real-time Subscriptions</li>
+                        <li>Authentication Service</li>
+                        <li>JWT Token Management</li>
+                        <li>Request Handling</li>
+                        <li>Error Responses</li>
+                    </ul>
+                </div>
+                
+                <div class="component-box">
+                    <h3>💾 Database</h3>
+                    <ul>
+                        <li>PostgreSQL Tables</li>
+                        <li>Row Level Security</li>
+                        <li>Database Functions</li>
+                        <li>Triggers & Rules</li>
+                        <li>Indexes & Constraints</li>
+                        <li>Data Integrity</li>
+                    </ul>
+                </div>
+                
+                <div class="component-box">
+                    <h3>🔐 Security</h3>
+                    <ul>
+                        <li>Authentication</li>
+                        <li>Authorization (RBAC)</li>
+                        <li>Input Validation</li>
+                        <li>SQL Injection Prevention</li>
+                        <li>CORS Policy</li>
+                        <li>Audit Logging</li>
+                    </ul>
+                </div>
+                
+                <div class="component-box">
+                    <h3>📊 Business Logic</h3>
+                    <ul>
+                        <li>User Management</li>
+                        <li>Alumni Profile Mgmt</li>
+                        <li>Career Tracking</li>
+                        <li>Data Aggregation</li>
+                        <li>Archive Automation</li>
+                        <li>Statistics Calculation</li>
+                    </ul>
+                </div>
+                
+                <div class="component-box">
+                    <h3>📝 Operations</h3>
+                    <ul>
+                        <li>Audit Trail</li>
+                        <li>Error Handling</li>
+                        <li>Logging</li>
+                        <li>Monitoring</li>
+                        <li>Backup & Recovery</li>
+                        <li>Performance Metrics</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note" style="margin-top: 30px;">
+                <strong>Integration Points:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Frontend ↔ API: HTTP requests/responses</li>
+                    <li>API ↔ Auth: Token validation</li>
+                    <li>API ↔ Database: Query execution</li>
+                    <li>Database ↔ RLS: Policy enforcement</li>
+                    <li>All layers: Error handling & logging</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 8. DEPLOYMENT & INFRASTRUCTURE -->
+        <div class="flow-section" id="section-8">
+            <h2>
+                🚀 Deployment & Infrastructure
+                <button onclick="downloadSection('section-8', 'Deployment-Infrastructure')">⬇️ PNG</button>
+            </h2>
+            <p>How the application is deployed and accessed by users.</p>
+            
+            <div class="mermaid">
+                graph LR
+                    subgraph Dev["🔧 Development"]
+                        GIT["Git Repository<br/>GitHub"]
+                        BRANCH["Dev/Main<br/>Branches"]
+                    end
+                    
+                    subgraph Host["☁️ Hosting"]
+                        WEB["Web Server<br/>Static Files<br/>HTML/CSS/JS"]
+                        CDN["CDN<br/>Cache & Deliver"]
+                    end
+                    
+                    subgraph Cloud["🌥️ Backend Infrastructure"]
+                        SUPABASE["Supabase Hosting<br/>PostgreSQL DB<br/>Auth Service<br/>REST API"]
+                    end
+                    
+                    subgraph User["👥 End Users"]
+                        BROWSER["Browser<br/>Windows/Mac"]
+                        MOBILE["Mobile<br/>iOS/Android"]
+                    end
+                    
+                    GIT --> BRANCH
+                    BRANCH --> WEB
+                    WEB --> CDN
+                    CDN --> BROWSER
+                    CDN --> MOBILE
+                    BROWSER -.->|HTTPS| SUPABASE
+                    MOBILE -.->|HTTPS| SUPABASE
+                    SUPABASE -.->|JWT Token| BROWSER
+                    SUPABASE -.->|JWT Token| MOBILE
+                    
+                    style Dev fill:#e3f2fd,stroke:#667eea,stroke-width:2px
+                    style Host fill:#fff3e0,stroke:#ff6f00,stroke-width:2px
+                    style Cloud fill:#f3e5f5,stroke:#764ba2,stroke-width:2px
+                    style User fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+            </div>
+            
+            <div class="note">
+                <strong>Deployment Flow:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Code committed to GitHub develop/main branches</li>
+                    <li>Frontend deployed to web hosting (static files)</li>
+                    <li>CDN distributes frontend assets globally</li>
+                    <li>Backend hosted on Supabase cloud platform</li>
+                    <li>All communication over HTTPS (encrypted)</li>
+                    <li>JWT tokens for secure API authentication</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="controls" style="margin-top: 40px; margin-bottom: 20px;">
+            <button onclick="downloadAllSections()">📥 Download All as PNG</button>
+            <button onclick="scrollToTop()">⬆️ Back to Top</button>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'base' });
+        mermaid.contentLoaded();
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function downloadSection(sectionId, sectionName) {
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '⏳ Saving...';
+
+                const element = document.getElementById(sectionId);
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `NextStep-ProgramFlow-${sectionName}-${new Date().toISOString().slice(0, 10)}.png`;
+                link.click();
+
+                btn.disabled = false;
+                btn.textContent = '⬇️ PNG';
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '⬇️ PNG';
+            }
+        }
+
+        async function downloadAllSections() {
+            try {
+                const button = event.target;
+                button.disabled = true;
+                button.textContent = '⏳ Generating all...';
+
+                const sections = [
+                    'section-1', 'section-2', 'section-3', 'section-4',
+                    'section-5', 'section-6', 'section-7', 'section-8'
+                ];
+
+                let count = 0;
+                for (const sectionId of sections) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const element = document.getElementById(sectionId);
+                    const h2 = element.querySelector('h2');
+                    const sectionName = h2.textContent.split('\n')[0].replace(/[⬇️📥].*/, '').trim();
+
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true
+                    });
+
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = `NextStep-ProgramFlow-${count + 1}-${new Date().toISOString().slice(0, 10)}.png`;
+                    link.click();
+
+                    count++;
+                }
+
+                button.disabled = false;
+                button.textContent = '📥 Download All as PNG';
+                alert(`✅ Downloaded ${count} program flow diagrams!`);
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                button.disabled = false;
+                button.textContent = '📥 Download All as PNG';
+            }
+        }
+    </script>
+</body>
+</html>
