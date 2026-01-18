@@ -24,10 +24,13 @@ async function loadAuditTrail() {
 
         console.log('✅ Supabase ready');
 
-        // Fetch audit trail records
+        // Fetch audit trail records with admin details
         const { data, error } = await window.supabase
             .from('audit_trail')
-            .select('*')
+            .select(`
+                *,
+                admin:admins(employee_id)
+            `)
             .order('created_at', { ascending: false })
             .limit(500);
 
@@ -64,10 +67,16 @@ function renderAuditTable(records) {
         const tr = document.createElement('tr');
         const timestamp = new Date(record.created_at).toLocaleString();
         const actionBadge = getActionBadge(record.action_type);
+        
+        // Get employee ID with role prefix (DEV-### or ADM-###)
+        let userDisplay = record.user_email || 'System';
+        if (record.admin && record.admin.employee_id) {
+            userDisplay = record.admin.employee_id;
+        }
 
         tr.innerHTML = `
             <td class="timestamp">${timestamp}</td>
-            <td>${record.user_email || 'System'}</td>
+            <td><strong>${userDisplay}</strong></td>
             <td>${actionBadge}</td>
             <td>${record.entity_type || 'N/A'}</td>
             <td>${record.entity_name || 'N/A'}</td>
