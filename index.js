@@ -463,61 +463,15 @@ async function loadCareerStats() {
 
         console.log('🔍 Fetching career stats...');
         
-        // First get active alumni IDs
-        let { data: activeAlumni, error: alumniError } = await window.supabase
-            .from('alumni_profiles')
-            .select('id')
-            .eq('is_active', true);
-
-        if (alumniError) {
-            console.error('❌ Error fetching active alumni:', alumniError);
-            // Try without is_active filter (column might not exist)
-            const { data: allAlumni, error: allError } = await window.supabase
-                .from('alumni_profiles')
-                .select('id');
-            
-            if (allError) {
-                showCareerStatsError(`Database error: ${allError.message}`);
-                return;
-            }
-            activeAlumni = allAlumni;
-        }
-
-        const activeAlumniIds = (activeAlumni || []).map(a => a.id);
-        const totalAlumni = activeAlumniIds.length;
-
-        // Then get career info - try with ID filter first, fallback to all records
-        let careerData, careerError;
-        
-        if (activeAlumniIds.length > 0) {
-            // Try with just basic fields that should exist
-            const result = await window.supabase
-                .from('career_info')
-                .select('alumni_id, industry, mentorship, is_employed, open_for_mentorship')
-                .in('alumni_id', activeAlumniIds);
-            careerData = result.data;
-            careerError = result.error;
-            
-            // If that fails, try with all fields
-            if (careerError && careerError.message.includes('does not exist')) {
-                const result2 = await window.supabase
-                    .from('career_info')
-                    .select('*');
-                careerData = result2.data;
-                careerError = result2.error;
-            }
-        } else {
-            // If no active alumni IDs, fetch all career data
-            const result = await window.supabase
-                .from('career_info')
-                .select('*');
-            careerData = result.data;
-            careerError = result.error;
-        }
+        // First, just try to fetch ALL career data without filters
+        // The career_info table should be independent of alumni status
+        let { data: careerData, error: careerError } = await window.supabase
+            .from('career_info')
+            .select('*');
 
         if (careerError) {
-            console.warn('❌ Career info error:', careerError.message);
-            showCareerStatsError(`Database error: ${careerError.message}`);
+            console.error('❌ Career info error:', careerError);
+            showCareerStatsError(`Unable to fetch career data: ${careerError.message}`);
             return;
         }
 
@@ -619,7 +573,7 @@ function showCareerStatsError(message) {
 function showCareerStatsEmpty() {
     const container = document.getElementById('careerStatusChart');
     if (container) {
-        container.innerHTML = '<div class="status-placeholder" style="padding: 40px 20px; color: #999;">📊 No career data submitted yet.<br>Alumni need to fill out their career information to see statistics here.</div>';
+        container.innerHTML = '<div class="status-placeholder" style="padding: 60px 20px; color: #999; text-align: center;"><strong>📊 No career data available</strong><br><br>Career information submissions will appear here once alumni complete their career profiles.</div>';
     }
     
     const setText = (id, text) => {
@@ -629,9 +583,9 @@ function showCareerStatsEmpty() {
     
     setText('careerTotal', '0');
     setText('careerEmployedPercent', '—');
-    setText('careerEmployedCount', '0 submissions');
+    setText('careerEmployedCount', 'No submissions');
     setText('careerMentorshipPercent', '—');
-    setText('careerMentorshipCount', '0 submissions');
+    setText('careerMentorshipCount', 'No submissions');
     setText('careerTopIndustry', '—');
     setText('careerTopIndustryCount', 'No data');
 }
