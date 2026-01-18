@@ -1,134 +1,177 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Alumni List - Admin</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="adminstyle.css">
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="adminstyle.css" />
     <script src="logo-fallback.js" defer></script>
     <script src="user-menu.js" defer></script>
-    
-    <!-- Supabase Configuration -->
-    <script>
-        // Set Supabase credentials - Update with your actual values
-        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
-        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
-    </script>
-    
-    <script src="supabase-client.js" defer></script>
-</head>
 
-<body>
+    <!-- Supabase Configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      window.SUPABASE_URL = "https://ziquhxrfxywsmvunuyzi.supabase.co";
+      window.SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc";
+    </script>
+    <script src="supabase-client.js"></script>
+  </head>
+
+  <body>
     <header class="admin-header">
-        <div class="header-left">
-            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+      <div class="header-left">
+        <div class="logo-circle small">
+          <img
+            src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg"
+            class="nav-logo"
+            alt="logo"
+            onerror="
+              this.onerror = null;
+              this.src =
+                '../logo/557536151_1257403522824074_2017646524872962832_n.png';
+            "
+          />
         </div>
-        <div class="header-center">NEXT STEP</div>
-        <div class="header-right"><button class="user-icon">👤</button></div>
+      </div>
+      <div class="header-center">NEXT STEP</div>
+      <div class="header-right"><button class="user-icon">👤</button></div>
     </header>
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <nav>
-                <ul>
-                    <li><a href="homepage.html"><span class="home-ico">🏠</span> Dashboard</a></li>
-                </ul>
-            </nav>
-            <!-- Sidebar footer removed -->
-        </aside>
+      <aside class="admin-sidebar">
+        <nav>
+          <ul>
+            <li>
+              <a href="homepage.html"
+                ><span class="home-ico">🏠</span> Dashboard</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- Sidebar footer removed -->
+      </aside>
 
-        <main class="admin-main">
-            <a class="back-link" href="../homepage.html">←</a>
-            
-            <div class="alumni-list-container">
-                <aside class="alumni-filters">
-                    <h3>Filters</h3>
-                    
-                    <div class="filter-group">
-                        <label for="searchName">Search Name</label>
-                        <input type="text" id="searchName" placeholder="Enter name...">
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="filterDegree">Degree</label>
-                        <select id="filterDegree">
-                            <option value="">All Degrees</option>
-                            <option value="BSA">BSA - Accountancy</option>
-                            <option value="BSCpE">BSCpE - Computer Engineering</option>
-                            <option value="BSENTREP">BSENTREP - Entrepreneurship</option>
-                            <option value="BSHM">BSHM - Hospitality Management</option>
-                            <option value="BSIT">BSIT - Information Technology</option>
-                            <option value="BSEDEN">BSEDEN - Secondary Education (English)</option>
-                            <option value="BSEDMT">BSEDMT - Secondary Education (Math)</option>
-                            <option value="DOMTLOM">DOMTLOM - Office Management</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="filterYear">Graduation Year</label>
-                        <select id="filterYear">
-                            <option value="">All Years</option>
-                        </select>
-                    </div>
+      <main class="admin-main">
+        <a class="back-link" href="../homepage.html">←</a>
 
-                    <div class="filter-group">
-                        <label for="filterCompletion">Form Status</label>
-                        <select id="filterCompletion">
-                            <option value="">All Status</option>
-                            <option value="complete">Complete</option>
-                            <option value="incomplete">Incomplete</option>
-                        </select>
-                    </div>
-                    
-                    <button class="reset-btn" id="resetFilters">Reset Filters</button>
-                    <a href="bulk-upload.html" class="btn btn-primary" style="display: block; text-align: center; margin-top: 15px;">📁 Bulk Upload</a>
-                    <a href="archive.html" class="btn btn-secondary" style="display: block; text-align: center; margin-top: 10px;">📦 View Archive</a>
-                </aside>
-                
-                <div class="alumni-content">
-                    <div class="content-header">
-                        <h2>Alumni List</h2>
-                        <div class="content-stats">
-                            Showing <strong id="showingCount">0</strong> of <strong id="totalCount">0</strong> alumni
-                        </div>
-                    </div>
+        <div class="alumni-list-container">
+          <aside class="alumni-filters">
+            <h3>Filters</h3>
 
-                    <!-- Bulk Actions Bar -->
-                    <div id="bulkActionsBar" class="bulk-actions-bar" style="display: none;">
-                        <div class="bulk-info">
-                            <span id="selectedCount">0</span> selected
-                        </div>
-                        <div class="bulk-buttons">
-                            <button id="archiveSelectedBtn" class="btn btn-danger">Archive Selected</button>
-                            <button id="cancelSelectBtn" class="btn btn-secondary">Cancel</button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-wrap">
-                        <table id="alumTable">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
-                                    <th>Full Name</th>
-                                    <th>Student Number</th>
-                                    <th>Degree</th>
-                                    <th>Graduation Year</th>
-                                    <th>Form Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="7" class="empty">Loading...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="filter-group">
+              <label for="searchName">Search Name</label>
+              <input type="text" id="searchName" placeholder="Enter name..." />
             </div>
-        </main>
+
+            <div class="filter-group">
+              <label for="filterDegree">Degree</label>
+              <select id="filterDegree">
+                <option value="">All Degrees</option>
+                <option value="BSA">BSA - Accountancy</option>
+                <option value="BSCpE">BSCpE - Computer Engineering</option>
+                <option value="BSENTREP">BSENTREP - Entrepreneurship</option>
+                <option value="BSHM">BSHM - Hospitality Management</option>
+                <option value="BSIT">BSIT - Information Technology</option>
+                <option value="BSEDEN">
+                  BSEDEN - Secondary Education (English)
+                </option>
+                <option value="BSEDMT">
+                  BSEDMT - Secondary Education (Math)
+                </option>
+                <option value="DOMTLOM">DOMTLOM - Office Management</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterYear">Graduation Year</label>
+              <select id="filterYear">
+                <option value="">All Years</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterCompletion">Form Status</label>
+              <select id="filterCompletion">
+                <option value="">All Status</option>
+                <option value="complete">Complete</option>
+                <option value="incomplete">Incomplete</option>
+              </select>
+            </div>
+
+            <button class="reset-btn" id="resetFilters">Reset Filters</button>
+            <a
+              href="bulk-upload.html"
+              class="btn btn-primary"
+              style="display: block; text-align: center; margin-top: 15px"
+              >📁 Bulk Upload</a
+            >
+            <a
+              href="archive.html"
+              class="btn btn-secondary"
+              style="display: block; text-align: center; margin-top: 10px"
+              >📦 View Archive</a
+            >
+          </aside>
+
+          <div class="alumni-content">
+            <div class="content-header">
+              <h2>Alumni List</h2>
+              <div class="content-stats">
+                Showing <strong id="showingCount">0</strong> of
+                <strong id="totalCount">0</strong> alumni
+              </div>
+            </div>
+
+            <!-- Bulk Actions Bar -->
+            <div
+              id="bulkActionsBar"
+              class="bulk-actions-bar"
+              style="display: none"
+            >
+              <div class="bulk-info">
+                <span id="selectedCount">0</span> selected
+              </div>
+              <div class="bulk-buttons">
+                <button id="archiveSelectedBtn" class="btn btn-danger">
+                  Archive Selected
+                </button>
+                <button id="cancelSelectBtn" class="btn btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table id="alumTable">
+                <thead>
+                  <tr>
+                    <th style="width: 40px">
+                      <input
+                        type="checkbox"
+                        id="selectAllCheckbox"
+                        title="Select all"
+                      />
+                    </th>
+                    <th>Full Name</th>
+                    <th>Student Number</th>
+                    <th>Degree</th>
+                    <th>Graduation Year</th>
+                    <th>Form Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="7" class="empty">Loading...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -136,6 +179,5 @@
     <script src="alumni-form-tracker.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="alumlist.js" defer></script>
-</body>
-
+  </body>
 </html>
