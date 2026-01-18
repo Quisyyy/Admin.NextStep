@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: white; }
+        .diagram { margin: 40px 0; page-break-after: always; }
+        svg { background: white; }
+    </style>
+</head>
+<body>
+<div class="diagram" id="dfd">
+<div class="mermaid" id="dfdContent">
+graph LR
+    subgraph Ext["🔵 EXTERNAL ENTITIES"]
+        User["👤 Admin User"]
+        Source["🗄️ Data Source"]
+    end
+    
+    subgraph Proc["🟢 PROCESSES"]
+        P1["Authentication<br/>Module"]
+        P2["Bulk Upload<br/>Processor"]  
+        P3["Career Status<br/>Tracker"]
+        P4["Audit Trail<br/>Logger"]
+        P5["Employment<br/>Manager"]
+    end
+    
+    subgraph Store["🔵 DATA STORES"]
+        D1[("Alumni<br/>Database")]
+        D2[("Career<br/>Database")]
+        D3[("Audit<br/>Database")]
+    end
+    
+    User -->|Login| P1
+    P1 -->|Token| User
+    User -->|CSV| P2
+    P2 -->|Records| D1
+    P2 -->|Events| P4
+    P4 -->|Logs| D3
+    D1 -->|Data| P3
+    P3 -->|Status| D2
+    D1 -->|Employment| P5
+    D2 -->|Career| P5
+    P5 -->|Reports| User
+</div>
+</div>
+
+<div class="diagram" id="flowchart">
+<div class="mermaid" id="fcContent">
+graph TD
+    Start(["START"]):::startEnd
+    
+    S1["📄 Open Upload Page"]:::process
+    S2["📁 Select CSV File"]:::process
+    S3["🔍 Parse CSV"]:::process
+    
+    D1{{"✓ Valid?"}}:::decision
+    E1["❌ Error"]:::error
+    
+    S4["📋 Preview 50 Records"]:::process
+    S5["👆 Confirm"]:::process
+    
+    D2{{"✓ Confirmed?"}}:::decision
+    
+    S6["🔌 Connect Database"]:::process
+    Loop["🔄 For Each Record"]:::process
+    S7["📝 Extract: name, email"]:::process
+    
+    D3{{"✓ Valid?"}}:::decision
+    S8["💾 Insert to DB"]:::process
+    D4{{"✓ Success?"}}:::decision
+    
+    Error["⚠️ Log & Skip"]:::error
+    S9["✅ Log to Audit"]:::process
+    
+    D5{{"More Records?"}}:::decision
+    
+    S10["📊 Results Summary"]:::process
+    S11["🔄 Refresh Dashboard"]:::process
+    
+    End(["END"]):::startEnd
+    
+    Start --> S1
+    S1 --> S2
+    S2 --> S3
+    S3 --> D1
+    D1 -->|NO| E1
+    E1 --> S2
+    D1 -->|YES| S4
+    S4 --> S5
+    S5 --> D2
+    D2 -->|NO| S2
+    D2 -->|YES| S6
+    S6 --> Loop
+    Loop --> S7
+    S7 --> D3
+    D3 -->|NO| Error
+    D3 -->|YES| S8
+    S8 --> D4
+    D4 -->|NO| Error
+    D4 -->|YES| S9
+    Error --> D5
+    S9 --> D5
+    D5 -->|YES| Loop
+    D5 -->|NO| S10
+    S10 --> S11
+    S11 --> End
+    
+    classDef startEnd fill:#90EE90,stroke:#228B22,stroke-width:3px,color:#000
+    classDef process fill:#ADD8E6,stroke:#0047AB,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFE0,stroke:#FFD700,stroke-width:2px,color:#000
+    classDef error fill:#FFB6C6,stroke:#DC143C,stroke-width:2px,color:#000
+</div>
+</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true, theme: 'base' });
+    mermaid.contentLoaded();
+</script>
+</body>
+</html>
