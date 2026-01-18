@@ -492,30 +492,31 @@ async function loadCareerStats() {
         let recordsWithStatus = 0;
 
         (careerData || []).forEach(d => {
-            // Try to find job status from multiple possible column names
+            // Since job_status column doesn't exist, derive status from current_position
+            // If current_position is null, mark as "No Position"
+            // Otherwise use "Employed" as default
             let status = null;
-            if (d.job_status) status = d.job_status;
-            else if (d.current_job) status = d.current_job;
-            else if (d.current_position) status = d.current_position;
+            if (d.current_position && d.current_position.toLowerCase().includes('free')) {
+                status = 'Freelancer';
+            } else if (d.current_position && d.current_position.toLowerCase().includes('self')) {
+                status = 'Self-Employed';
+            } else if (d.current_position) {
+                status = 'Employed';
+            } else {
+                status = 'Not Currently Employed';
+            }
             
-            const normalizedStatus = (status || '').trim() || 'No Status Specified';
+            const normalizedStatus = (status || '').trim() || 'Unknown Status';
             
             statusCounts[normalizedStatus] = (statusCounts[normalizedStatus] || 0) + 1;
             
-            if (status) {
+            if (d.current_position) {
                 recordsWithStatus++;
-            }
-
-            // Check is_employed (boolean) or job_status (text)
-            const isEmployed = d.is_employed === true || 
-                (status && /employ|self|freelan|working/i.test(status));
-            if (isEmployed) {
                 employedCount++;
             }
 
-            // Check open_for_mentorship (boolean) or mentorship (text)
-            const openMentorship = d.open_for_mentorship === true ||
-                (d.mentorship && /yes|open/i.test(d.mentorship));
+            // Check mentorship availability
+            const openMentorship = d.mentorship && /yes|open/i.test(d.mentorship);
             if (openMentorship) {
                 mentorshipCount++;
             }
@@ -539,7 +540,7 @@ async function loadCareerStats() {
         setText('careerTopIndustry', topIndustry[0] || '—');
         setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
 
-        // Render status breakdown by actual job statuses
+        // Render status breakdown by derived status
         renderCareerStatusBars(statusCounts, total);
 
     } catch (err) {
