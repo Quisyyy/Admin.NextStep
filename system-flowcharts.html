@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NextStep System Flowcharts</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -110,9 +111,9 @@
         <p class="subtitle">Complete System Flowcharts & Architecture</p>
 
         <div class="controls">
-            <button onclick="printPage()">🖨️ Print/Save as PDF</button>
-            <button onclick="window.print()">📄 Print Page</button>
-            <button onclick="scrollToTop()">⬆️ Back to Top</button>
+            <button onclick="downloadAsPDF()">📥 Download as PDF</button>
+            <button onclick="downloadAsImage()">🖼️ Download as PNG</button>
+            <button onclick="printPage()">🖨️ Print Page</button>
         </div>
 
         <!-- FLOWCHART 1: SYSTEM ACCESS FLOW -->
@@ -393,9 +394,9 @@
         </div>
 
         <div class="controls" style="margin-top: 40px;">
-            <button onclick="printPage()">🖨️ Print/Save as PDF</button>
-            <button onclick="window.print()">📄 Print Page</button>
-            <button onclick="downloadAsImage()">📸 Save as Image</button>
+            <button onclick="downloadAsPDF()">📥 Download as PDF</button>
+            <button onclick="downloadAsImage()">🖼️ Download as PNG</button>
+            <button onclick="printPage()">🖨️ Print Page</button>
         </div>
     </div>
 
@@ -411,8 +412,51 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function downloadAsImage() {
-            alert('To save as JPEG:\n1. Press Ctrl+P (Print)\n2. Select "Save as PDF"\n3. Then use a converter to JPG\n\nOr right-click any diagram and select "Save image as"');
+        async function downloadAsImage() {
+            try {
+                const button = event.target;
+                button.disabled = true;
+                button.textContent = '⏳ Generating image...';
+
+                const element = document.querySelector('.container');
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                });
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `NextStep-Flowcharts-${new Date().toISOString().slice(0, 10)}.png`;
+                link.click();
+
+                button.disabled = false;
+                button.textContent = '🖼️ Download as PNG';
+                alert('✅ Image saved successfully!');
+            } catch (error) {
+                alert('❌ Error generating image: ' + error.message);
+                button.disabled = false;
+                button.textContent = '🖼️ Download as PNG';
+            }
+        }
+
+        async function downloadAsPDF() {
+            try {
+                const button = event.target;
+                button.disabled = true;
+                button.textContent = '⏳ Generating PDF...';
+
+                // Note: This requires a PDF library. For now, use print functionality
+                window.print();
+                
+                button.disabled = false;
+                button.textContent = '📥 Download as PDF';
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                button.disabled = false;
+                button.textContent = '📥 Download as PDF';
+            }
         }
     </script>
 </body>
