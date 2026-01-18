@@ -490,17 +490,27 @@ async function loadCareerStats() {
         let careerData, careerError;
         
         if (activeAlumniIds.length > 0) {
+            // Try with just basic fields that should exist
             const result = await window.supabase
                 .from('career_info')
-                .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry')
+                .select('alumni_id, industry, mentorship, is_employed, open_for_mentorship')
                 .in('alumni_id', activeAlumniIds);
             careerData = result.data;
             careerError = result.error;
+            
+            // If that fails, try with all fields
+            if (careerError && careerError.message.includes('does not exist')) {
+                const result2 = await window.supabase
+                    .from('career_info')
+                    .select('*');
+                careerData = result2.data;
+                careerError = result2.error;
+            }
         } else {
             // If no active alumni IDs, fetch all career data
             const result = await window.supabase
                 .from('career_info')
-                .select('alumni_id, job_status, is_employed, open_for_mentorship, mentorship, industry');
+                .select('*');
             careerData = result.data;
             careerError = result.error;
         }
@@ -528,9 +538,13 @@ async function loadCareerStats() {
         let recordsWithStatus = 0;
 
         (careerData || []).forEach(d => {
-            // Normalize and count job status - handle NULL values
-            const status = (d.job_status || '').trim();
-            const normalizedStatus = status || 'No Status Specified';
+            // Try to find job status from multiple possible column names
+            let status = null;
+            if (d.job_status) status = d.job_status;
+            else if (d.current_job) status = d.current_job;
+            else if (d.current_position) status = d.current_position;
+            
+            const normalizedStatus = (status || '').trim() || 'No Status Specified';
             
             statusCounts[normalizedStatus] = (statusCounts[normalizedStatus] || 0) + 1;
             
@@ -540,7 +554,7 @@ async function loadCareerStats() {
 
             // Check is_employed (boolean) or job_status (text)
             const isEmployed = d.is_employed === true || 
-                (d.job_status && /employ|self|freelan|working/i.test(d.job_status));
+                (status && /employ|self|freelan|working/i.test(status));
             if (isEmployed) {
                 employedCount++;
             }
