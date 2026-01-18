@@ -6,28 +6,50 @@
 
 async function checkAdminAccess() {
     try {
-        // Wait for Supabase to be ready
+        // Wait for Supabase to be ready with retries
+        let attempts = 0;
+        const maxAttempts = 20; // 2 seconds max wait
+        
+        while ((!window.supabase || !window.supabaseClientReady) && attempts < maxAttempts) {
+            console.log(`⏳ Waiting for Supabase (attempt ${attempts + 1}/${maxAttempts})...`);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
         if (!window.supabase || !window.supabaseClientReady) {
-            console.warn('Supabase not ready, skipping admin check');
+            console.warn('❌ Supabase not ready after timeout');
+            // Schedule retry
+            setTimeout(checkAdminAccess, 500);
             return;
         }
+
+        console.log('✅ Supabase ready, checking admin access...');
 
         // Get current user
         const { data: { user } } = await window.supabase.auth.getUser();
         if (!user) {
-            console.log('No user logged in');
+            console.log('ℹ️ No user logged in');
             return;
         }
 
+        console.log('👤 User found:', user.id);
+
         // Get admin record to check employee_id
-        const { data: admin } = await window.supabase
+        const { data: admin, error } = await window.supabase
             .from('admins')
             .select('employee_id')
             .eq('id', user.id)
             .maybeSingle();
 
+        if (error) {
+            console.warn('⚠️ Error fetching admin record:', error.message);
+            // Schedule retry
+            setTimeout(checkAdminAccess, 500);
+            return;
+        }
+
         if (!admin) {
-            console.log('Not an admin account');
+            console.log('ℹ️ Not an admin account');
             return;
         }
 
@@ -41,17 +63,29 @@ async function checkAdminAccess() {
             const auditTrailLink = document.getElementById('auditTrailLink');
             if (auditTrailLink) {
                 auditTrailLink.style.display = 'block';
+                console.log('✅ Audit Trail link is now visible');
+            } else {
+                console.warn('⚠️ Audit Trail link element not found in DOM');
             }
         } else {
-            console.log('⚠️ Non-admin account:', employeeId);
+            console.log('ℹ️ Non-admin account:', employeeId);
             // Hide admin-only features (already hidden by default)
         }
     } catch (err) {
-        console.error('Error checking admin access:', err);
+        console.error('❌ Error checking admin access:', err);
+        // Schedule retry on error
+        setTimeout(checkAdminAccess, 500);
     }
 }
 
 // Run check when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOMContentLoaded fired, checking admin access...');
     checkAdminAccess();
+});
+
+// Also check after a short delay to catch cases where Supabase initializes after DOM ready
+window.addEventListener('load', () => {
+    console.log('🪟 Window load fired, rechecking admin access...');
+    setTimeout(checkAdminAccess, 100);
 });
