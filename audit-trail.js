@@ -24,20 +24,32 @@ async function loadAuditTrail() {
 
         console.log('✅ Supabase ready');
 
-        // Fetch audit trail records with admin details
-        const { data, error } = await window.supabase
-            .from('audit_trail')
-            .select(`
-                *,
-                admin:admins(employee_id)
-            `)
+        // Fetch audit trail records - try admin_audit_trail first (new table), then audit_trail (legacy)
+        let { data, error } = await window.supabase
+            .from('admin_audit_trail')
+            .select('*')
             .order('created_at', { ascending: false })
             .limit(500);
 
-        if (error) {
-            console.error('❌ Error fetching audit trail:', error);
-            showEmptyState('Error loading audit trail: ' + error.message);
-            return;
+        // If admin_audit_trail doesn't exist or is empty, try audit_trail
+        if (error || !data || data.length === 0) {
+            console.log('📊 Trying legacy audit_trail table...');
+            const result = await window.supabase
+                .from('audit_trail')
+                .select(`
+                    *,
+                    admin:admins(employee_id)
+                `)
+                .order('created_at', { ascending: false })
+                .limit(500);
+            
+            if (result.error) {
+                console.error('❌ Error fetching audit trail:', result.error);
+                showEmptyState('Error loading audit trail: ' + result.error.message);
+                return;
+            }
+            data = result.data;
+            error = result.error;
         }
 
         allAuditRecords = data || [];
@@ -66,21 +78,29 @@ function renderAuditTable(records) {
     records.forEach(record => {
         const tr = document.createElement('tr');
         const timestamp = new Date(record.created_at).toLocaleString();
-        const actionBadge = getActionBadge(record.action_type);
         
-        // Get employee ID with role prefix (DEV-### or ADM-###)
-        let userDisplay = record.user_email || 'System';
+        // Handle both table formats
+        const actionType = record.action_type || record.action || 'Unknown';
+        const actionBadge = getActionBadge(actionType);
+        
+        // Get user display - try multiple field names
+        let userDisplay = record.user_email || record.employee_id || 'System';
         if (record.admin && record.admin.employee_id) {
             userDisplay = record.admin.employee_id;
         }
+
+        // Get entity info - try multiple field names
+        const entityType = record.entity_type || record.table_affected || 'N/A';
+        const entityName = record.entity_name || record.record_id || 'N/A';
+        const description = record.description || record.details || 'N/A';
 
         tr.innerHTML = `
             <td class="timestamp">${timestamp}</td>
             <td><strong>${userDisplay}</strong></td>
             <td>${actionBadge}</td>
-            <td>${record.entity_type || 'N/A'}</td>
-            <td>${record.entity_name || 'N/A'}</td>
-            <td>${record.description || 'N/A'}</td>
+            <td>${entityType}</td>
+            <td>${entityName}</td>
+            <td>${description}</td>
         `;
 
         tbody.appendChild(tr);
