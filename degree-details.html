@@ -1,98 +1,119 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Degree Details - Admin</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="adminstyle.css">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="adminstyle.css" />
     <script src="logo-fallback.js" defer></script>
     <script src="user-menu.js" defer></script>
-    
+
     <!-- Supabase Configuration -->
     <script>
-        // Set Supabase credentials - Update with your actual values
-        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
-        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
+      // Set Supabase credentials - Update with your actual values
+      window.SUPABASE_URL = "https://ziquhxrfxywsmvunuyzi.supabase.co";
+      window.SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc";
     </script>
-    
-    <script src="supabase-client.js" defer></script>
-</head>
 
-<body>
+    <script src="supabase-client.js" defer></script>
+  </head>
+
+  <body>
     <header class="admin-header">
-        <div class="header-left">
-            <div class="logo-circle small"><img src="logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+      <div class="header-left">
+        <div class="logo-circle small">
+          <img
+            src="logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg"
+            class="nav-logo"
+            alt="logo"
+            onerror="
+              this.onerror = null;
+              this.src =
+                'logo/557536151_1257403522824074_2017646524872962832_n.png';
+            "
+          />
         </div>
-        <div class="header-center">NEXT STEP</div>
-        <div class="header-right"><button class="user-icon">👤</button></div>
+      </div>
+      <div class="header-center">NEXT STEP</div>
+      <div class="header-right"><button class="user-icon">👤</button></div>
     </header>
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <nav>
-                <ul>
-                    <li><a href="homepage.html" style="color: white;"><span class="home-ico">🏠</span> Dashboard</a></li>
-                    <li><a href="audit-trail.html" style="color: white;"><span class="home-ico">📋</span> Audit Trail</a></li>
-                    <li><a href="archive.html" style="color: white;"><span class="home-ico">📦</span> Archive</a></li>
-                </ul>
-            </nav>
-            <!-- Sidebar footer removed -->
-        </aside>
+      <aside class="admin-sidebar">
+        <nav>
+          <ul>
+            <li>
+              <a href="homepage.html" style="color: white"
+                ><span class="home-ico">🏠</span> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="audit-trail.html" style="color: white"
+                ><span class="home-ico">📋</span> Audit Trail</a
+              >
+            </li>
+            <li>
+              <a href="archive.html" style="color: white"
+                ><span class="home-ico">📦</span> Archive</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- Sidebar footer removed -->
+      </aside>
 
-        <main class="admin-main">
-            <a class="back-link" href="homepage.html">←</a>
-            <div class="page-card">
-                <h2 id="degreeTitle">Degree Details</h2>
-                <div class="degree-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Total Alumni</span>
-                        <span class="stat-value" id="totalCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Profiles Completed</span>
-                        <span class="stat-value" id="completedCount">0</span>
-                    </div>
-                </div>
-
-                <div class="table-wrap">
-                    <table id="degreeAlumniTable">
-                        <thead>
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Student Number</th>
-                                <th>Email</th>
-                                <th>Current Job</th>
-                                <th>Previous Roles</th>
-                                <th>Industry</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" class="empty">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+      <main class="admin-main">
+        <a class="back-link" href="homepage.html">←</a>
+        <div class="page-card">
+          <h2 id="degreeTitle">Degree Details</h2>
+          <div class="degree-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total Alumni</span>
+              <span class="stat-value" id="totalCount">0</span>
             </div>
-        </main>
+            <div class="stat-item">
+              <span class="stat-label">Profiles Completed</span>
+              <span class="stat-value" id="completedCount">0</span>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="degreeAlumniTable">
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Student Number</th>
+                  <th>Email</th>
+                  <th>Current Job</th>
+                  <th>Industry</th>
+                  <th>Related to Course</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" class="empty">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
     </div>
 
     <footer class="admin-footer">
-        <div class="admin-footer-inner">© Next Step</div>
+      <div class="admin-footer-inner">© Next Step</div>
     </footer>
-    
+
     <script src="degree-details.js" defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', loadDegreeDetails);
+      document.addEventListener("DOMContentLoaded", loadDegreeDetails);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="degree-details.js" defer></script>
-
-</body>
-
+  </body>
 </html>
