@@ -1,0 +1,10 @@
+student_number,full_name,birthday,email,phone_number,degree,graduation_year
+SN2023001,Juan Dela Cruz,1999-05-12,juan.delacruz@email.com,09171234567,BSIT,2023
+SN2023002,Maria Santos,2000-08-23,maria.santos@email.com,09181234567,BSA,2023
+SN2023003,Jose Rizal,1998-06-19,jose.rizal@email.com,09191234567,BSIT,2022
+SN2023004,Ana Lopez,2001-01-30,ana.lopez@email.com,09201234567,BSENTREP,2024
+SN2023005,Pedro Pascual,1997-11-05,pedro.pascual@email.com,09211234567,BSIT,2021
+
+
+# change niyo laman nito if want niyo test, kasi already exist na yung mga data nito sa database.
+# if mag error, burahin niyo lang yung comment na to,
