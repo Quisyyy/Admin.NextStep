@@ -55,7 +55,8 @@ async function loadArchivedAlumni() {
     const { data, error } = await window.supabase
       .from("alumni_profiles")
       .select("*")
-      .eq("is_archived", true);
+      .eq("is_archived", true)
+      .eq("is_deleted", false);
 
     if (error) {
       console.error("❌ Query error:", error);
@@ -166,7 +167,7 @@ async function restoreRecord(archiveId, fullName) {
       .eq("id", archiveId);
     if (error) throw error;
     alert("✓ Record restored successfully.");
-    window.location.href = "alumlist.html";
+    await loadArchivedAlumni();
   } catch (error) {
     console.error("❌ Error restoring:", error);
     showError("Error restoring record: " + error.message);
@@ -178,21 +179,19 @@ async function deleteRecord(archiveId, fullName) {
     return;
 
   try {
-    console.log("🗑️ Deleting record:", archiveId);
-
-    const { data, error } = await window.supabase.rpc("delete_alumni_record", {
-      p_archive_id: archiveId,
-    });
-
+    console.log("🗑️ Soft deleting record:", archiveId);
+    const { error } = await window.supabase
+      .from("alumni_profiles")
+      .update({ is_deleted: true })
+      .eq("id", archiveId);
     if (error) throw error;
-
-    if (data && data.success) {
-      console.log("✅ Deleted successfully");
-      alert("✓ " + data.message);
-      await loadArchivedAlumni();
-    } else {
-      throw new Error(data?.message || "Unknown error");
-    }
+    // Remove from UI immediately
+    allArchivedRecords = allArchivedRecords.filter((r) => r.id !== archiveId);
+    renderArchiveTable(allArchivedRecords);
+    updateArchiveStats();
+    alert("✓ Record marked as deleted.");
+    // Also reload from Supabase in the background to stay in sync
+    loadArchivedAlumni();
   } catch (error) {
     console.error("❌ Error deleting:", error);
     showError("Error deleting record: " + error.message);
