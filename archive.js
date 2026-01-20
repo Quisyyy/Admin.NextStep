@@ -53,9 +53,9 @@ async function loadArchivedAlumni() {
 
     // Fetch all fields directly from alumni_archive
     const { data, error } = await window.supabase
-      .from("alumni_archive")
+      .from("alumni_profiles")
       .select("*")
-      .order("archived_at", { ascending: false });
+      .eq("is_archived", true);
 
     if (error) {
       console.error("❌ Query error:", error);
@@ -122,19 +122,19 @@ function renderArchiveTable(records) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-            <td>${record.full_name || "N/A"}</td>
-            <td>${record.email || "N/A"}</td>
-            <td>${record.student_number || "N/A"}</td>
-            <td>${record.degree || "N/A"}</td>
-            <td>${archivedDate.toLocaleDateString()}</td>
-            <td>${record.archive_reason || "Archived"}</td>
-            <td><span class="badge" style="background: #f44336; color: white; padding: 4px 8px; border-radius: 3px;">ARCHIVED</span></td>
-            <td style="white-space: nowrap;">
-                <span style="font-size: 12px; ${daysLeft > 5 ? "color: #2196F3" : "color: #ff9800"}">${daysText}</span><br>
-                <button class="btn-small" onclick="restoreRecord('${record.id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Restore</button>
-                <button class="btn-small" onclick="deleteRecord('${record.id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Delete</button>
-            </td>
-        `;
+        <td>${record.full_name || "N/A"}</td>
+        <td>${record.email || "N/A"}</td>
+        <td>${record.student_number || "N/A"}</td>
+        <td>${record.degree || "N/A"}</td>
+        <td>${archivedDate.toLocaleDateString()}</td>
+        <td>${record.archive_reason || "Archived"}</td>
+        <td><span class="badge" style="background: #f44336; color: white; padding: 4px 8px; border-radius: 3px;">ARCHIVED</span></td>
+        <td style="white-space: nowrap;">
+          <span style="font-size: 12px; ${daysLeft > 5 ? "color: #2196F3" : "color: #ff9800"}">${daysText}</span><br>
+          <button class="btn-small" onclick="restoreRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Restore</button>
+          <button class="btn-small" onclick="deleteRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Delete</button>
+        </td>
+      `;
     tbody.appendChild(tr);
   });
 }
@@ -160,23 +160,13 @@ async function restoreRecord(archiveId, fullName) {
 
   try {
     console.log("🔄 Restoring record:", archiveId);
-
-    const { data, error } = await window.supabase.rpc("restore_alumni_record", {
-      p_archive_id: archiveId,
-    });
-
+    const { error } = await window.supabase
+      .from("alumni_profiles")
+      .update({ is_archived: false })
+      .eq("id", archiveId);
     if (error) throw error;
-
-    if (data && data.success) {
-      console.log("✅ Restored successfully");
-      alert("✓ " + data.message);
-      await loadArchivedAlumni();
-
-      // Notify alumni list to refresh
-      window.dispatchEvent(new Event("alumni:restored"));
-    } else {
-      throw new Error(data?.message || "Unknown error");
-    }
+    alert("✓ Record restored successfully.");
+    window.location.href = "alumlist.html";
   } catch (error) {
     console.error("❌ Error restoring:", error);
     showError("Error restoring record: " + error.message);

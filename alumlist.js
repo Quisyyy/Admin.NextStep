@@ -44,9 +44,8 @@ async function loadAlumni() {
         .select(
           "id, full_name, student_number, degree, graduated_year, created_at",
         )
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq("is_archived", false)
+        .order("created_at", { ascending: false });
 
       console.log("📊 Supabase response:", { data, error });
 
@@ -300,41 +299,13 @@ async function bulkArchiveSelected() {
 
   for (const alumniId of selectedAlumni) {
     try {
-      // 1. Get the alumni record
-      const { data: alumni, error: fetchError } = await window.supabase
+      const { error: archiveError } = await window.supabase
         .from("alumni_profiles")
-        .select("*")
-        .eq("id", alumniId)
-        .maybeSingle();
-      if (fetchError || !alumni)
-        throw fetchError || new Error("Alumni record not found");
-
-      // Debug: Log the alumni record being archived
-      console.log("Archiving alumni (bulk):", alumni);
-      // 2. Insert into alumni_archive
-      const { error: insertError } = await window.supabase
-        .from("alumni_archive")
-        .insert([
-          {
-            original_alumni_id: alumni.id,
-            full_name: alumni.full_name,
-            email: alumni.email,
-            student_number: alumni.student_number,
-            degree: alumni.degree,
-            archive_reason: "Bulk archived by admin",
-            archived_at: new Date().toISOString(),
-            original_created_at: alumni.created_at || null,
-          },
-        ]);
-      if (insertError) throw insertError;
-
-      // 3. Delete from alumni_profiles
-      const { error: deleteError } = await window.supabase
-        .from("alumni_profiles")
-        .delete()
+        .update({
+          is_archived: true,
+        })
         .eq("id", alumniId);
-      if (deleteError) throw deleteError;
-
+      if (archiveError) throw archiveError;
       successCount++;
     } catch (error) {
       failureCount++;
@@ -396,31 +367,15 @@ async function archiveAlumni(alumniId, fullName) {
     if (fetchError || !alumni)
       throw fetchError || new Error("Alumni record not found");
 
-    // Debug: Log the alumni record being archived
     console.log("Archiving alumni (single):", alumni);
-    // 2. Insert into alumni_archive
-    const { error: insertError } = await window.supabase
-      .from("alumni_archive")
-      .insert([
-        {
-          original_alumni_id: alumni.id,
-          full_name: alumni.full_name,
-          email: alumni.email,
-          student_number: alumni.student_number,
-          degree: alumni.degree,
-          archive_reason: reason || "No reason specified",
-          archived_at: new Date().toISOString(),
-          original_created_at: alumni.created_at || null,
-        },
-      ]);
-    if (insertError) throw insertError;
 
-    // 3. Delete from alumni_profiles
-    const { error: deleteError } = await window.supabase
+    const { error: archiveError } = await window.supabase
       .from("alumni_profiles")
-      .delete()
+      .update({
+        is_archived: true,
+      })
       .eq("id", alumniId);
-    if (deleteError) throw deleteError;
+    if (archiveError) throw archiveError;
 
     alert("✓ Alumni archived successfully.");
     // Reload the list
