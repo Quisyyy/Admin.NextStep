@@ -247,23 +247,24 @@
 
       <main class="admin-main">
         <a class="back-link" href="homepage.html">←</a>
-        <div class="page-card">
+        <div class="audit-tabs">
+          <button class="tab-btn" id="adminTab" onclick="showAuditTab('admin')">Admin/Employee Audit Trail</button>
+          <button class="tab-btn" id="alumniTab" onclick="showAuditTab('alumni')">Alumni Audit Trail</button>
+        </div>
+        <div class="page-card" id="adminAuditSection">
           <h2>Audit Trail - Employee Activity Log</h2>
-          
-          <!-- Employee Filter -->
           <div class="audit-filters">
             <div class="filter-group">
               <label for="employeeFilter">Filter by Employee ID (e.g., EMP-001)</label>
-              <input 
-                type="text" 
-                id="employeeFilter" 
+              <input
+                type="text"
+                id="employeeFilter"
                 placeholder="Enter employee ID (EMP-###) or leave blank to show all"
               >
             </div>
             <button class="btn btn-primary" onclick="applyEmployeeFilter()">Filter</button>
             <button class="btn btn-secondary" onclick="clearEmployeeFilter()">Clear</button>
           </div>
-          
           <div class="table-wrap">
             <table id="auditTable" class="audit-table">
               <thead>
@@ -275,6 +276,38 @@
                 </tr>
               </thead>
               <tbody id="auditTableBody">
+                <tr>
+                  <td colspan="4">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="page-card" id="alumniAuditSection" style="display:none;">
+          <h2>Alumni Audit Trail (Client Side)</h2>
+          <div class="audit-filters">
+            <div class="filter-group">
+              <label for="alumniFilter">Filter by Alumni ID</label>
+              <input
+                type="text"
+                id="alumniFilter"
+                placeholder="Enter alumni ID or leave blank to show all"
+              >
+            </div>
+            <button class="btn btn-primary" onclick="applyAlumniFilter()">Filter</button>
+            <button class="btn btn-secondary" onclick="clearAlumniFilter()">Clear</button>
+          </div>
+          <div class="table-wrap">
+            <table id="alumniAuditTable" class="audit-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Alumni ID</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="alumniAuditTableBody">
                 <tr>
                   <td colspan="4">Loading…</td>
                 </tr>
