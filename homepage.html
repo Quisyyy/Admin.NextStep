@@ -1,235 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Dashboard - Next Step</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="adminstyle.css">
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="adminstyle.css" />
     <script src="/logo-fallback.js" defer></script>
-    
+
     <!-- Supabase Configuration -->
     <script>
-        // Set Supabase credentials - Update with your actual values
-        window.SUPABASE_URL = 'https://ziquhxrfxywsmvunuyzi.supabase.co';
-        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc';
+      // Set Supabase credentials - Update with your actual values
+      window.SUPABASE_URL = "https://ziquhxrfxywsmvunuyzi.supabase.co";
+      window.SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcXVoeHJmeHl3c212dW51eXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNjM1NzQsImV4cCI6MjA3NzczOTU3NH0.IXCfC4IwcyJ5jv2jfDP2ZYfPCXUPS88kCupj0DMoVqc";
     </script>
-</head>
+  </head>
 
-<body>
+  <body>
     <header class="admin-header">
-        <div class="header-left">
-            <div class="logo-circle small"><img src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg" class="nav-logo" alt="logo" onerror="this.onerror=null;this.src='../logo/557536151_1257403522824074_2017646524872962832_n.png'"></div>
+      <div class="header-left">
+        <div class="logo-circle small">
+          <img
+            src="../logo/Blue%20%26%20Orange%20Circle%20Illustrative%20Education%20Logo.jpg"
+            class="nav-logo"
+            alt="logo"
+            onerror="
+              this.onerror = null;
+              this.src =
+                '../logo/557536151_1257403522824074_2017646524872962832_n.png';
+            "
+          />
         </div>
-        <div class="header-center">NEXT STEP</div>
-        <div class="header-right"><button class="user-icon" title="Click to logout">👤</button></div>
+      </div>
+      <div class="header-center">NEXT STEP</div>
+      <div class="header-right">
+        <button class="user-icon" title="Click to logout">👤</button>
+      </div>
     </header>
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <nav>
-                <ul>
-                    <li class="active"><a href="homepage.html" style="color: white;"><span class="home-ico">🏠</span> Dashboard</a></li>
-                    <li><a href="audit-trail.html" style="color: white;"><span class="home-ico">📋</span> Audit Trail</a></li>
-                    <li><a href="archive.html" style="color: white;"><span class="home-ico">📦</span> Archive</a></li>
-                </ul>
-            </nav>
-        </aside>
+      <aside class="admin-sidebar">
+        <nav>
+          <ul>
+            <li class="active">
+              <a href="homepage.html" style="color: white"
+                ><span class="home-ico">🏠</span> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="audit-trail.html" style="color: white"
+                ><span class="home-ico">📋</span> Audit Trail</a
+              >
+            </li>
+            <li>
+              <a href="archive.html" style="color: white"
+                ><span class="home-ico">📦</span> Archive</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-        <main class="admin-main">
-            <h1>Dashboard</h1>
+      <main class="admin-main">
+        <h1>Dashboard</h1>
 
-            <div class="dashboard-summary">
-                <h2>Alumni Registration Overview</h2>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-number" id="totalAlumni">0</div>
-                        <div class="summary-label">Total Registered Alumni</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="newThisMonth">0</div>
-                        <div class="summary-label">New This Month</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="activeAlumni">0</div>
-                        <div class="summary-label">Active Alumni</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="completedProfiles">0</div>
-                        <div class="summary-label">Completed Profiles</div>
-                    </div>
-                </div>
-                <div class="last-updated" id="lastUpdated">Last updated: October 29, 2025 at 2:30 PM</div>
+        <div class="dashboard-summary">
+          <h2>Alumni Registration Overview</h2>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-number" id="totalAlumni">0</div>
+              <div class="summary-label">Total Registered Alumni</div>
             </div>
-
-            <div class="chart-container">
-                <h3>Monthly Alumni Registrations (2026)</h3>
-                <div class="chart" id="registrationChart">
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Jan</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Feb</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Mar</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Apr</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">May</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Jun</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Jul</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Aug</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Sep</div>
-                    </div>
-                    <div class="bar" style="--height: 0px; height: 0px;">
-                        <div class="bar-value">0</div>
-                        <div class="bar-label">Oct</div>
-                    </div>
-                </div>
+            <div class="summary-item">
+              <div class="summary-number" id="newThisMonth">0</div>
+              <div class="summary-label">New This Month</div>
             </div>
-
-            <div class="alumni-download-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="card-total">0</div>
-                    <div class="stat-text">Total Registered Alumni</div>
-                    <div class="card-filter-section">
-                        <label for="degreeFilter">Filter by Degree:</label>
-                        <select id="degreeFilter">
-                            <option value="">-- All Degrees --</option>
-                            <option value="BSA">Bachelor of Science in Accountancy</option>
-                            <option value="BSCpE">Bachelor of Science in Computer Engineering</option>
-                            <option value="BSENTREP">Bachelor of Science in Entrepreneurship</option>
-                            <option value="BSHM">Bachelor of Science in Hospitality Management</option>
-                            <option value="BSIT">Bachelor of Science in Information Technology</option>
-                            <option value="BSEDEN">Bachelor of Secondary Education (English)</option>
-                            <option value="BSEDMT">Bachelor of Secondary Education (Mathematics)</option>
-                            <option value="DOMTLOM">Diploma in Office Management Technology</option>
-                        </select>
-                    </div>
-                    <a class="card-btn" href="alumlist.html">View Details</a>
-                </div>
-
-                <div class="stat-card">
-                    <h2>📁 Upload Alumni Data</h2>
-                    <p style="color: #666; font-size: 0.95rem; margin: 10px 0;">Upload multiple alumni records from a CSV file</p>
-                    <a class="card-btn" href="bulk-upload.html">Upload CSV</a>
-                </div>
-
-                <div class="download-section">
-                    <h2>Download Alumni Data</h2>
-                    <div class="download-form-container">
-                        <form id="downloadForm">
-                            <div class="form-group">
-                                <label for="downloadFormat">Select Format:</label>
-                                <select id="downloadFormat" required>
-                                    <option value="">-- CSV File Only --</option>
-                                    <option value="csv">CSV File</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="dataFilter">Filter by Program (Optional):</label>
-                                <select id="dataFilter">
-                                    <option value="all">All Alumni</option>
-                                    <option value="BSA">Bachelor of Science in Accountancy</option>
-                                    <option value="BSCpE">Bachelor of Science in Computer Engineering</option>
-                                    <option value="BSENTREP">Bachelor of Science in Entrepreneurship</option>
-                                    <option value="BSHM">Bachelor of Science in Hospitality Management</option>
-                                    <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                    <option value="BSEDEN">Bachelor of Secondary Education (English)</option>
-                                    <option value="BSEDMT">Bachelor of Secondary Education (Mathematics)</option>
-                                    <option value="DOMTLOM">Diploma in Office Management Technology</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="yearFilter">Filter by Graduation Year (Optional):</label>
-                                <select id="yearFilter">
-                                    <option value="">All Years</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="download-btn">Download Data</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="summary-item">
+              <div class="summary-number" id="activeAlumni">0</div>
+              <div class="summary-label">Active Alumni</div>
             </div>
-
-            <div class="status-section">
-                <h2>Alumni Current Status</h2>
-                <div class="status-grid" id="statusGrid">
-                    <!-- Status data will be loaded here -->
-                </div>
+            <div class="summary-item">
+              <div class="summary-number" id="completedProfiles">0</div>
+              <div class="summary-label">Completed Profiles</div>
             </div>
+          </div>
+          <div class="last-updated" id="lastUpdated">
+            Last updated: October 29, 2025 at 2:30 PM
+          </div>
+        </div>
 
-            <section class="career-stats-section">
-                <div class="career-stats-header">
-                    <div>
-                        <h2>Alumni Career Overview</h2>
-                    </div>
+        <div class="chart-container">
+          <h3>Monthly Alumni Registrations (2026)</h3>
+          <div class="chart" id="registrationChart">
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Jan</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Feb</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Mar</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Apr</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">May</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Jun</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Jul</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Aug</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Sep</div>
+            </div>
+            <div class="bar" style="--height: 0px; height: 0px">
+              <div class="bar-value">0</div>
+              <div class="bar-label">Oct</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alumni-download-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="card-total">0</div>
+            <div class="stat-text">Total Registered Alumni</div>
+            <div class="card-filter-section">
+              <label for="degreeFilter">Filter by Degree:</label>
+              <select id="degreeFilter">
+                <option value="">-- All Degrees --</option>
+                <option value="BSA">Bachelor of Science in Accountancy</option>
+                <option value="BSCpE">
+                  Bachelor of Science in Computer Engineering
+                </option>
+                <option value="BSENTREP">
+                  Bachelor of Science in Entrepreneurship
+                </option>
+                <option value="BSHM">
+                  Bachelor of Science in Hospitality Management
+                </option>
+                <option value="BSIT">
+                  Bachelor of Science in Information Technology
+                </option>
+                <option value="BSEDEN">
+                  Bachelor of Secondary Education (English)
+                </option>
+                <option value="BSEDMT">
+                  Bachelor of Secondary Education (Mathematics)
+                </option>
+                <option value="DOMTLOM">
+                  Diploma in Office Management Technology
+                </option>
+              </select>
+            </div>
+            <a class="card-btn" href="alumlist.html">View Details</a>
+          </div>
+
+          <div class="stat-card">
+            <h2>📁 Upload Alumni Data</h2>
+            <p style="color: #666; font-size: 0.95rem; margin: 10px 0">
+              Upload multiple alumni records from a CSV file
+            </p>
+            <a class="card-btn" href="bulk-upload.html">Upload CSV</a>
+          </div>
+
+          <div class="download-section">
+            <h2>Download Alumni Data</h2>
+            <div class="download-form-container">
+              <form id="downloadForm">
+                <div class="form-group">
+                  <label for="downloadFormat">Select Format:</label>
+                  <select id="downloadFormat" required>
+                    <option value="">-- CSV File Only --</option>
+                    <option value="csv">CSV File</option>
+                  </select>
                 </div>
-
-                <div class="career-stats-grid">
-                    <div class="career-stat-card">
-                        <div class="career-stat-label">Total Career Profiles</div>
-                        <div class="career-stat-value" id="careerTotal">0</div>
-                        <div class="career-stat-sub">Profiles with career submissions</div>
-                    </div>
-                    <div class="career-stat-card">
-                        <div class="career-stat-label">Currently Employed</div>
-                        <div class="career-stat-value" id="careerEmployedPercent">0%</div>
-                        <div class="career-stat-sub" id="careerEmployedCount">0 of 0</div>
-                    </div>
-                    <div class="career-stat-card">
-                        <div class="career-stat-label">Open for Mentorship</div>
-                        <div class="career-stat-value" id="careerMentorshipPercent">0%</div>
-                        <div class="career-stat-sub" id="careerMentorshipCount">0 of 0</div>
-                    </div>
-                    <div class="career-stat-card">
-                        <div class="career-stat-label">Top Industry</div>
-                        <div class="career-stat-value" id="careerTopIndustry">—</div>
-                        <div class="career-stat-sub" id="careerTopIndustryCount">0 submissions</div>
-                    </div>
+                <div class="form-group">
+                  <label for="dataFilter">Filter by Program (Optional):</label>
+                  <select id="dataFilter">
+                    <option value="all">All Alumni</option>
+                    <option value="BSA">
+                      Bachelor of Science in Accountancy
+                    </option>
+                    <option value="BSCpE">
+                      Bachelor of Science in Computer Engineering
+                    </option>
+                    <option value="BSENTREP">
+                      Bachelor of Science in Entrepreneurship
+                    </option>
+                    <option value="BSHM">
+                      Bachelor of Science in Hospitality Management
+                    </option>
+                    <option value="BSIT">
+                      Bachelor of Science in Information Technology
+                    </option>
+                    <option value="BSEDEN">
+                      Bachelor of Secondary Education (English)
+                    </option>
+                    <option value="BSEDMT">
+                      Bachelor of Secondary Education (Mathematics)
+                    </option>
+                    <option value="DOMTLOM">
+                      Diploma in Office Management Technology
+                    </option>
+                  </select>
                 </div>
-
-                <div class="career-status-chart">
-                    <h3>Career Status Breakdown</h3>
-                    <div class="career-chart-container">
-                        <div class="career-vertical-chart" id="careerStatusChart">
-                            <div class="status-placeholder">Loading...</div>
-                        </div>
-                        <div class="career-chart-legend" id="careerChartLegend"></div>
-                    </div>
+                <div class="form-group">
+                  <label for="yearFilter"
+                    >Filter by Graduation Year (Optional):</label
+                  >
+                  <select id="yearFilter">
+                    <option value="">All Years</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                  </select>
                 </div>
-            </section>
+                <button type="submit" class="download-btn">
+                  Download Data
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
 
-        </main>
+        <div class="status-section">
+          <h2>Alumni Current Status</h2>
+          <div class="status-grid" id="statusGrid">
+            <!-- Status data will be loaded here -->
+          </div>
+        </div>
+
+        <section class="career-stats-section">
+          <div class="career-stats-header">
+            <div>
+              <h2>Alumni Career Overview</h2>
+            </div>
+          </div>
+
+          <div class="career-stats-grid">
+            <div class="career-stat-card">
+              <div class="career-stat-label">Total Career Profiles</div>
+              <div class="career-stat-value" id="careerTotal">0</div>
+              <div class="career-stat-sub">
+                Profiles with career submissions
+              </div>
+            </div>
+            <div class="career-stat-card">
+              <div class="career-stat-label">Currently Employed</div>
+              <div class="career-stat-value" id="careerEmployedPercent">0%</div>
+              <div class="career-stat-sub" id="careerEmployedCount">0 of 0</div>
+            </div>
+            <div class="career-stat-card">
+              <div class="career-stat-label">Top Industry</div>
+              <div class="career-stat-value" id="careerTopIndustry">—</div>
+              <div class="career-stat-sub" id="careerTopIndustryCount">
+                0 submissions
+              </div>
+            </div>
+          </div>
+
+          <div class="career-status-chart">
+            <h3>Career Status Breakdown</h3>
+            <div class="career-chart-container">
+              <div class="career-vertical-chart" id="careerStatusChart">
+                <div class="status-placeholder">Loading...</div>
+              </div>
+              <div class="career-chart-legend" id="careerChartLegend"></div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <footer class="admin-footer">
-        <div class="admin-footer-inner">© Next Step</div>
+      <div class="admin-footer-inner">© Next Step</div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -240,7 +301,5 @@
     <script src="admin-access-control.js" defer></script>
     <script src="logout.js" defer></script>
     <script src="index.js" defer></script>
-
-</body>
-
+  </body>
 </html>
