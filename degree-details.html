@@ -79,6 +79,47 @@
             </div>
           </div>
 
+          <!-- Filter Section -->
+          <div class="filter-section">
+            <div class="filter-group">
+              <label for="filterStudentNumber">Student Number</label>
+              <input
+                type="text"
+                id="filterStudentNumber"
+                placeholder="Search by student number..."
+              />
+            </div>
+
+            <div class="filter-group">
+              <label for="sortAlpha">Sort</label>
+              <select id="sortAlpha">
+                <option value="none">None</option>
+                <option value="asc">A-Z</option>
+                <option value="desc">Z-A</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterEmployment">Employment</label>
+              <select id="filterEmployment">
+                <option value="all">All</option>
+                <option value="employed">Employed</option>
+                <option value="self-employed">Self-Employed</option>
+                <option value="freelancer">Freelancer</option>
+                <option value="unemployed">Unemployed</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterRelated">Related to Course</label>
+              <select id="filterRelated">
+                <option value="all">All</option>
+                <option value="related">Related</option>
+                <option value="not-related">Not Related</option>
+              </select>
+            </div>
+          </div>
+
           <div class="table-wrap">
             <table id="degreeAlumniTable">
               <thead>
@@ -88,12 +129,13 @@
                   <th>Email</th>
                   <th>Current Job</th>
                   <th>Industry</th>
+                  <th>Job Status</th>
                   <th>Related to Course</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td colspan="6" class="empty">Loading...</td>
+                  <td colspan="7" class="empty">Loading...</td>
                 </tr>
               </tbody>
             </table>
@@ -105,11 +147,6 @@
     <footer class="admin-footer">
       <div class="admin-footer-inner">© Next Step</div>
     </footer>
-
-    <script src="degree-details.js" defer></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", loadDegreeDetails);
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js" defer></script>

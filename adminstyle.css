@@ -1151,7 +1151,59 @@ table#alumTable tbody tr td.empty {
     transform: scale(1.05);
 }
 
-/* Degree Details Page Styles */
+/* Filter Section Styles */
+.filter-section {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+    color: #333;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #004AAD;
+    box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.1);
+}
+
+.filter-group select {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .filter-section {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 15px;
+    }
+}
 .degree-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
