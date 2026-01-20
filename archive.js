@@ -132,8 +132,8 @@ function renderArchiveTable(records) {
         <td><span class="badge" style="background: #f44336; color: white; padding: 4px 8px; border-radius: 3px;">ARCHIVED</span></td>
         <td style="white-space: nowrap;">
           <span style="font-size: 12px; ${daysLeft > 5 ? "color: #2196F3" : "color: #ff9800"}">${daysText}</span><br>
-          <button class="btn-small" onclick="restoreRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Restore</button>
-          <button class="btn-small" onclick="deleteRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Delete</button>
+          <button class="btn-small btn-restore" onclick="restoreRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Restore</button>
+          <button class="btn-small btn-delete" onclick="deleteRecord('${record.id || record.alumni_id}', '${(record.full_name || "Alumni").replace(/'/g, "\\'")}')">Delete</button>
         </td>
       `;
     tbody.appendChild(tr);

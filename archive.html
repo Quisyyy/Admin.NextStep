@@ -84,67 +84,97 @@
         <a class="back-link" href="alumlist.html">← Back to Alumni List</a>
 
         <div class="archive-container">
-          <h1>📦 Alumni Archive</h1>
-          <p class="archive-description">
-            Deleted alumni records are stored here and can be restored if
-            needed.
-          </p>
+          <!-- Header Section -->
+          <div class="archive-header">
+            <div class="header-content">
+              <h1 class="archive-title">
+                Alumni Archive
+              </h1>
+              <p class="archive-description">
+                Deleted alumni records are stored here and can be restored if needed.
+                Records are automatically deleted after 30 days.
+              </p>
+            </div>
+          </div>
 
           <!-- Filter Section -->
           <section class="archive-filters">
-            <h3>Filters</h3>
-            <div class="filter-group">
-              <label for="searchArchive">Search Name/Email</label>
-              <input
-                type="text"
-                id="searchArchive"
-                placeholder="Enter name or email..."
-              />
+            <div class="filters-header">
+              <h3>Search & Filter</h3>
             </div>
-            <div class="filter-group">
-              <label for="filterArchiveStatus">Status</label>
-              <select id="filterArchiveStatus">
-                <option value="">All Records</option>
-                <option value="archived">Archived</option>
-                <option value="restored">Restored</option>
-              </select>
+            <div class="filters-grid">
+              <div class="filter-group">
+                <label for="searchArchive">
+                  Search Name/Email
+                </label>
+                <input
+                  type="text"
+                  id="searchArchive"
+                  placeholder="Enter name or email..."
+                  class="search-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="filterArchiveStatus">
+                  Status Filter
+                </label>
+                <select id="filterArchiveStatus" class="status-select">
+                  <option value="">All Records</option>
+                  <option value="archived">Archived</option>
+                  <option value="restored">Restored</option>
+                </select>
+              </div>
+              <div class="filter-actions">
+                <button id="resetArchiveFilters" class="btn btn-reset">
+                  Reset Filters
+                </button>
+              </div>
             </div>
-            <button id="resetArchiveFilters" class="btn btn-secondary">
-              Reset Filters
-            </button>
           </section>
 
           <!-- Archive Stats -->
           <section class="archive-stats">
-            <div class="stat-box">
-              <h4>Total Archived</h4>
-              <p id="totalArchived">0</p>
+            <div class="stat-box stat-archived">
+              <div class="stat-content">
+                <h4>Total Archived</h4>
+                <p id="totalArchived" class="stat-number">0</p>
+              </div>
             </div>
-            <div class="stat-box">
-              <h4>Restored</h4>
-              <p id="totalRestored">0</p>
+            <div class="stat-box stat-restored">
+              <div class="stat-content">
+                <h4>Restored</h4>
+                <p id="totalRestored" class="stat-number">0</p>
+              </div>
             </div>
           </section>
 
           <!-- Cleanup Notice -->
           <section class="cleanup-notice">
             <div class="notice-content">
-              <p>
-                <strong>⏰ Auto-Delete Notice:</strong> Archived records will be
-                permanently deleted 30 days after archiving. You can restore
-                them before the 30-day period ends.
-              </p>
-              <button id="cleanupBtn" class="btn btn-danger">
-                🗑️ Cleanup Old Records Now
-              </button>
+              <div class="notice-text">
+                <p>
+                  <strong>Auto-Delete Notice:</strong> Archived records will be
+                  permanently deleted 30 days after archiving. You can restore
+                  them before the 30-day period ends.
+                </p>
+              </div>
+              <div class="notice-action">
+                <button id="cleanupBtn" class="btn btn-danger cleanup-btn">
+                  Cleanup Old Records
+                </button>
+              </div>
             </div>
           </section>
 
           <!-- Archive Table -->
           <section class="archive-table-section">
-            <h3>Archived Records</h3>
+            <div class="table-header">
+              <h3>
+                Archived Records
+              </h3>
+            </div>
             <div class="table-wrap">
-              <table id="archiveTable">
+              <table id="archiveTable" class="archive-table">
                 <thead>
                   <tr>
                     <th>Full Name</th>
@@ -159,7 +189,12 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td colspan="8" class="empty">Loading...</td>
+                    <td colspan="8" class="empty-state">
+                      <div class="loading-content">
+                        <div class="loading-spinner"></div>
+                        <span>Loading archived records...</span>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -175,8 +210,8 @@
         <h2>Restore Alumni Record?</h2>
         <p id="restoreMessage">Are you sure you want to restore this record?</p>
         <div class="modal-actions">
-          <button id="confirmRestoreBtn" class="btn btn-primary">
-            ✓ Restore
+          <button id="confirmRestoreBtn" class="btn btn-success">
+            Restore
           </button>
           <button id="cancelRestoreBtn" class="btn btn-secondary">
             Cancel
@@ -194,7 +229,7 @@
         </p>
         <div class="modal-actions">
           <button id="confirmDeleteBtn" class="btn btn-danger">
-            ✓ Delete Permanently
+            Delete Permanently
           </button>
           <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
         </div>
