@@ -51,17 +51,20 @@ async function loadAlumni() {
 
       if (!error && Array.isArray(data)) {
         console.log(`✅ Found ${data.length} alumni records`);
-        // Fetch completion status for each alumni
+        // Fetch section completion status for each alumni (based on alumni_profiles fields)
         const alumniWithStatus = await Promise.all(
           data.map(async (r) => {
-            const status = await getAlumniCompletionStatus(r.id);
+            const sectionStatus =
+              await window.alumniFormTracker.getAlumniProfileSectionCompletion(
+                r.id,
+              );
             return {
               id: r.id,
               fullName: r.full_name,
               studentNumber: r.student_number,
               degree: r.degree,
               graduationYear: r.graduated_year || r.graduatedYear || "",
-              completionStatus: status,
+              sectionCompletion: sectionStatus,
             };
           }),
         );
@@ -110,17 +113,17 @@ async function renderTable(alumni) {
   alumni.forEach((a) => {
     const tr = document.createElement("tr");
     const degreeLabel = labelForDegree(a.degree);
-    const completionStatus = a.completionStatus || {
-      isAllComplete: false,
-      completedForms: 0,
-      totalForms: 0,
+    const sectionCompletion = a.sectionCompletion || {
+      completedSections: 0,
+      totalSections: 3,
+      sectionStatus: { personal: false, academic: false, career: false },
     };
-    const statusClass = completionStatus.isAllComplete
-      ? "complete"
-      : "incomplete";
-    const statusText = completionStatus.isAllComplete
-      ? `✅ Complete (${completionStatus.completedForms}/${completionStatus.totalForms})`
-      : `⏳ Incomplete (${completionStatus.completedForms}/${completionStatus.totalForms})`;
+    const isComplete =
+      sectionCompletion.completedSections === sectionCompletion.totalSections;
+    const statusClass = isComplete ? "complete" : "incomplete";
+    const statusText = isComplete
+      ? `✅ Complete (${sectionCompletion.completedSections}/3)`
+      : `⏳ Incomplete (${sectionCompletion.completedSections}/3)`;
 
     const isChecked = selectedAlumni.has(a.id) ? "checked" : "";
 
