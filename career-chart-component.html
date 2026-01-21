@@ -2,209 +2,219 @@
 <!-- Include this section where you want the career chart to appear -->
 
 <section class="career-stats-section">
-    <div class="career-stats-header">
-        <div>
-            <h2>Alumni Career Overview</h2>
-        </div>
+  <div class="career-stats-header">
+    <div>
+      <h2>Alumni Career Overview</h2>
     </div>
+  </div>
 
-    <div class="career-stats-grid">
-        <div class="career-stat-card">
-            <div class="career-stat-label">Total Career Profiles</div>
-            <div class="career-stat-value" id="careerTotal">0</div>
-            <div class="career-stat-sub">Profiles with career submissions</div>
-        </div>
-        <div class="career-stat-card">
-            <div class="career-stat-label">Currently Employed</div>
-            <div class="career-stat-value" id="careerEmployedPercent">0%</div>
-            <div class="career-stat-sub" id="careerEmployedCount">0 of 0</div>
-        </div>
-        <div class="career-stat-card">
-            <div class="career-stat-label">Open for Mentorship</div>
-            <div class="career-stat-value" id="careerMentorshipPercent">0%</div>
-            <div class="career-stat-sub" id="careerMentorshipCount">0 of 0</div>
-        </div>
-        <div class="career-stat-card">
-            <div class="career-stat-label">Top Industry</div>
-            <div class="career-stat-value" id="careerTopIndustry">—</div>
-            <div class="career-stat-sub" id="careerTopIndustryCount">0 submissions</div>
-        </div>
+  <div class="career-stats-grid">
+    <div class="career-stat-card">
+      <div class="career-stat-label">Total Career Profiles</div>
+      <div class="career-stat-value" id="careerTotal">0</div>
+      <div class="career-stat-sub">Profiles with career submissions</div>
     </div>
+    <div class="career-stat-card">
+      <div class="career-stat-label">Currently Employed</div>
+      <div class="career-stat-value" id="careerEmployedPercent">0%</div>
+      <div class="career-stat-sub" id="careerEmployedCount">0 of 0</div>
+    </div>
+    <div class="career-stat-card">
+      <div class="career-stat-label">Open for Mentorship</div>
+      <div class="career-stat-value" id="careerMentorshipPercent">0%</div>
+      <div class="career-stat-sub" id="careerMentorshipCount">0 of 0</div>
+    </div>
+    <div class="career-stat-card">
+      <div class="career-stat-label">Top Industry</div>
+      <div class="career-stat-value" id="careerTopIndustry">—</div>
+      <div class="career-stat-sub" id="careerTopIndustryCount">
+        0 submissions
+      </div>
+    </div>
+  </div>
 
-    <div class="career-status-chart">
-        <h3>Career Status Breakdown</h3>
-        <div class="career-chart-container">
-            <div class="career-vertical-chart" id="careerStatusChart">
-                <div class="status-placeholder">Loading...</div>
-            </div>
-            <div class="career-chart-legend" id="careerChartLegend"></div>
-        </div>
+  <div class="career-status-chart">
+    <h3>Career Status Breakdown</h3>
+    <div class="career-chart-container">
+      <div class="career-vertical-chart" id="careerStatusChart">
+        <div class="status-placeholder">Loading...</div>
+      </div>
+      <div class="career-chart-legend" id="careerChartLegend"></div>
     </div>
+  </div>
 </section>
 
 <!-- Add this at the bottom before closing </body> tag -->
 <script>
-    // Load career stats from Supabase
-    async function loadCareerStatsAlumni() {
-        try {
-            if (!window.supabase) {
-                console.warn('Supabase not loaded');
-                return;
-            }
+  // Load career stats from Supabase
+  async function loadCareerStatsAlumni() {
+    try {
+      if (!window.supabase) {
+        console.warn("Supabase not loaded");
+        return;
+      }
 
-            const { data, error } = await window.supabase
-                .from('career_info')
-                .select('job_status, industry, mentorship');
+      const { data, error } = await window.supabase
+        .from("alumni_profiles")
+        .select("job_status");
 
-            if (error) {
-                console.error('Error fetching career stats:', error);
-                return;
-            }
+      if (error) {
+        console.error("Error fetching career stats:", error);
+        return;
+      }
 
-            const total = data.length;
-            if (total === 0) {
-                document.getElementById('careerStatusChart').innerHTML = '<div class="status-placeholder">No career data yet.</div>';
-                return;
-            }
+      const total = data.length;
+      if (total === 0) {
+        document.getElementById("careerStatusChart").innerHTML =
+          '<div class="status-placeholder">No career data yet.</div>';
+        return;
+      }
 
-            const statusCounts = {};
-            const industryCounts = {};
-            let employedCount = 0;
-            let mentorshipCount = 0;
+      const statusCounts = {};
+      const industryCounts = {};
+      let employedCount = 0;
+      let mentorshipCount = 0;
 
-            const normalizeStatus = (raw) => {
-                const s = (raw || '').trim().toLowerCase();
-                if (!s) return 'Other';
-                if (s.includes('self')) return 'Self-Employed';
-                if (s.includes('free')) return 'Freelancer';
-                if (s.includes('unemploy')) return 'Unemployed';
-                if (s.includes('student')) return 'Student';
-                if (s.includes('career')) return 'Career Break';
-                if (s.includes('employ')) return 'Employed';
-                return (raw || '').trim() || 'Other';
-            };
+      const normalizeStatus = (raw) => {
+        const s = (raw || "").trim().toLowerCase();
+        if (!s) return "Unknown";
+        if (s === "employed") return "Employed";
+        if (s === "unemployed") return "Unemployed";
+        if (s === "freelancer") return "Freelancer";
+        if (s.replace(/[- ]/g, "") === "selfemployed") return "Self-Employed";
+        // Accept variants like 'self employed', 'self-employed', 'selfemployed'
+        if (s.includes("self") && s.includes("employ")) return "Self-Employed";
+        // Group all other non-empty as 'Others'
+        return "Others";
+      };
 
-            data.forEach(d => {
-                const normStatus = normalizeStatus(d.job_status);
-                statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
-
-                if (['Employed', 'Self-Employed', 'Freelancer'].includes(normStatus)) {
-                    employedCount++;
-                }
-
-                if ((d.mentorship || '').trim().toLowerCase() === 'yes') {
-                    mentorshipCount++;
-                }
-
-                const key = (d.industry || '').trim();
-                if (key) {
-                    industryCounts[key] = (industryCounts[key] || 0) + 1;
-                }
-            });
-
-            const topIndustry = Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
-            const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
-            const mentorshipPct = total ? Math.round((mentorshipCount / total) * 100) : 0;
-
-            // Update stats
-            const setText = (id, text) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = text;
-            };
-
-            setText('careerTotal', total.toLocaleString());
-            setText('careerEmployedPercent', `${employedPct}%`);
-            setText('careerEmployedCount', `${employedCount} of ${total}`);
-            setText('careerMentorshipPercent', `${mentorshipPct}%`);
-            setText('careerMentorshipCount', `${mentorshipCount} of ${total}`);
-            setText('careerTopIndustry', topIndustry[0] || '—');
-            setText('careerTopIndustryCount', `${topIndustry[1]} submission${topIndustry[1] === 1 ? '' : 's'}`);
-
-            // Render chart
-            renderCareerChart(statusCounts, total);
-
-        } catch (err) {
-            console.error('loadCareerStatsAlumni error:', err);
+      data.forEach((d) => {
+        const normStatus = normalizeStatus(d.job_status);
+        statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
+        if (["Employed", "Self-Employed", "Freelancer"].includes(normStatus)) {
+          employedCount++;
         }
+      });
+
+      const topIndustry = Object.entries(industryCounts).sort(
+        (a, b) => b[1] - a[1],
+      )[0] || ["—", 0];
+      const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
+      const mentorshipPct = total
+        ? Math.round((mentorshipCount / total) * 100)
+        : 0;
+
+      // Update stats
+      const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+
+      setText("careerTotal", total.toLocaleString());
+      setText("careerEmployedPercent", `${employedPct}%`);
+      setText("careerEmployedCount", `${employedCount} of ${total}`);
+      setText("careerMentorshipPercent", `${mentorshipPct}%`);
+      setText("careerMentorshipCount", `${mentorshipCount} of ${total}`);
+      setText("careerTopIndustry", topIndustry[0] || "—");
+      setText(
+        "careerTopIndustryCount",
+        `${topIndustry[1]} submission${topIndustry[1] === 1 ? "" : "s"}`,
+      );
+
+      // Render chart
+      renderCareerChart(statusCounts, total);
+    } catch (err) {
+      console.error("loadCareerStatsAlumni error:", err);
+    }
+  }
+
+  // Render vertical bar chart
+  function renderCareerChart(statusCounts, total) {
+    const container = document.getElementById("careerStatusChart");
+    const legendContainer = document.getElementById("careerChartLegend");
+    if (!container) return;
+
+    container.innerHTML = "";
+    if (legendContainer) legendContainer.innerHTML = "";
+
+    if (!total) {
+      container.innerHTML =
+        '<div class="status-placeholder">No career data yet.</div>';
+      return;
     }
 
-    // Render vertical bar chart
-    function renderCareerChart(statusCounts, total) {
-        const container = document.getElementById('careerStatusChart');
-        const legendContainer = document.getElementById('careerChartLegend');
-        if (!container) return;
+    const order = [
+      "Employed",
+      "Self-Employed",
+      "Freelancer",
+      "Unemployed",
+      "Student",
+      "Career Break",
+      "Other",
+    ];
+    const colors = [
+      "linear-gradient(to top, #004AAD, #0066cc)",
+      "linear-gradient(to top, #2e6edc, #5b8ee0)",
+      "linear-gradient(to top, #FF6B35, #ff8c5a)",
+      "linear-gradient(to top, #dc3545, #e8576a)",
+      "linear-gradient(to top, #ffc107, #ffd454)",
+      "linear-gradient(to top, #6f5ac8, #8a7cd8)",
+      "linear-gradient(to top, #666, #888)",
+    ];
 
-        container.innerHTML = '';
-        if (legendContainer) legendContainer.innerHTML = '';
+    const chartData = [];
+    order.forEach((label, index) => {
+      const count = statusCounts[label] || 0;
+      if (count > 0) {
+        chartData.push({ label, count, color: colors[index] });
+      }
+    });
 
-        if (!total) {
-            container.innerHTML = '<div class="status-placeholder">No career data yet.</div>';
-            return;
-        }
+    Object.entries(statusCounts).forEach(([label, count]) => {
+      if (!order.includes(label) && count > 0) {
+        chartData.push({ label, count, color: colors[6] });
+      }
+    });
 
-        const order = ['Employed', 'Self-Employed', 'Freelancer', 'Unemployed', 'Student', 'Career Break', 'Other'];
-        const colors = [
-            'linear-gradient(to top, #004AAD, #0066cc)',
-            'linear-gradient(to top, #2e6edc, #5b8ee0)',
-            'linear-gradient(to top, #FF6B35, #ff8c5a)',
-            'linear-gradient(to top, #dc3545, #e8576a)',
-            'linear-gradient(to top, #ffc107, #ffd454)',
-            'linear-gradient(to top, #6f5ac8, #8a7cd8)',
-            'linear-gradient(to top, #666, #888)'
-        ];
+    if (chartData.length === 0) {
+      container.innerHTML =
+        '<div class="status-placeholder">No career data yet.</div>';
+      return;
+    }
 
-        const chartData = [];
-        order.forEach((label, index) => {
-            const count = statusCounts[label] || 0;
-            if (count > 0) {
-                chartData.push({ label, count, color: colors[index] });
-            }
-        });
+    const maxCount = Math.max(...chartData.map((d) => d.count));
+    const maxHeight = 220;
 
-        Object.entries(statusCounts).forEach(([label, count]) => {
-            if (!order.includes(label) && count > 0) {
-                chartData.push({ label, count, color: colors[6] });
-            }
-        });
+    chartData.forEach(({ label, count, color }) => {
+      const pct = total ? Math.round((count / total) * 100) : 0;
+      const height = maxCount > 0 ? (count / maxCount) * maxHeight : 0;
 
-        if (chartData.length === 0) {
-            container.innerHTML = '<div class="status-placeholder">No career data yet.</div>';
-            return;
-        }
-
-        const maxCount = Math.max(...chartData.map(d => d.count));
-        const maxHeight = 220;
-
-        chartData.forEach(({ label, count, color }) => {
-            const pct = total ? Math.round((count / total) * 100) : 0;
-            const height = maxCount > 0 ? (count / maxCount) * maxHeight : 0;
-
-            const barItem = document.createElement('div');
-            barItem.className = 'career-bar-item';
-            barItem.innerHTML = `
+      const barItem = document.createElement("div");
+      barItem.className = "career-bar-item";
+      barItem.innerHTML = `
                 <div class="career-bar" style="--bar-height: ${height}px; height: ${height}px; background: ${color};">
                     <div class="career-bar-value">${pct}%</div>
                 </div>
                 <div class="career-bar-label">${label}<br>(${count})</div>
             `;
-            container.appendChild(barItem);
-        });
+      container.appendChild(barItem);
+    });
 
-        if (legendContainer) {
-            chartData.forEach(({ label, count, color }) => {
-                const legendItem = document.createElement('div');
-                legendItem.className = 'career-legend-item';
-                legendItem.innerHTML = `
+    if (legendContainer) {
+      chartData.forEach(({ label, count, color }) => {
+        const legendItem = document.createElement("div");
+        legendItem.className = "career-legend-item";
+        legendItem.innerHTML = `
                     <div class="career-legend-color" style="background: ${color}"></div>
                     <span><strong>${label}:</strong> ${count}</span>
                 `;
-                legendContainer.appendChild(legendItem);
-            });
-        }
+        legendContainer.appendChild(legendItem);
+      });
     }
+  }
 
-    // Load on page ready
-    document.addEventListener('DOMContentLoaded', () => {
-        loadCareerStatsAlumni();
-    });
+  // Load on page ready
+  document.addEventListener("DOMContentLoaded", () => {
+    loadCareerStatsAlumni();
+  });
 </script>

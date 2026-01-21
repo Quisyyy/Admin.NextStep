@@ -572,118 +572,60 @@ async function loadCareerStats() {
 
     console.log("🔍 Fetching career stats...");
 
-    // First, just try to fetch ALL career data without filters
-    // The career_info table should be independent of alumni status
-    let { data: careerData, error: careerError } = await window.supabase
-      .from("career_info")
-      .select("*");
+    let { data: profiles, error: profilesError } = await window.supabase
+      .from("alumni_profiles")
+      .select("job_status");
 
-    if (careerError) {
-      console.error("❌ Career info error:", careerError);
+    if (profilesError) {
+      console.error("❌ Alumni profiles error:", profilesError);
       showCareerStatsError(
-        `Unable to fetch career data: ${careerError.message}`,
+        `Unable to fetch alumni profile data: ${profilesError.message}`,
       );
       return;
     }
 
-    console.log(`✅ Found ${(careerData || []).length} career records`);
+    console.log(`✅ Found ${(profiles || []).length} alumni profile records`);
 
-    const total = (careerData || []).length;
+    const total = (profiles || []).length;
 
     if (total === 0) {
-      console.warn("⚠️ No career data found in database");
+      console.warn("⚠️ No alumni profile data found in database");
       showCareerStatsEmpty();
       return;
     }
 
-    // SET UP REAL-TIME SUBSCRIPTION - Updates when alumni submit new data
-    if (window.careerSubscription) {
-      window.careerSubscription.unsubscribe();
-    }
+    // No real-time subscription for alumni_profiles for now
 
-    window.careerSubscription = window.supabase
-      .channel("career_info_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "career_info" },
-        (payload) => {
-          console.log(
-            "🔄 Real-time update received:",
-            payload.eventType,
-            payload.new,
-          );
-          // Reload career stats when data changes
-          setTimeout(() => loadCareerStats(), 500);
-        },
-      )
-      .subscribe();
-
-    console.log(
-      "📡 Real-time subscription active - dashboard will update when alumni submit data",
-    );
-
-    const industryCounts = {};
     const statusCounts = {};
     let employedCount = 0;
-    let mentorshipCount = 0;
 
-    (careerData || []).forEach((d) => {
-      // Track employment status for chart
-      const employed = d.is_employed === true || d.employed === true;
-      const unemployed = d.is_employed === false || d.employed === false;
+    // Normalization logic for job_status
+    const normalizeStatus = (raw) => {
+      const s = (raw || "").trim().toLowerCase();
+      if (!s) return "Unknown";
+      if (s === "employed") return "Employed";
+      if (s === "unemployed") return "Unemployed";
+      if (s === "freelancer") return "Freelancer";
+      if (s.replace(/[- ]/g, "") === "selfemployed") return "Self-Employed";
+      if (s.includes("self") && s.includes("employ")) return "Self-Employed";
+      return "Others";
+    };
 
-      // Determine status category for chart
-      let statusLabel;
-      if (employed) {
-        statusLabel = "Employed";
-      } else if (unemployed) {
-        statusLabel = "Unemployed";
-      } else {
-        statusLabel = "Unknown Status";
-      }
-
-      statusCounts[statusLabel] = (statusCounts[statusLabel] || 0) + 1;
-
-      // Also track employment metrics
-      const mentorOpen =
-        d.open_for_mentorship === true || d.open_mentorship === true;
-
-      if (employed) {
+    (profiles || []).forEach((d) => {
+      const normStatus = normalizeStatus(d.job_status);
+      statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
+      if (["Employed", "Self-Employed", "Freelancer"].includes(normStatus)) {
         employedCount++;
-      }
-
-      if (mentorOpen) {
-        mentorshipCount++;
-      }
-
-      // Count industries
-      const industry = d.industry || "Not Specified";
-      if (industry && industry.trim()) {
-        industryCounts[industry] = (industryCounts[industry] || 0) + 1;
       }
     });
 
-    // Get top industry
-    const topIndustry =
-      Object.entries(industryCounts).length > 0
-        ? Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0]
-        : ["Career Data", total];
-
     const employedPct = total ? Math.round((employedCount / total) * 100) : 0;
-    const mentorshipPct = total
-      ? Math.round((mentorshipCount / total) * 100)
-      : 0;
 
     setText("careerTotal", total.toLocaleString());
     setText("careerEmployedPercent", `${employedPct}%`);
     setText("careerEmployedCount", `${employedCount} of ${total}`);
-    setText("careerMentorshipPercent", `${mentorshipPct}%`);
-    setText("careerMentorshipCount", `${mentorshipCount} of ${total}`);
-    setText("careerTopIndustry", topIndustry[0] || "—");
-    setText(
-      "careerTopIndustryCount",
-      `${topIndustry[1]} submission${topIndustry[1] === 1 ? "" : "s"}`,
-    );
+    setText("careerTopIndustry", "—");
+    setText("careerTopIndustryCount", "—");
 
     // Render status breakdown
     renderCareerStatusBars(statusCounts, total);
