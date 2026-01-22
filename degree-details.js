@@ -158,15 +158,64 @@ async function loadDegreeDetails() {
       return;
     }
     // Fetch alumni with specific degree
-    const { data: profiles, error } = await window.supabase
+    // Handle degree code mapping like in alumlist.js
+    const degreeMapping = {
+      'BSA': ['BSA'],
+      'BSCE': ['BSCE', 'BSCpE'], 
+      'BSE': ['BSE', 'BSEntrep', 'BSENTREP'],
+      'BSHM': ['BSHM'],
+      'BSIT': ['BSIT'],
+      'BSE(ENGLISH)': ['BSE(ENGLISH)', 'BSEDEN'],
+      'BSE(MATH)': ['BSE(MATH)', 'BSEDMT'],
+      'DOMT': ['DOMT', 'DOMTLOM']
+    };
+    
+    const validDegreeCodes = degreeMapping[degree] || [degree];
+    console.log('🎯 Looking for degree codes:', validDegreeCodes);
+    
+    // Fetch all profiles first, then filter by degree codes and active status
+    let { data: allProfiles, error } = await window.supabase
       .from("alumni_profiles")
       .select("*")
-      .eq("degree", degree);
+      .eq("is_archived", false)
+      .eq("is_deleted", false);
+      
+    // If is_archived or is_deleted columns don't exist, get all profiles and filter manually
+    if (
+      error &&
+      (error.message.includes("is_archived") ||
+        error.message.includes("is_deleted"))
+    ) {
+      console.warn(
+        "is_archived or is_deleted column not found, loading all profiles and filtering manually",
+      );
+      const result = await window.supabase
+        .from("alumni_profiles")
+        .select("*");
+      allProfiles = result.data;
+      error = result.error;
+      
+      // Filter out archived and deleted manually if columns exist
+      if (allProfiles) {
+        allProfiles = allProfiles.filter((p) => 
+          p.is_archived !== true && p.is_deleted !== true
+        );
+      }
+    }
+      
     if (error) {
       console.error("Error fetching alumni:", error);
       showEmptyTable();
       return;
     }
+    
+    // Filter profiles by matching degree codes
+    const profiles = allProfiles.filter(p => {
+      console.log('🔍 Checking profile degree:', p.degree, 'against valid codes:', validDegreeCodes);
+      return validDegreeCodes.includes(p.degree);
+    });
+    
+    console.log('📊 Found matching profiles:', profiles.length);
     // Fetch career info for all alumni - get ALL career data
     const { data: careerData, error: careerError } = await window.supabase
       .from("career_info")
