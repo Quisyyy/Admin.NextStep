@@ -50,12 +50,24 @@ function applyFiltersAndRender() {
     );
   }
 
-  // Employment filter (now using job_status)
   const employmentVal = document.getElementById("filterEmployment").value;
   if (employmentVal !== "all") {
     filtered = filtered.filter((p) => {
-      const career = getCareerForProfile(p);
-      return career.job_status === employmentVal;
+      const jobStatus = (p.job_status || "").toLowerCase();
+      const filterValue = employmentVal.toLowerCase();
+
+      // Handle different job status variations
+      if (filterValue === "employed") {
+        return jobStatus === "employed";
+      } else if (filterValue === "self-employed") {
+        return jobStatus === "self-employed" || jobStatus === "self employed";
+      } else if (filterValue === "freelancer") {
+        return jobStatus === "freelancer";
+      } else if (filterValue === "unemployed") {
+        return jobStatus === "unemployed";
+      }
+
+      return jobStatus === filterValue;
     });
   }
 
