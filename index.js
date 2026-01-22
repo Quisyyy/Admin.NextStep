@@ -574,7 +574,7 @@ async function loadCareerStats() {
 
     let { data: profiles, error: profilesError } = await window.supabase
       .from("alumni_profiles")
-      .select("job_status");
+      .select("job_status, career_path");
 
     if (profilesError) {
       console.error("❌ Alumni profiles error:", profilesError);
@@ -600,22 +600,36 @@ async function loadCareerStats() {
     let employedCount = 0;
 
     // Normalization logic for job_status
+    const standardStatuses = [
+      "employed",
+      "self-employed",
+      "freelancer",
+      "unemployed",
+    ];
     const normalizeStatus = (raw) => {
       const s = (raw || "").trim().toLowerCase();
-      if (!s) return "Unknown";
+      if (!s) return null; // Do not count blank/null as Others
       if (s === "employed") return "Employed";
       if (s === "unemployed") return "Unemployed";
       if (s === "freelancer") return "Freelancer";
       if (s.replace(/[- ]/g, "") === "selfemployed") return "Self-Employed";
       if (s.includes("self") && s.includes("employ")) return "Self-Employed";
+      // If not blank/null and not standard, count as Others
       return "Others";
     };
 
+    const industryCounts = {};
     (profiles || []).forEach((d) => {
       const normStatus = normalizeStatus(d.job_status);
-      statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
-      if (["Employed", "Self-Employed", "Freelancer"].includes(normStatus)) {
-        employedCount++;
+      if (normStatus) {
+        statusCounts[normStatus] = (statusCounts[normStatus] || 0) + 1;
+        if (["Employed", "Self-Employed", "Freelancer"].includes(normStatus)) {
+          employedCount++;
+        }
+      }
+      const key = (d.career_path || "").trim();
+      if (key) {
+        industryCounts[key] = (industryCounts[key] || 0) + 1;
       }
     });
 
@@ -624,8 +638,11 @@ async function loadCareerStats() {
     setText("careerTotal", total.toLocaleString());
     setText("careerEmployedPercent", `${employedPct}%`);
     setText("careerEmployedCount", `${employedCount} of ${total}`);
-    setText("careerTopIndustry", "—");
-    setText("careerTopIndustryCount", "—");
+    const topIndustry = Object.entries(industryCounts).sort(
+      (a, b) => b[1] - a[1],
+    )[0] || ["—", 0];
+    setText("careerTopIndustry", topIndustry[0] || "—");
+    setText("careerTopIndustryCount", `${topIndustry[1]} submissions`);
 
     // Render status breakdown
     renderCareerStatusBars(statusCounts, total);
