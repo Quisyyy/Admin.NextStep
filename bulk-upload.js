@@ -89,8 +89,8 @@ function parseCSV(text) {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
 
-  // Parse headers - case insensitive
-  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  // Parse headers with proper CSV parsing
+  const headers = parseCSVLine(lines[0]).map((h) => h.trim().toLowerCase());
   const records = [];
 
   // Find column indices
@@ -98,7 +98,10 @@ function parseCSV(text) {
     emailIdx = -1,
     phoneIdx = -1,
     studentNumberIdx = -1,
-    birthdayIdx = -1;
+    birthdayIdx = -1,
+    degreeIdx = -1,
+    graduationYearIdx = -1;
+    
   headers.forEach((header, idx) => {
     if (header.includes("full") || header.includes("name")) fullNameIdx = idx;
     if (header.includes("email")) emailIdx = idx;
@@ -106,18 +109,22 @@ function parseCSV(text) {
     if (header.includes("student") || header.includes("student_number"))
       studentNumberIdx = idx;
     if (header.includes("birth")) birthdayIdx = idx;
+    if (header.includes("degree")) degreeIdx = idx;
+    if (header.includes("graduation") || header.includes("year")) graduationYearIdx = idx;
   });
 
   // Parse data rows
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(",").map((v) => v.trim());
-    if (!values.some((v) => v)) continue; // Skip empty rows
+    const values = parseCSVLine(lines[i]);
+    if (!values.some((v) => v.trim())) continue; // Skip empty rows
 
-    const fullName = fullNameIdx >= 0 ? values[fullNameIdx] : "";
-    const email = emailIdx >= 0 ? values[emailIdx] : "";
-    const phone = phoneIdx >= 0 ? values[phoneIdx] : "";
-    const studentNumber = studentNumberIdx >= 0 ? values[studentNumberIdx] : "";
-    const birthday = birthdayIdx >= 0 ? values[birthdayIdx] : "";
+    const fullName = fullNameIdx >= 0 ? cleanValue(values[fullNameIdx]) : "";
+    const email = emailIdx >= 0 ? cleanValue(values[emailIdx]) : "";
+    const phone = phoneIdx >= 0 ? cleanValue(values[phoneIdx]) : "";
+    const studentNumber = studentNumberIdx >= 0 ? cleanValue(values[studentNumberIdx]) : "";
+    const birthday = birthdayIdx >= 0 ? cleanValue(values[birthdayIdx]) : "";
+    const degree = degreeIdx >= 0 ? cleanValue(values[degreeIdx]) : "";
+    const graduationYear = graduationYearIdx >= 0 ? cleanValue(values[graduationYearIdx]) : "";
 
     // Only require student_number and full_name
     if (studentNumber && fullName) {
@@ -127,12 +134,53 @@ function parseCSV(text) {
         birthday: birthday,
         email: email,
         phone: phone,
+        degree: degree,
+        graduation_year: graduationYear,
         is_active: true,
       });
     }
   }
 
   return records;
+}
+
+// Helper function to properly parse CSV line with quoted fields
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"';
+        i++; // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  // Add the last field
+  result.push(current);
+  return result;
+}
+
+// Helper function to clean and trim values
+function cleanValue(value) {
+  if (!value) return '';
+  return value.toString().trim().replace(/^["']|["']$/g, '');
 }
 
 function displayPreview(records) {
