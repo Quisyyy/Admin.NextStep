@@ -248,7 +248,7 @@ async function loadAlumniStatus(profiles) {
       statusCard.innerHTML = `
                 <div class="status-degree">${label}</div>
                 <div class="status-count">${count}</div>
-                <a href="alumlist.html?degree=${code}" class="status-view-btn">View</a>
+                <a href="degree-details.html?degree=${code}" class="status-view-btn">View</a>
             `;
       statusGrid.appendChild(statusCard);
     });
