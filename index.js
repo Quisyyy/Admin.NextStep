@@ -193,21 +193,26 @@ async function loadDashboardData() {
 
 // Load and display alumni current status by degree
 async function loadAlumniStatus(profiles) {
+  // Map short codes to full degree names based on your dropdown
   const degreeLabels = {
     BSA: "Bachelor of Science in Accountancy",
-    BSCpE: "Bachelor of Science in Computer Engineering",
-    BSENTREP: "Bachelor of Science in Entrepreneurship",
+    BSCE: "Bachelor of Science in Computer Engineering", 
+    BSE: "Bachelor of Science in Entrepreneurship",
     BSHM: "Bachelor of Science in Hospitality Management",
     BSIT: "Bachelor of Science in Information Technology",
-    BSEDEN: "Bachelor of Secondary Education (English)",
-    BSEDMT: "Bachelor of Secondary Education (Mathematics)",
-    DOMTLOM: "Diploma in Office Management Technology",
+    "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
+    "BSE(MATH)": "Bachelor of Secondary Education (Mathematics)",
+    DOMT: "Diploma in Office Management Technology",
   };
 
-  // Count alumni by degree
+  // Count active alumni by degree (exclude archived and deleted)
   const degreeCounts = {};
   Object.keys(degreeLabels).forEach((code) => {
-    degreeCounts[code] = profiles.filter((p) => p.degree === code).length;
+    degreeCounts[code] = profiles.filter((p) => {
+      // Only count active alumni (not archived, not deleted)
+      const isActive = (p.is_archived !== true && p.is_deleted !== true);
+      return isActive && p.degree === code;
+    }).length;
   });
 
   // Display status grid
@@ -221,7 +226,7 @@ async function loadAlumniStatus(profiles) {
       statusCard.innerHTML = `
                 <div class="status-degree">${label}</div>
                 <div class="status-count">${count}</div>
-                <a href="degree-details.html?degree=${code}" class="status-view-btn">View</a>
+                <a href="alumlist.html?degree=${code}" class="status-view-btn">View</a>
             `;
       statusGrid.appendChild(statusCard);
     });
