@@ -79,9 +79,36 @@ async function loadDashboardData() {
       );
     }).length;
 
-    const completedProfiles = profiles.filter(
-      (p) => p.full_name && p.email && p.degree && p.student_number,
-    ).length;
+    // Calculate completed profiles using comprehensive field check
+    const completedProfiles = profiles.filter((p) => {
+      // Personal Info fields (11 required)
+      const personalFields = [
+        "student_number", "full_name", "email", "birth_month", "birth_day", 
+        "birth_year", "contact", "street", "province", "municipality", "barangay"
+      ];
+      const personalComplete = personalFields.every(
+        (f) => !!(p[f] && String(p[f]).trim() !== "")
+      );
+
+      // Academic Background fields (5 required)
+      const academicFields = [
+        "degree", "major", "honors", "graduated_year", "degree_label"
+      ];
+      const academicComplete = academicFields.every(
+        (f) => !!(p[f] && String(p[f]).trim() !== "")
+      );
+
+      // Career Info fields (4 required)
+      const careerFields = [
+        "job_status", "current_job", "career_path", "is_related"
+      ];
+      const careerComplete = careerFields.every(
+        (f) => p[f] !== undefined && p[f] !== null && String(p[f]).trim() !== ""
+      );
+
+      // Profile is complete only if ALL sections are complete
+      return personalComplete && academicComplete && careerComplete;
+    }).length;
 
     // Update dashboard numbers with animation
     animateNumber(document.getElementById("totalAlumni"), 0, total, 1000);
