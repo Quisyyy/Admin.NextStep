@@ -112,9 +112,9 @@ function applyFiltersAndRender() {
       <td>${profile.full_name || "N/A"}</td>
       <td>${profile.student_number || "N/A"}</td>
       <td>${profile.email || "N/A"}</td>
-      <td>${career.current_job || career.job_title || "Not specified"}</td>
-      <td>${career.industry || "Not specified"}</td>
-      <td>${career.job_status ? capitalizeJobStatus(career.job_status) : "N/A"}</td>
+      <td>${profile.current_job || profile.job_title || "Not specified"}</td>
+      <td>${profile.career_path || "Not specified"}</td>
+      <td>${profile.job_status ? capitalizeJobStatus(profile.job_status) : "N/A"}</td>
       <td>${profile.is_related === true ? "Related" : "Not Related"}</td>
     `;
     tbody.appendChild(tr);
