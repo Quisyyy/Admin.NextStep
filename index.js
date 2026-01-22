@@ -302,9 +302,35 @@ async function handleDownload(event) {
       return;
     }
 
-    const { data: profiles, error } = await window.supabase
+    // Fetch only active alumni data (exclude archived and deleted)
+    let { data: profiles, error } = await window.supabase
       .from("alumni_profiles")
-      .select("*");
+      .select("*")
+      .eq("is_archived", false)
+      .eq("is_deleted", false);
+
+    // If is_archived or is_deleted columns don't exist, get all profiles and filter manually
+    if (
+      error &&
+      (error.message.includes("is_archived") ||
+        error.message.includes("is_deleted"))
+    ) {
+      console.warn(
+        "is_archived or is_deleted column not found, loading all profiles and filtering manually",
+      );
+      const result = await window.supabase
+        .from("alumni_profiles")
+        .select("*");
+      profiles = result.data;
+      error = result.error;
+      
+      // Filter out archived and deleted manually if columns exist
+      if (profiles) {
+        profiles = profiles.filter((p) => 
+          p.is_archived !== true && p.is_deleted !== true
+        );
+      }
+    }
 
     if (error) {
       console.error("Error fetching data:", error);
