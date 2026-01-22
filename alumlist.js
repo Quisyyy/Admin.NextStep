@@ -184,7 +184,12 @@ async function applyFilters() {
 
   if (completion) {
     filtered = filtered.filter((a) => {
-      const isComplete = a.sectionCompletion?.isAllComplete || false;
+      const sectionCompletion = a.sectionCompletion || {
+        completedSections: 0,
+        totalSections: 3,
+      };
+      const isComplete =
+        sectionCompletion.completedSections === sectionCompletion.totalSections;
       return completion === "complete" ? isComplete : !isComplete;
     });
   }
@@ -251,6 +256,7 @@ function initFilters() {
   const degreeFilter = document.getElementById("filterDegree");
   const yearFrom = document.getElementById("filterYearFrom");
   const yearTo = document.getElementById("filterYearTo");
+  const completionFilter = document.getElementById("filterCompletion");
   const searchInput = document.getElementById("searchName");
   const resetBtn = document.getElementById("resetFilters");
   const selectAllCheckbox = document.getElementById("selectAllCheckbox");
@@ -260,12 +266,15 @@ function initFilters() {
   if (degreeFilter) degreeFilter.addEventListener("change", applyFilters);
   if (yearFrom) yearFrom.addEventListener("change", applyFilters);
   if (yearTo) yearTo.addEventListener("change", applyFilters);
+  if (completionFilter)
+    completionFilter.addEventListener("change", applyFilters);
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
       if (degreeFilter) degreeFilter.value = "";
       if (yearFrom) yearFrom.value = "";
       if (yearTo) yearTo.value = "";
+      if (completionFilter) completionFilter.value = "";
       if (searchInput) searchInput.value = "";
       applyFilters();
     });
