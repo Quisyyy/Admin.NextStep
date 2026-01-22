@@ -198,6 +198,8 @@ async function loadAlumniStatus(profiles) {
     BSA: "Bachelor of Science in Accountancy",
     BSCE: "Bachelor of Science in Computer Engineering", 
     BSE: "Bachelor of Science in Entrepreneurship",
+    BSEntrep: "Bachelor of Science in Entrepreneurship", // Alternative code
+    BSENTREP: "Bachelor of Science in Entrepreneurship", // Another alternative
     BSHM: "Bachelor of Science in Hospitality Management",
     BSIT: "Bachelor of Science in Information Technology",
     "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
@@ -215,12 +217,32 @@ async function loadAlumniStatus(profiles) {
     }).length;
   });
 
-  // Display status grid
+  // Merge counts for Entrepreneurship variants into BSE
+  const entrepreneurshipCount = (degreeCounts.BSE || 0) + (degreeCounts.BSEntrep || 0) + (degreeCounts.BSENTREP || 0);
+  
+  // Display status grid - show only main degree cards
+  const mainDegrees = {
+    BSA: "Bachelor of Science in Accountancy",
+    BSCE: "Bachelor of Science in Computer Engineering", 
+    BSE: "Bachelor of Science in Entrepreneurship",
+    BSHM: "Bachelor of Science in Hospitality Management",
+    BSIT: "Bachelor of Science in Information Technology",
+    "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
+    "BSE(MATH)": "Bachelor of Secondary Education (Mathematics)",
+    DOMT: "Diploma in Office Management Technology",
+  };
+
   const statusGrid = document.getElementById("statusGrid");
   if (statusGrid) {
     statusGrid.innerHTML = "";
-    Object.entries(degreeLabels).forEach(([code, label]) => {
-      const count = degreeCounts[code];
+    Object.entries(mainDegrees).forEach(([code, label]) => {
+      let count = degreeCounts[code] || 0;
+      
+      // Use combined count for Entrepreneurship
+      if (code === "BSE") {
+        count = entrepreneurshipCount;
+      }
+      
       const statusCard = document.createElement("div");
       statusCard.className = "status-card";
       statusCard.innerHTML = `
