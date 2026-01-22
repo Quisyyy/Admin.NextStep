@@ -34,16 +34,16 @@ async function loadDashboardData() {
       return;
     }
 
-    // Get only active alumni profiles
+    // Get only non-archived alumni profiles
     let { data: profiles, error } = await window.supabase
       .from("alumni_profiles")
       .select("*")
-      .eq("is_active", true)
+      .eq("is_archived", false)
       .order("created_at", { ascending: false });
 
-    // If is_active column doesn't exist, get all profiles
-    if (error && error.message.includes("is_active")) {
-      console.warn("is_active column not found, loading all profiles");
+    // If is_archived column doesn't exist, get all profiles
+    if (error && error.message.includes("is_archived")) {
+      console.warn("is_archived column not found, loading all profiles");
       const result = await window.supabase
         .from("alumni_profiles")
         .select("*")
