@@ -34,16 +34,23 @@ async function loadDashboardData() {
       return;
     }
 
-    // Get only non-archived alumni profiles
+    // Get only non-archived and non-deleted alumni profiles
     let { data: profiles, error } = await window.supabase
       .from("alumni_profiles")
       .select("*")
       .eq("is_archived", false)
+      .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
-    // If is_archived column doesn't exist, get all profiles
-    if (error && error.message.includes("is_archived")) {
-      console.warn("is_archived column not found, loading all profiles");
+    // If is_archived or is_deleted columns don't exist, get all profiles
+    if (
+      error &&
+      (error.message.includes("is_archived") ||
+        error.message.includes("is_deleted"))
+    ) {
+      console.warn(
+        "is_archived or is_deleted column not found, loading all profiles",
+      );
       const result = await window.supabase
         .from("alumni_profiles")
         .select("*")
@@ -574,7 +581,25 @@ async function loadCareerStats() {
 
     let { data: profiles, error: profilesError } = await window.supabase
       .from("alumni_profiles")
-      .select("job_status, career_path");
+      .select("job_status, career_path")
+      .eq("is_archived", false)
+      .eq("is_deleted", false);
+
+    // If is_archived or is_deleted columns don't exist, get all profiles
+    if (
+      profilesError &&
+      (profilesError.message.includes("is_archived") ||
+        profilesError.message.includes("is_deleted"))
+    ) {
+      console.warn(
+        "is_archived or is_deleted column not found in career stats, loading all profiles",
+      );
+      const result = await window.supabase
+        .from("alumni_profiles")
+        .select("job_status, career_path");
+      profiles = result.data;
+      profilesError = result.error;
+    }
 
     if (profilesError) {
       console.error("❌ Alumni profiles error:", profilesError);
