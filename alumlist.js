@@ -158,7 +158,8 @@ let selectedAlumni = new Set();
 // Apply filters
 async function applyFilters() {
   const degree = document.getElementById("filterDegree")?.value || "";
-  const year = document.getElementById("filterYear")?.value || "";
+  const yearFrom = document.getElementById("filterYearFrom")?.value || "";
+  const yearTo = document.getElementById("filterYearTo")?.value || "";
   const completion = document.getElementById("filterCompletion")?.value || "";
   const search =
     document.getElementById("searchName")?.value?.toLowerCase() || "";
@@ -169,13 +170,21 @@ async function applyFilters() {
     filtered = filtered.filter((a) => a.degree === degree);
   }
 
-  if (year) {
-    filtered = filtered.filter((a) => String(a.graduationYear) === year);
+  if (yearFrom || yearTo) {
+    filtered = filtered.filter((a) => {
+      const gradYear = parseInt(a.graduationYear, 10);
+      const from = yearFrom ? parseInt(yearFrom, 10) : null;
+      const to = yearTo ? parseInt(yearTo, 10) : null;
+      if (from && to) return gradYear >= from && gradYear <= to;
+      if (from) return gradYear >= from;
+      if (to) return gradYear <= to;
+      return true;
+    });
   }
 
   if (completion) {
     filtered = filtered.filter((a) => {
-      const isComplete = a.completionStatus?.isAllComplete || false;
+      const isComplete = a.sectionCompletion?.isAllComplete || false;
       return completion === "complete" ? isComplete : !isComplete;
     });
   }
@@ -199,27 +208,49 @@ async function applyFilters() {
 
 // Populate year filter
 function populateYearFilter(alumni) {
-  const years = [
-    ...new Set(alumni.map((a) => a.graduationYear).filter((y) => y)),
-  ].sort((a, b) => b - a);
-  const yearSelect = document.getElementById("filterYear");
-  if (yearSelect) {
-    const current = yearSelect.value;
-    yearSelect.innerHTML = '<option value="">All Years</option>';
-    years.forEach((year) => {
-      const option = document.createElement("option");
-      option.value = year;
-      option.textContent = year;
-      yearSelect.appendChild(option);
+  // Show a full range of years (2000 to current year)
+  const startYear = 2000;
+  const endYear = new Date().getFullYear();
+  const years = [];
+  for (let y = endYear; y >= startYear; y--) {
+    years.push(y);
+  }
+  const yearFrom = document.getElementById("filterYearFrom");
+  const yearTo = document.getElementById("filterYearTo");
+  if (yearFrom && yearTo) {
+    const currentFrom = yearFrom.value;
+    const currentTo = yearTo.value;
+    yearFrom.innerHTML = '<option value="">From</option>';
+    yearTo.innerHTML = '<option value="">To</option>';
+    let yearsWithSelected = [...years];
+    if (currentFrom && !yearsWithSelected.includes(Number(currentFrom))) {
+      yearsWithSelected = [Number(currentFrom), ...yearsWithSelected];
+    }
+    if (currentTo && !yearsWithSelected.includes(Number(currentTo))) {
+      yearsWithSelected = [Number(currentTo), ...yearsWithSelected];
+    }
+    // Remove duplicates and keep descending order
+    yearsWithSelected = [...new Set(yearsWithSelected)].sort((a, b) => b - a);
+    yearsWithSelected.forEach((year) => {
+      const optionFrom = document.createElement("option");
+      optionFrom.value = year;
+      optionFrom.textContent = year;
+      yearFrom.appendChild(optionFrom);
+      const optionTo = document.createElement("option");
+      optionTo.value = year;
+      optionTo.textContent = year;
+      yearTo.appendChild(optionTo);
     });
-    if (current) yearSelect.value = current;
+    if (currentFrom) yearFrom.value = currentFrom;
+    if (currentTo) yearTo.value = currentTo;
   }
 }
 
 // Initialize filters
 function initFilters() {
   const degreeFilter = document.getElementById("filterDegree");
-  const yearFilter = document.getElementById("filterYear");
+  const yearFrom = document.getElementById("filterYearFrom");
+  const yearTo = document.getElementById("filterYearTo");
   const searchInput = document.getElementById("searchName");
   const resetBtn = document.getElementById("resetFilters");
   const selectAllCheckbox = document.getElementById("selectAllCheckbox");
@@ -227,12 +258,14 @@ function initFilters() {
   const cancelSelectBtn = document.getElementById("cancelSelectBtn");
 
   if (degreeFilter) degreeFilter.addEventListener("change", applyFilters);
-  if (yearFilter) yearFilter.addEventListener("change", applyFilters);
+  if (yearFrom) yearFrom.addEventListener("change", applyFilters);
+  if (yearTo) yearTo.addEventListener("change", applyFilters);
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
       if (degreeFilter) degreeFilter.value = "";
-      if (yearFilter) yearFilter.value = "";
+      if (yearFrom) yearFrom.value = "";
+      if (yearTo) yearTo.value = "";
       if (searchInput) searchInput.value = "";
       applyFilters();
     });

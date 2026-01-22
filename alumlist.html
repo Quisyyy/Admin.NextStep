@@ -44,17 +44,17 @@
         <nav>
           <ul>
             <li>
-              <a href="homepage.html" style="color: white;"
+              <a href="homepage.html" style="color: white"
                 ><span class="home-ico">🏠</span> Dashboard</a
               >
             </li>
             <li>
-              <a href="audit-trail.html" style="color: white;"
+              <a href="audit-trail.html" style="color: white"
                 ><span class="home-ico">📋</span> Audit Trail</a
               >
             </li>
             <li>
-              <a href="archive.html" style="color: white;"
+              <a href="archive.html" style="color: white"
                 ><span class="home-ico">📦</span> Archive</a
               >
             </li>
@@ -95,10 +95,16 @@
             </div>
 
             <div class="filter-group">
-              <label for="filterYear">Graduation Year</label>
-              <select id="filterYear">
-                <option value="">All Years</option>
-              </select>
+              <label>Graduation Year</label>
+              <div style="display: flex; gap: 8px; align-items: center">
+                <select id="filterYearFrom" style="flex: 1">
+                  <option value="">From</option>
+                </select>
+                <span style="font-weight: bold">-</span>
+                <select id="filterYearTo" style="flex: 1">
+                  <option value="">To</option>
+                </select>
+              </div>
             </div>
 
             <div class="filter-group">
