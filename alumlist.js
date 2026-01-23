@@ -447,6 +447,18 @@ async function bulkArchiveSelected() {
     if (showingCount) showingCount.textContent = data.length;
     if (totalCount) totalCount.textContent = data.length;
     
+    // Check for URL parameters and apply filters
+    const urlParams = new URLSearchParams(window.location.search);
+    const degreeParam = urlParams.get('degree');
+    if (degreeParam) {
+      const degreeFilter = document.getElementById('filterDegree');
+      if (degreeFilter) {
+        degreeFilter.value = degreeParam;
+        console.log(`🎯 Applying degree filter from URL: ${degreeParam}`);
+        await applyFilters();
+      }
+    }
+    
     console.log("✅ Alumni list initialized successfully");
   } catch (error) {
     console.error("❌ Error initializing alumni list:", error);

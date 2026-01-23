@@ -137,6 +137,7 @@ async function loadDashboardData() {
 
     // Setup degree filter
     const degreeFilter = document.getElementById("degreeFilter");
+    const viewDetailsBtn = document.getElementById("viewDetailsBtn");
     if (degreeFilter) {
       degreeFilter.addEventListener("change", (e) => {
         const selectedDegree = e.target.value;
@@ -148,6 +149,10 @@ async function loadDashboardData() {
             filtered.length,
             500,
           );
+          // Update View Details link with degree filter
+          if (viewDetailsBtn) {
+            viewDetailsBtn.href = `alumlist.html?degree=${encodeURIComponent(selectedDegree)}`;
+          }
         } else {
           animateNumber(
             document.getElementById("card-total"),
@@ -155,6 +160,10 @@ async function loadDashboardData() {
             total,
             500,
           );
+          // Reset View Details link
+          if (viewDetailsBtn) {
+            viewDetailsBtn.href = "alumlist.html";
+          }
         }
       });
     }
