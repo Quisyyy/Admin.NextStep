@@ -524,24 +524,64 @@ async function handleDownload(event) {
   }
 }
 
-// Generate and download CSV file
-function downloadAsCSV(data) {
+// Generate and download CSV file with readable location names
+async function downloadAsCSV(data) {
   if (!data || data.length === 0) {
     alert("❌ No data available to download.");
     return;
   }
 
+  // Helper function to get location name from PSGC API
+  async function getLocationName(type, code) {
+    if (!code) return "";
+    try {
+      let apiUrl = "";
+      if (type === "province") {
+        apiUrl = `https://psgc.gitlab.io/api/provinces/${code}/`;
+      } else if (type === "city") {
+        apiUrl = `https://psgc.gitlab.io/api/cities-municipalities/${code}/`;
+      }
+      
+      if (apiUrl) {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const json = await res.json();
+          return json.name || code;
+        }
+      }
+    } catch (e) {
+      console.warn(`Failed to fetch ${type} name for code ${code}:`, e);
+    }
+    return code;
+  }
+
+  // Convert location codes to readable names
+  const processedData = await Promise.all(
+    data.map(async (row) => {
+      const processedRow = { ...row };
+      
+      if (row.province) {
+        processedRow.province = await getLocationName("province", row.province);
+      }
+      
+      if (row.municipality) {
+        processedRow.municipality = await getLocationName("city", row.municipality);
+      }
+      
+      return processedRow;
+    })
+  );
+
   // Get headers from first object
-  const headers = Object.keys(data[0]);
+  const headers = Object.keys(processedData[0]);
 
   // Create CSV content
   const csv = [
     headers.join(","),
-    ...data.map((row) =>
+    ...processedData.map((row) =>
       headers
         .map((header) => {
           const value = row[header];
-          // Handle CSV escaping
           if (value === null || value === undefined) return "";
           const stringValue = String(value);
           if (
@@ -563,7 +603,6 @@ function downloadAsCSV(data) {
   const url = URL.createObjectURL(blob);
 
   link.setAttribute("href", url);
-  // Get selected filter value and label
   const filterSelect = document.getElementById("dataFilter");
   let filterLabel = "";
   if (filterSelect) {
@@ -584,7 +623,7 @@ function downloadAsCSV(data) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 
-  alert(`✅ Downloaded ${data.length} records as CSV`);
+  alert(`✅ Downloaded ${data.length} records as CSV with readable location names`);
 }
 
 // Generate and download PDF file
