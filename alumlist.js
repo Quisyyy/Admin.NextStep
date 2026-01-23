@@ -179,9 +179,25 @@ async function applyFilters() {
 
   if (degree) {
     const beforeCount = filtered.length;
+    
+    // Degree mapping to handle different codes for same degree
+    const degreeMapping = {
+      'BSA': ['BSA'],
+      'BSCpE': ['BSCpE', 'BSCE'], // Computer Engineering can be stored as either code
+      'BSE': ['BSE', 'BSEntrep', 'BSENTREP'],
+      'BSHM': ['BSHM'],
+      'BSIT': ['BSIT'],
+      'BSE(ENGLISH)': ['BSE(ENGLISH)', 'BSEDEN'],
+      'BSE(MATH)': ['BSE(MATH)', 'BSEDMT'],
+      'DOMT': ['DOMT', 'DOMTLOM']
+    };
+    
+    const validDegreeCodes = degreeMapping[degree] || [degree];
+    console.log(`🎯 Filtering for degree: ${degree}, valid codes: ${validDegreeCodes.join(', ')}`);
+    
     filtered = filtered.filter((a) => {
       const alumniDegree = a.degree || "";
-      return alumniDegree === degree;
+      return validDegreeCodes.includes(alumniDegree);
     });
     console.log(`🎯 Degree filter applied: ${beforeCount} -> ${filtered.length}`);
   }
