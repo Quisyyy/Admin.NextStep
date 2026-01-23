@@ -141,11 +141,14 @@ async function loadDashboardData() {
     if (degreeFilter) {
       degreeFilter.addEventListener("change", (e) => {
         const selectedDegree = e.target.value;
+        const cardTotalElement = document.getElementById("card-total");
+        
         if (selectedDegree) {
           const filtered = profiles.filter((p) => p.degree === selectedDegree);
+          const currentCount = parseInt(cardTotalElement.textContent.replace(/,/g, '')) || 0;
           animateNumber(
-            document.getElementById("card-total"),
-            total,
+            cardTotalElement,
+            currentCount,
             filtered.length,
             500,
           );
@@ -154,9 +157,11 @@ async function loadDashboardData() {
             viewDetailsBtn.href = `alumlist.html?degree=${encodeURIComponent(selectedDegree)}`;
           }
         } else {
+          // Reset to show all alumni
+          const currentCount = parseInt(cardTotalElement.textContent.replace(/,/g, '')) || 0;
           animateNumber(
-            document.getElementById("card-total"),
-            document.getElementById("card-total").textContent,
+            cardTotalElement,
+            currentCount,
             total,
             500,
           );
