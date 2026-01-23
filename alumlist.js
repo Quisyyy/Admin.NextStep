@@ -4,17 +4,18 @@
 const degreeLabels = {
   BSA: "Bachelor of Science in Accountancy",
   BSCpE: "Bachelor of Science in Computer Engineering",
-  BSENTREP: "Bachelor of Science in Entrepreneurship",
+  BSE: "Bachelor of Science in Entrepreneurship",
   BSHM: "Bachelor of Science in Hospitality Management",
   BSIT: "Bachelor of Science in Information Technology",
-  BSEDEN: "Bachelor of Secondary Education (English)",
-  BSEDMT: "Bachelor of Secondary Education (Mathematics)",
-  DOMTLOM: "Diploma in Office Management Technology",
-  BSE: "Bachelor of Science in Entrepreneurship",
-  BSCE: "Bachelor of Science in Computer Engineering",
   "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
   "BSE(MATH)": "Bachelor of Secondary Education (Mathematics)",
-  DOMT: "Diploma in Office Management Technology"
+  DOMT: "Diploma in Office Management Technology",
+  // Legacy mappings for backward compatibility
+  BSENTREP: "Bachelor of Science in Entrepreneurship",
+  BSCE: "Bachelor of Science in Computer Engineering",
+  BSEDEN: "Bachelor of Secondary Education (English)",
+  BSEDMT: "Bachelor of Secondary Education (Mathematics)",
+  DOMTLOM: "Diploma in Office Management Technology"
 };
 
 function labelForDegree(codeOrLabel) {
@@ -170,16 +171,17 @@ async function applyFilters() {
 
   console.log("🔍 Applying filters:", { degree, yearFrom, yearTo, completion, search });
   console.log("📊 Total alumni before filtering:", allAlumni.length);
+  
+  // Debug: Show first few alumni degrees
+  console.log("📋 Sample alumni degrees:", allAlumni.slice(0, 5).map(a => ({ name: a.fullName, degree: a.degree })));
 
   let filtered = [...allAlumni];
 
   if (degree) {
     const beforeCount = filtered.length;
     filtered = filtered.filter((a) => {
-      // Check both the degree code and the full degree label
       const alumniDegree = a.degree || "";
-      const degreeLabel = labelForDegree(alumniDegree);
-      return alumniDegree === degree || degreeLabel.includes(degree);
+      return alumniDegree === degree;
     });
     console.log(`🎯 Degree filter applied: ${beforeCount} -> ${filtered.length}`);
   }

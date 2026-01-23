@@ -196,10 +196,8 @@ async function loadAlumniStatus(profiles) {
   // Map short codes to full degree names based on your dropdown
   const degreeLabels = {
     BSA: "Bachelor of Science in Accountancy",
-    BSCE: "Bachelor of Science in Computer Engineering", 
+    BSCpE: "Bachelor of Science in Computer Engineering", 
     BSE: "Bachelor of Science in Entrepreneurship",
-    BSEntrep: "Bachelor of Science in Entrepreneurship", // Alternative code
-    BSENTREP: "Bachelor of Science in Entrepreneurship", // Another alternative
     BSHM: "Bachelor of Science in Hospitality Management",
     BSIT: "Bachelor of Science in Information Technology",
     "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
@@ -223,7 +221,7 @@ async function loadAlumniStatus(profiles) {
   // Display status grid - show only main degree cards
   const mainDegrees = {
     BSA: "Bachelor of Science in Accountancy",
-    BSCE: "Bachelor of Science in Computer Engineering", 
+    BSCpE: "Bachelor of Science in Computer Engineering", 
     BSE: "Bachelor of Science in Entrepreneurship",
     BSHM: "Bachelor of Science in Hospitality Management",
     BSIT: "Bachelor of Science in Information Technology",
@@ -298,12 +296,12 @@ async function handleDownload(event) {
   const degreeCodes = [
     "BSA",
     "BSCpE",
-    "BSENTREP",
+    "BSE",
     "BSHM",
     "BSIT",
-    "BSEDEN",
-    "BSEDMT",
-    "DOMTLOM",
+    "BSE(ENGLISH)",
+    "BSE(MATH)",
+    "DOMT",
   ];
 
   if (!format) {
