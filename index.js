@@ -144,7 +144,21 @@ async function loadDashboardData() {
         const cardTotalElement = document.getElementById("card-total");
         
         if (selectedDegree) {
-          const filtered = profiles.filter((p) => p.degree === selectedDegree);
+          // Create degree mapping for filtering
+          const degreeMapping = {
+            'BSA': ['BSA'],
+            'BSCpE': ['BSCE', 'BSCpE'], // BSCpE option maps to BSCE in database
+            'BSE': ['BSE', 'BSEntrep', 'BSENTREP'],
+            'BSHM': ['BSHM'],
+            'BSIT': ['BSIT'],
+            'BSE(ENGLISH)': ['BSE(ENGLISH)', 'BSEDEN'],
+            'BSE(MATH)': ['BSE(MATH)', 'BSEDMT'],
+            'DOMT': ['DOMT', 'DOMTLOM']
+          };
+          
+          const validDegreeCodes = degreeMapping[selectedDegree] || [selectedDegree];
+          const filtered = profiles.filter((p) => validDegreeCodes.includes(p.degree));
+          
           const currentCount = parseInt(cardTotalElement.textContent.replace(/,/g, '')) || 0;
           animateNumber(
             cardTotalElement,
@@ -210,7 +224,8 @@ async function loadAlumniStatus(profiles) {
   // Map short codes to full degree names based on your dropdown
   const degreeLabels = {
     BSA: "Bachelor of Science in Accountancy",
-    BSCpE: "Bachelor of Science in Computer Engineering", 
+    BSCpE: "Bachelor of Science in Computer Engineering",
+    BSCE: "Bachelor of Science in Computer Engineering", // Alternative code for Computer Engineering
     BSE: "Bachelor of Science in Entrepreneurship",
     BSHM: "Bachelor of Science in Hospitality Management",
     BSIT: "Bachelor of Science in Information Technology",
@@ -219,18 +234,50 @@ async function loadAlumniStatus(profiles) {
     DOMT: "Diploma in Office Management Technology",
   };
 
+  // Debug: Log all unique degree values in database
+  const uniqueDegrees = [...new Set(profiles.map(p => p.degree).filter(d => d))];
+  console.log('🎓 Unique degree values in database:', uniqueDegrees);
+  console.log('🔍 Expected degree codes:', Object.keys(degreeLabels));
+  
   // Count active alumni by degree (exclude archived and deleted)
   const degreeCounts = {};
   Object.keys(degreeLabels).forEach((code) => {
-    degreeCounts[code] = profiles.filter((p) => {
+    const matchingProfiles = profiles.filter((p) => {
       // Only count active alumni (not archived, not deleted)
       const isActive = (p.is_archived !== true && p.is_deleted !== true);
-      return isActive && p.degree === code;
-    }).length;
+      
+      if (!isActive) return false;
+      
+      const profileDegree = (p.degree || '').toString().trim();
+      
+      // Try exact match first
+      if (profileDegree === code) return true;
+      
+      // Try case-insensitive match
+      if (profileDegree.toLowerCase() === code.toLowerCase()) return true;
+      
+      // Try matching with full degree name
+      if (profileDegree === degreeLabels[code]) return true;
+      
+      // Debug logging for Computer Engineering specifically
+      if (code === 'BSCpE' && profileDegree) {
+        console.log(`🔍 BSCpE Debug - Profile degree: "${profileDegree}", Expected: "${code}", Full name: "${degreeLabels[code]}"`);
+      }
+      
+      return false;
+    });
+    
+    degreeCounts[code] = matchingProfiles.length;
+    
+    // Log count for each degree
+    if (matchingProfiles.length > 0) {
+      console.log(`✅ ${code}: ${matchingProfiles.length} alumni`);
+    }
   });
 
-  // Merge counts for Entrepreneurship variants into BSE
+  // Merge counts for similar degrees
   const entrepreneurshipCount = (degreeCounts.BSE || 0) + (degreeCounts.BSEntrep || 0) + (degreeCounts.BSENTREP || 0);
+  const computerEngineeringCount = (degreeCounts.BSCpE || 0) + (degreeCounts.BSCE || 0);
   
   // Display status grid - show only main degree cards
   const mainDegrees = {
@@ -253,6 +300,11 @@ async function loadAlumniStatus(profiles) {
       // Use combined count for Entrepreneurship
       if (code === "BSE") {
         count = entrepreneurshipCount;
+      }
+      
+      // Use combined count for Computer Engineering
+      if (code === "BSCpE") {
+        count = computerEngineeringCount;
       }
       
       const statusCard = document.createElement("div");

@@ -163,10 +163,10 @@ async function loadDegreeDetails() {
       return;
     }
     // Fetch alumni with specific degree
-    // Handle degree code mapping like in alumlist.js
+    // Handle degree code mapping - map URL parameter to database values
     const degreeMapping = {
       'BSA': ['BSA'],
-      'BSCE': ['BSCE', 'BSCpE'], 
+      'BSCpE': ['BSCE', 'BSCpE'], // BSCpE from URL maps to BSCE in database
       'BSE': ['BSE', 'BSEntrep', 'BSENTREP'],
       'BSHM': ['BSHM'],
       'BSIT': ['BSIT'],
