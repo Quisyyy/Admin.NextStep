@@ -241,7 +241,22 @@ async function loadAlumniStatus(profiles) {
   
   // Count active alumni by degree (exclude archived and deleted)
   const degreeCounts = {};
+  
+  // Define degree variations for proper matching
+  const degreeVariations = {
+    BSA: ['BSA'],
+    BSCpE: ['BSCpE', 'BSCE'],
+    BSE: ['BSE', 'BSEntrep', 'BSENTREP', 'BS Entrepreneurship'],
+    BSHM: ['BSHM'],
+    BSIT: ['BSIT'],
+    'BSE(ENGLISH)': ['BSE(ENGLISH)', 'BSEDEN'],
+    'BSE(MATH)': ['BSE(MATH)', 'BSEDMT'],
+    DOMT: ['DOMT', 'DOMTLOM']
+  };
+  
   Object.keys(degreeLabels).forEach((code) => {
+    const variations = degreeVariations[code] || [code];
+    
     const matchingProfiles = profiles.filter((p) => {
       // Only count active alumni (not archived, not deleted)
       const isActive = (p.is_archived !== true && p.is_deleted !== true);
@@ -250,34 +265,26 @@ async function loadAlumniStatus(profiles) {
       
       const profileDegree = (p.degree || '').toString().trim();
       
-      // Try exact match first
-      if (profileDegree === code) return true;
-      
-      // Try case-insensitive match
-      if (profileDegree.toLowerCase() === code.toLowerCase()) return true;
-      
-      // Try matching with full degree name
-      if (profileDegree === degreeLabels[code]) return true;
-      
-      // Debug logging for Computer Engineering specifically
-      if (code === 'BSCpE' && profileDegree) {
-        console.log(`🔍 BSCpE Debug - Profile degree: "${profileDegree}", Expected: "${code}", Full name: "${degreeLabels[code]}"`);
-      }
-      
-      return false;
+      // Check all variations for this degree
+      return variations.some(variation => {
+        // Try exact match
+        if (profileDegree === variation) return true;
+        
+        // Try case-insensitive match
+        if (profileDegree.toLowerCase() === variation.toLowerCase()) return true;
+        
+        // Try matching with full degree name
+        if (profileDegree === degreeLabels[code]) return true;
+        
+        return false;
+      });
     });
     
     degreeCounts[code] = matchingProfiles.length;
     
     // Log count for each degree
-    if (matchingProfiles.length > 0) {
-      console.log(`✅ ${code}: ${matchingProfiles.length} alumni`);
-    }
+    console.log(`✅ ${code}: ${matchingProfiles.length} alumni (variations: ${variations.join(', ')})`);
   });
-
-  // Merge counts for similar degrees
-  const entrepreneurshipCount = (degreeCounts.BSE || 0) + (degreeCounts.BSEntrep || 0) + (degreeCounts.BSENTREP || 0);
-  const computerEngineeringCount = (degreeCounts.BSCpE || 0) + (degreeCounts.BSCE || 0);
   
   // Display status grid - show only main degree cards
   const mainDegrees = {
@@ -296,16 +303,6 @@ async function loadAlumniStatus(profiles) {
     statusGrid.innerHTML = "";
     Object.entries(mainDegrees).forEach(([code, label]) => {
       let count = degreeCounts[code] || 0;
-      
-      // Use combined count for Entrepreneurship
-      if (code === "BSE") {
-        count = entrepreneurshipCount;
-      }
-      
-      // Use combined count for Computer Engineering
-      if (code === "BSCpE") {
-        count = computerEngineeringCount;
-      }
       
       const statusCard = document.createElement("div");
       statusCard.className = "status-card";
