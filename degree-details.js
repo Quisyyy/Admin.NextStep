@@ -20,6 +20,11 @@ const degreeLabels = {
   BSEDEN: "Bachelor of Secondary Education (English)",
   BSEDMT: "Bachelor of Secondary Education (Mathematics)",
   DOMTLOM: "Diploma in Office Management Technology",
+  BSE: "Bachelor of Science in Entrepreneurship",
+  BSCE: "Bachelor of Science in Computer Engineering",
+  "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
+  "BSE(MATH)": "Bachelor of Secondary Education (Mathematics)",
+  DOMT: "Diploma in Office Management Technology"
 };
 
 // Get degree from URL query parameter

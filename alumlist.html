@@ -76,26 +76,23 @@
             </div>
 
             <div class="filter-group">
-              <label for="filterDegree">Degree</label>
+              <label for="filterDegree">Filter by Degree</label>
               <select id="filterDegree">
-                <option value="">All Degrees</option>
-                <option value="BSA">BSA - Accountancy</option>
-                <option value="BSCpE">BSCpE - Computer Engineering</option>
-                <option value="BSENTREP">BSENTREP - Entrepreneurship</option>
-                <option value="BSHM">BSHM - Hospitality Management</option>
-                <option value="BSIT">BSIT - Information Technology</option>
-                <option value="BSEDEN">
-                  BSEDEN - Secondary Education (English)
-                </option>
-                <option value="BSEDMT">
-                  BSEDMT - Secondary Education (Math)
-                </option>
-                <option value="DOMTLOM">DOMTLOM - Office Management</option>
-                <option value="BSE">BSE</option>
-                <option value="DOMT">DOMT</option>
-                <option value="BSE(MATH)">BSE(MATH)</option>
-                <option value="BSE(ENGLISH)">BSE(ENGLISH)</option>
-                <option value="Bachelor of Science in Information Technology (BSIT)">BSIT (Full)</option>
+                <option value="">— All Degrees —</option>
+                <optgroup label="Bachelor of Science">
+                  <option value="BSA">Bachelor of Science in Accountancy</option>
+                  <option value="BSCpE">Bachelor of Science in Computer Engineering</option>
+                  <option value="BSENTREP">Bachelor of Science in Entrepreneurship</option>
+                  <option value="BSHM">Bachelor of Science in Hospitality Management</option>
+                  <option value="BSIT">Bachelor of Science in Information Technology</option>
+                </optgroup>
+                <optgroup label="Bachelor of Secondary Education">
+                  <option value="BSEDEN">Bachelor of Secondary Education (English)</option>
+                  <option value="BSEDMT">Bachelor of Secondary Education (Mathematics)</option>
+                </optgroup>
+                <optgroup label="Diploma Programs">
+                  <option value="DOMTLOM">Diploma in Office Management Technology</option>
+                </optgroup>
               </select>
             </div>
 

@@ -2,15 +2,19 @@
 
 // Map of degree codes to full labels (match the options used in alumni/Information.html)
 const degreeLabels = {
-  BSA: "Bachelor of Science in Accountancy (BSA)",
-  BSCpE: "Bachelor of Science in Computer Engineering (BSCpE)",
-  BSENTREP: "Bachelor of Science in Entrepreneurship (BSENTREP)",
-  BSHM: "Bachelor of Science in Hospitality Management (BSHM)",
-  BSIT: "Bachelor of Science in Information Technology (BSIT)",
-  BSEDEN: "Bachelor of Secondary Education major in English (BSEDEN)",
-  BSEDMT: "Bachelor of Secondary Education major in Mathematics (BSEDMT)",
-  DOMTLOM:
-    "Diploma in Office Management Technology- Legal Office Management (DOMTLOM)",
+  BSA: "Bachelor of Science in Accountancy",
+  BSCpE: "Bachelor of Science in Computer Engineering",
+  BSENTREP: "Bachelor of Science in Entrepreneurship",
+  BSHM: "Bachelor of Science in Hospitality Management",
+  BSIT: "Bachelor of Science in Information Technology",
+  BSEDEN: "Bachelor of Secondary Education (English)",
+  BSEDMT: "Bachelor of Secondary Education (Mathematics)",
+  DOMTLOM: "Diploma in Office Management Technology",
+  BSE: "Bachelor of Science in Entrepreneurship",
+  BSCE: "Bachelor of Science in Computer Engineering",
+  "BSE(ENGLISH)": "Bachelor of Secondary Education (English)",
+  "BSE(MATH)": "Bachelor of Secondary Education (Mathematics)",
+  DOMT: "Diploma in Office Management Technology"
 };
 
 function labelForDegree(codeOrLabel) {
