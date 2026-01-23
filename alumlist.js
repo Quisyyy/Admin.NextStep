@@ -164,13 +164,24 @@ async function applyFilters() {
   const search =
     document.getElementById("searchName")?.value?.toLowerCase() || "";
 
-  let filtered = allAlumni;
+  console.log("🔍 Applying filters:", { degree, yearFrom, yearTo, completion, search });
+  console.log("📊 Total alumni before filtering:", allAlumni.length);
+
+  let filtered = [...allAlumni];
 
   if (degree) {
-    filtered = filtered.filter((a) => a.degree === degree);
+    const beforeCount = filtered.length;
+    filtered = filtered.filter((a) => {
+      // Check both the degree code and the full degree label
+      const alumniDegree = a.degree || "";
+      const degreeLabel = labelForDegree(alumniDegree);
+      return alumniDegree === degree || degreeLabel.includes(degree);
+    });
+    console.log(`🎯 Degree filter applied: ${beforeCount} -> ${filtered.length}`);
   }
 
   if (yearFrom || yearTo) {
+    const beforeCount = filtered.length;
     filtered = filtered.filter((a) => {
       const gradYear = parseInt(a.graduationYear, 10);
       const from = yearFrom ? parseInt(yearFrom, 10) : null;
@@ -180,9 +191,11 @@ async function applyFilters() {
       if (to) return gradYear <= to;
       return true;
     });
+    console.log(`📅 Year filter applied: ${beforeCount} -> ${filtered.length}`);
   }
 
   if (completion) {
+    const beforeCount = filtered.length;
     filtered = filtered.filter((a) => {
       const sectionCompletion = a.sectionCompletion || {
         completedSections: 0,
@@ -192,16 +205,28 @@ async function applyFilters() {
         sectionCompletion.completedSections === sectionCompletion.totalSections;
       return completion === "complete" ? isComplete : !isComplete;
     });
+    console.log(`✅ Completion filter applied: ${beforeCount} -> ${filtered.length}`);
   }
 
   if (search) {
+    const beforeCount = filtered.length;
     filtered = filtered.filter(
-      (a) =>
-        (a.fullName || "").toLowerCase().includes(search) ||
-        (a.studentNumber || "").toLowerCase().includes(search),
+      (a) => {
+        const fullName = (a.fullName || "").toLowerCase();
+        const studentNumber = (a.studentNumber || "").toLowerCase();
+        const degree = (a.degree || "").toLowerCase();
+        const degreeLabel = labelForDegree(a.degree || "").toLowerCase();
+        
+        return fullName.includes(search) ||
+               studentNumber.includes(search) ||
+               degree.includes(search) ||
+               degreeLabel.includes(search);
+      }
     );
+    console.log(`🔍 Search filter applied: ${beforeCount} -> ${filtered.length}`);
   }
 
+  console.log(`📊 Filtered results: ${filtered.length} out of ${allAlumni.length}`);
   await renderTable(filtered);
 
   // Update counts
@@ -253,6 +278,7 @@ function populateYearFilter(alumni) {
 
 // Initialize filters
 function initFilters() {
+  console.log("🔧 Initializing filters...");
   const degreeFilter = document.getElementById("filterDegree");
   const yearFrom = document.getElementById("filterYearFrom");
   const yearTo = document.getElementById("filterYearTo");
@@ -263,14 +289,39 @@ function initFilters() {
   const archiveSelectedBtn = document.getElementById("archiveSelectedBtn");
   const cancelSelectBtn = document.getElementById("cancelSelectBtn");
 
-  if (degreeFilter) degreeFilter.addEventListener("change", applyFilters);
-  if (yearFrom) yearFrom.addEventListener("change", applyFilters);
-  if (yearTo) yearTo.addEventListener("change", applyFilters);
-  if (completionFilter)
-    completionFilter.addEventListener("change", applyFilters);
-  if (searchInput) searchInput.addEventListener("input", applyFilters);
+  if (degreeFilter) {
+    degreeFilter.addEventListener("change", () => {
+      console.log("🎯 Degree filter changed:", degreeFilter.value);
+      applyFilters();
+    });
+  }
+  if (yearFrom) {
+    yearFrom.addEventListener("change", () => {
+      console.log("📅 Year from changed:", yearFrom.value);
+      applyFilters();
+    });
+  }
+  if (yearTo) {
+    yearTo.addEventListener("change", () => {
+      console.log("📅 Year to changed:", yearTo.value);
+      applyFilters();
+    });
+  }
+  if (completionFilter) {
+    completionFilter.addEventListener("change", () => {
+      console.log("✅ Completion filter changed:", completionFilter.value);
+      applyFilters();
+    });
+  }
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      console.log("🔍 Search input changed:", searchInput.value);
+      applyFilters();
+    });
+  }
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
+      console.log("🔄 Resetting all filters...");
       if (degreeFilter) degreeFilter.value = "";
       if (yearFrom) yearFrom.value = "";
       if (yearTo) yearTo.value = "";
@@ -314,6 +365,8 @@ function initFilters() {
       updateBulkActionsBar();
     });
   }
+  
+  console.log("✅ Filters initialized successfully");
 }
 
 function updateBulkActionsBar() {
@@ -372,17 +425,26 @@ async function bulkArchiveSelected() {
 
 // Initialize on load
 (async () => {
-  const data = await loadAlumni();
-  allAlumni = data;
-  renderTable(data);
-  populateYearFilter(data);
-  initFilters();
+  try {
+    console.log("🚀 Initializing alumni list...");
+    const data = await loadAlumni();
+    allAlumni = data;
+    console.log(`📊 Loaded ${data.length} alumni records`);
+    
+    await renderTable(data);
+    populateYearFilter(data);
+    initFilters();
 
-  // Set initial counts
-  const showingCount = document.getElementById("showingCount");
-  const totalCount = document.getElementById("totalCount");
-  if (showingCount) showingCount.textContent = data.length;
-  if (totalCount) totalCount.textContent = data.length;
+    // Set initial counts
+    const showingCount = document.getElementById("showingCount");
+    const totalCount = document.getElementById("totalCount");
+    if (showingCount) showingCount.textContent = data.length;
+    if (totalCount) totalCount.textContent = data.length;
+    
+    console.log("✅ Alumni list initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing alumni list:", error);
+  }
 })();
 
 // Listen for saves from other pages/tabs and reload
